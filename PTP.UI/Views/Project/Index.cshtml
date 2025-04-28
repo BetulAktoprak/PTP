@@ -1,0 +1,93 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Project List</h1>
+
+
+<div class="container-fluid">
+    <div class="row size-column">
+        <div class="col-xxl-9 box-col-12">
+            <div class="row">
+                <div class="col-xxl-12">
+                    <div class="card recent-order">
+                        <div class="card-header card-no-border total-revenue">
+                            <h4 class="m-0">All Project Table</h4>
+                            <div class="header-top"></div><a href="product.html">View All </a>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="project-table table-responsive custom-scrollbar">
+                                <table class="order-table project-table w-100">
+                                    <thead>
+                                        <tr>
+                                            <th>Project Name</th>
+                                            <th>Client Name</th>
+                                            <th>End Date</th>
+                                            <th>Assigned to</th>
+                                            <th>Status</th>
+                                            <th>Progress</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="project-comment  d-flex gap-2">
+                                                    <div class="radial-chart-wrap">
+                                                        <div class="widgetsChart" id="widgetsChart1"></div>
+                                                    </div>
+                                                    <div>
+                                                        <a class="f-w-500 f-14 " href="product.html">Pet App Design</a>
+                                                        <div class="project-comment-icon">
+                                                            <div class="project-link">
+                                                                <svg>
+                                                                    <use href="../assets/svg/icon-sprite.svg#messages-2"></use>
+                                                                </svg><span class="f-w-500 f-light f-12">20</span>
+                                                            </div>
+                                                            <div class="project-link">
+                                                                <svg>
+                                                                    <use href="../assets/svg/icon-sprite.svg#paperclip"></use>
+                                                                </svg><span class="f-w-500 f-light f-12">7</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="product-sub"><a class="f-w-500 f-14 " href="product.html">Darrell Steward</a><span class="f-w-500 f-light f-12 d-block">darrells@example.com</span></div>
+                                            </td>
+                                            <td>
+                                                <div class="product-sub"><a class="f-w-500 f-14 " href="product.html">15 Nov, 2024</a><span class="f-w-500 f-light f-12 d-block">8 Days Left</span></div>
+                                            </td>
+                                            <td>
+                                                <div class="product-sub"><a class="f-w-500 f-14 " href="product.html">Team Roha</a><span class="f-w-500 f-light f-12 d-block">12 Member</span></div>
+                                            </td>
+                                            <td>
+                                                <div class="txt-primary d-flex gap-2 align-items-center justify-content-center"><span class="pending bg-primary"></span><span class="f-w-500 f-13 txt-primary">Active</span></div>
+                                            </td>
+                                            <td>
+                                                <div class="product-sub">
+                                                    <div class="dropdown">
+                                                        <div id="dropdownMenuButtonicon11" data-bs-toggle="dropdown" aria-expanded="false" role="menu">
+                                                            <svg class="invoice-icon">
+                                                                <use href="../assets/svg/icon-sprite.svg#more-horizontal"></use>
+                                                            </svg>
+                                                        </div>
+                                                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButtonicon11"><span class="dropdown-item">Last Month</span><span class="dropdown-item">Last Week</span><span class="dropdown-item">Last Day </span></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
