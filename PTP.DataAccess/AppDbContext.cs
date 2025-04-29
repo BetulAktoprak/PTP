@@ -20,6 +20,7 @@ namespace PTP.DataAccess
         public DbSet<Process> Processes { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

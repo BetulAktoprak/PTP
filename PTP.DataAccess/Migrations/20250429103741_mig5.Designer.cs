@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429103741_mig5")]
+    partial class mig5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -340,21 +343,6 @@ namespace PTP.DataAccess.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("PersonnelProject", b =>
-                {
-                    b.Property<int>("PersonnelsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PersonnelsId", "ProjectsId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("PersonnelProject");
-                });
-
             modelBuilder.Entity("PTP.EntityLayer.Models.Comment", b =>
                 {
                     b.HasOne("PTP.EntityLayer.Models.Personnel", "Personnel")
@@ -420,21 +408,6 @@ namespace PTP.DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("PersonnelProject", b =>
-                {
-                    b.HasOne("PTP.EntityLayer.Models.Personnel", null)
-                        .WithMany()
-                        .HasForeignKey("PersonnelsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PTP.EntityLayer.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Customer", b =>

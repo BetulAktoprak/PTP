@@ -1,0 +1,92 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@model PTP.EntityLayer.Models.Project
+
+<div class="col-xxl-4 col-lg-6 box-col-6">
+    <div class="project-box @GetBoxClass(Model)">
+        <span class="badge @GetBadgeClass(Model)">@GetStatusText(Model)</span>
+        <h5 class="f-w-500">@Model.ProjectTitle</h5>
+
+        <div class="d-flex">
+            <img class="img-20 me-1 rounded-circle" src="~/images/default-user.jpg" alt="">
+            <div class="flex-grow-1">
+                <p>@(Model.Customer?.FullName ?? "No Customer")</p>
+            </div>
+        </div>
+
+        <p>@Model.Details</p>
+
+        <div class="row details">
+            <div class="col-6"><span>Issues </span></div>
+            <div class="col-6 font-primary">@Model.Processes?.Count() ?? 0</div>
+            <div class="col-6"><span>Resolved</span></div>
+            <div class="col-6 font-primary">@Model.Processes?.Count(p => p.ProcessType == "Resolved") ?? 0</div>
+            <div class="col-6"><span>Comment</span></div>
+            <div class="col-6 font-primary">@Model.Processes?.Sum(p => p.Comments?.Count() ?? 0)</div>
+        </div>
+
+        <div class="customers">
+            <ul>
+                <li class="d-inline-block"><img class="img-30 rounded-circle" src="~/images/default-user.jpg" alt=""></li>
+                <li class="d-inline-block"><img class="img-30 rounded-circle" src="~/images/default-user.jpg" alt=""></li>
+                <li class="d-inline-block ms-2">
+                    <p class="f-12">+10 More</p>
+                </li>
+            </ul>
+        </div>
+
+        <div class="project-status mt-4">
+            <div class="d-flex mb-0">
+                <p>@GetCompletionRate(Model)%</p>
+                <div class="flex-grow-1 text-end"><span>@GetStatusText(Model)</span></div>
+            </div>
+            <div class="progress" style="height: 5px">
+                <div class="progress-bar-animated progress-bar-striped @GetProgressClass(Model)" role="progressbar" style="width: @GetCompletionRate(Model)%;" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    int GetCompletionRate(PTP.EntityLayer.Models.Project project)
+    {
+        var total = project.Processes?.Count() ?? 0;
+        var done = project.Processes?.Count(p => p.ProcessType == "Done") ?? 0;
+        return total == 0 ? 0 : (done * 100 / total);
+    }
+
+    string GetStatusText(PTP.EntityLayer.Models.Project project)
+    {
+        var rate = GetCompletionRate(project);
+        if (rate == 100) return "Done";
+        if (rate == 100) return "Not Started";
+        return "Doing";
+    }
+    string GetProgressClass(PTP.EntityLayer.Models.Project project)
+    {
+        var rate = GetCompletionRate(project);
+        if (rate == 100) return "bg-success";
+        if (rate == 0) return "bg-secondary";
+        return "bg-warning";
+    }
+
+    string GetBadgeClass(PTP.EntityLayer.Models.Project project)
+    {
+        var rate = GetCompletionRate(project);
+        if (rate == 100) return "badge-success";
+        if (rate == 0) return "badge-secondary";
+        return "badge-warning";
+    }
+
+    string GetBoxClass(PTP.EntityLayer.Models.Project project)
+    {
+        var rate = GetCompletionRate(project);
+        if(rate == 100) return "b-light1-success";
+        if(rate == 0) return "b-light1-primary";
+        return "b-light1-warning";
+    }
+
+}

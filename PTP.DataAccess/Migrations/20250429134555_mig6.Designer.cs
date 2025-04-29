@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429134555_mig6")]
+    partial class mig6
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -269,6 +272,9 @@ namespace PTP.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("PersonnelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Priority")
                         .HasColumnType("nvarchar(max)");
 
@@ -296,6 +302,8 @@ namespace PTP.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("PersonnelId");
 
                     b.ToTable("Projects");
                 });
@@ -338,21 +346,6 @@ namespace PTP.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("PersonnelProject", b =>
-                {
-                    b.Property<int>("PersonnelsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PersonnelsId", "ProjectsId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("PersonnelProject");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Comment", b =>
@@ -419,22 +412,13 @@ namespace PTP.DataAccess.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("PTP.EntityLayer.Models.Personnel", "Personnel")
+                        .WithMany()
+                        .HasForeignKey("PersonnelId");
+
                     b.Navigation("Customer");
-                });
 
-            modelBuilder.Entity("PersonnelProject", b =>
-                {
-                    b.HasOne("PTP.EntityLayer.Models.Personnel", null)
-                        .WithMany()
-                        .HasForeignKey("PersonnelsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PTP.EntityLayer.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Personnel");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Customer", b =>

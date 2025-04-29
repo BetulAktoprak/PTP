@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429055937_mig2")]
+    partial class mig2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -245,43 +248,25 @@ namespace PTP.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ClientName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CustomerId")
+                    b.Property<int>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Details")
+                    b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("FilePath")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Priority")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("ProjectRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ProjectSize")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProjectTitle")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProjectType")
+                    b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -338,21 +323,6 @@ namespace PTP.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("PersonnelProject", b =>
-                {
-                    b.Property<int>("PersonnelsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProjectsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PersonnelsId", "ProjectsId");
-
-                    b.HasIndex("ProjectsId");
-
-                    b.ToTable("PersonnelProject");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Comment", b =>
@@ -417,24 +387,10 @@ namespace PTP.DataAccess.Migrations
                     b.HasOne("PTP.EntityLayer.Models.Customer", "Customer")
                         .WithMany("Projects")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Customer");
-                });
-
-            modelBuilder.Entity("PersonnelProject", b =>
-                {
-                    b.HasOne("PTP.EntityLayer.Models.Personnel", null)
-                        .WithMany()
-                        .HasForeignKey("PersonnelsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PTP.EntityLayer.Models.Project", null)
-                        .WithMany()
-                        .HasForeignKey("ProjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Customer", b =>
