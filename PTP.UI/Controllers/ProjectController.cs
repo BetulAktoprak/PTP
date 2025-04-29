@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PTP.Business.Services;
 using PTP.EntityLayer.Models;
@@ -6,6 +7,7 @@ using PTP.UI.Models;
 
 namespace PTP.UI.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ProjectController : Controller
     {
         private readonly ProjectService _projectService;
@@ -55,7 +57,7 @@ namespace PTP.UI.Controllers
 
             string filePath = null;
 
-            if(model.ProjectFile != null &&  model.ProjectFile.Length > 0)
+            if (model.ProjectFile != null && model.ProjectFile.Length > 0)
             {
                 var uploads = Path.Combine(_environment.WebRootPath, "uploads");
                 Directory.CreateDirectory(uploads);

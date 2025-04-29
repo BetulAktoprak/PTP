@@ -1,8 +1,7 @@
-﻿using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using PTP.Business.Services;
+using System.Security.Claims;
 
 namespace PTP.UI.Controllers
 {
@@ -21,15 +20,16 @@ namespace PTP.UI.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Login(string username, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
-            var user = _userService.ValidateUser(username, password);
 
-            if(user != null)
+            var user = _userService.ValidateUser(email, password);
+
+            if (user != null)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.Role, user.Role)
                 };
 
@@ -40,7 +40,7 @@ namespace PTP.UI.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            ViewBag.Error = "Kullanıcı adı veya şifre hatalı";
+            ViewBag.Error = "Email adresi veya şifre hatalı";
             return View();
         }
 

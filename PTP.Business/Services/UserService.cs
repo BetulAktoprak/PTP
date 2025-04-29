@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PTP.DataAccess;
+﻿using PTP.DataAccess;
 using PTP.EntityLayer.Models;
 
 namespace PTP.Business.Services
@@ -16,9 +11,9 @@ namespace PTP.Business.Services
         {
             _context = context;
         }
-        public User ValidateUser(string username, string password)
+        public User ValidateUser(string email, string password)
         {
-            return _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password)!;
+            return _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password)!;
         }
     }
 }
