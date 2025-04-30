@@ -1,39 +1,36 @@
 ﻿
-@*
-    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-*@
-
 @model PTP.EntityLayer.Models.Project
 
-<div class="col-xxl-4 col-lg-6 box-col-6">
+<div class="" data-id="@Model.Id" onclick="openEditModal(@Model.Id)" style="cursor: pointer;">
+
     <div class="project-box @GetBoxClass(Model)">
         <span class="badge @GetBadgeClass(Model)">@GetStatusText(Model)</span>
         <h5 class="f-w-500">@Model.ProjectTitle</h5>
 
-        <div class="d-flex">
-            <img class="img-20 me-1 rounded-circle" src="~/images/default-user.jpg" alt="">
-            <div class="flex-grow-1">
-                <p>@(Model.Customer?.FullName ?? "No Customer")</p>
-            </div>
-        </div>
-
+        @* <div class="d-flex"> *@
+        @*     <img class="img-20 me-1 rounded-circle" src="~/images/default-user.jpg" alt=""> *@
+        @*     <div class="flex-grow-1"> *@
+        @*         <p>@(Model.Customer?.FullName ?? "No Customer")</p> *@
+        @*     </div> *@
+        @* </div> *@
+        <hr />
         <p>@Model.Details</p>
 
         <div class="row details">
-            <div class="col-6"><span>Issues </span></div>
-            <div class="col-6 font-primary">@Model.Processes?.Count() ?? 0</div>
-            <div class="col-6"><span>Resolved</span></div>
-            <div class="col-6 font-primary">@Model.Processes?.Count(p => p.ProcessType == "Resolved") ?? 0</div>
-            <div class="col-6"><span>Comment</span></div>
-            <div class="col-6 font-primary">@Model.Processes?.Sum(p => p.Comments?.Count() ?? 0)</div>
+            <div class="col-6"><span>Sorun </span></div>
+            <div class="col-6 font-primary">@Model.Processes?.Count()</div>
+            <div class="col-6"><span>Çözüm</span></div>
+            <div class="col-6 font-primary">@Model.Processes?.Count(p => p.ProcessType == "Çözüldü")</div>
+            <div class="col-6"><span>Yorum</span></div>
+            <div class="col-6 font-primary">@Model.Processes?.Sum(p => p.Comments?.Count())</div>
         </div>
 
         <div class="customers">
             <ul>
-                <li class="d-inline-block"><img class="img-30 rounded-circle" src="~/images/default-user.jpg" alt=""></li>
-                <li class="d-inline-block"><img class="img-30 rounded-circle" src="~/images/default-user.jpg" alt=""></li>
+                <li class="d-inline-block"><img class="img-30 rounded-circle" src="~/dashboard/assets/images/default-user.jpg" alt=""></li>
+                <li class="d-inline-block"><img class="img-30 rounded-circle" src="~/dashboard/assets/images/default-user.jpg" alt=""></li>
                 <li class="d-inline-block ms-2">
-                    <p class="f-12">+10 More</p>
+                    <p class="f-12">+ @Model.Processes?.Sum(p => p.Comments?.Count()) Fazla</p>
                 </li>
             </ul>
         </div>
@@ -49,21 +46,35 @@
         </div>
     </div>
 </div>
+<div id="editProjectModalContainer"></div>
+
+<script>
+    function openEditModal(projectId) {
+      $.get(`/Project/Edit/${projectId}`, function (partialViewHtml) {
+        $('#editProjectModalContainer').html(partialViewHtml);
+        const modal = new bootstrap.Modal(document.getElementById('editProjectModal'));
+        modal.show();
+      });
+    }
+</script>
+
+
+
 
 @functions {
     int GetCompletionRate(PTP.EntityLayer.Models.Project project)
     {
         var total = project.Processes?.Count() ?? 0;
-        var done = project.Processes?.Count(p => p.ProcessType == "Done") ?? 0;
+        var done = project.Processes?.Count(p => p.ProcessType == "Tamamlandı") ?? 0;
         return total == 0 ? 0 : (done * 100 / total);
     }
 
     string GetStatusText(PTP.EntityLayer.Models.Project project)
     {
         var rate = GetCompletionRate(project);
-        if (rate == 100) return "Done";
-        if (rate == 100) return "Not Started";
-        return "Doing";
+        if (rate == 100) return "Tamamlandı";
+        if (rate == 0) return "Başlamadı";
+        return "Devam Ediyor";
     }
     string GetProgressClass(PTP.EntityLayer.Models.Project project)
     {

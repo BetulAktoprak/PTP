@@ -1,0 +1,121 @@
+﻿@model PTP.UI.Models.ProjectCreateViewModel
+
+<div class="modal fade" id="editProjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form id="editProjectForm" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label asp-for="ProjectTitle" class="form-label">Proje Adı</label>
+                    <input asp-for="ProjectTitle" class="form-control" />
+                    <span asp-validation-for="ProjectTitle" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ClientName" class="form-label">Kullanıcı</label>
+                    <input asp-for="ClientName" class="form-control" />
+                    <span asp-validation-for="ClientName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProjectRate" class="form-label">Proje Yüzdesi</label>
+                    <input asp-for="ProjectRate" type="number" class="form-control" />
+                    <span asp-validation-for="ProjectRate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProjectType" class="form-label">Proje Tipi</label>
+                    <input asp-for="ProjectType" class="form-control" />
+                    <span asp-validation-for="ProjectType" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Priority" class="form-label">Öncelik</label>
+                    <select asp-for="Priority" class="form-select">
+                        <option value="Low">Düşük</option>
+                        <option value="Medium">Orta</option>
+                        <option value="High">Yüksek</option>
+                    </select>
+                    <span asp-validation-for="Priority" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProjectSize" class="form-label">Proje Boyutu</label>
+                    <input asp-for="ProjectSize" class="form-control" />
+                    <span asp-validation-for="ProjectSize" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="StartingDate" class="form-label">Başlangıç Tarihi</label>
+                    <input asp-for="StartingDate" type="date" class="form-control" />
+                    <span asp-validation-for="StartingDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EndingDate" class="form-label">Bitiş Tarihi</label>
+                    <input asp-for="EndingDate" type="date" class="form-control" />
+                    <span asp-validation-for="EndingDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Details" class="form-label">Detaylar</label>
+                    <textarea asp-for="Details" class="form-control"></textarea>
+                    <span asp-validation-for="Details" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SelectedPersonnelIds" class="form-label">Personel Seçimi</label>
+                    <select asp-for="SelectedPersonnelIds" asp-items="Model.PersonnelList" class="form-select" multiple></select>
+                    <span asp-validation-for="SelectedPersonnelIds" class="text-danger"></span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.ExistingFilePath))
+                {
+                    <div class="mb-3">
+                        <label>Mevcut Dosya:</label><br />
+                        <a href="/@Model.ExistingFilePath" target="_blank">Dosyayı Görüntüle</a>
+                    </div>
+                }
+
+                    <div class="mb-3">
+                        <label asp-for="ProjectFile" class="form-label">Dosya Yükle (Opsiyonel)</label>
+                        <input asp-for="ProjectFile" type="file" class="form-control" />
+                        <span asp-validation-for="ProjectFile" class="text-danger"></span>
+                    </div>
+                    
+                
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#editProjectForm').submit(function (e) {
+      e.preventDefault();
+
+      let formData = new FormData(this);
+
+      $.ajax({
+        url: '/Project/Edit',
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+          if (res.success) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editProjectModal'));
+            modal.hide();
+            alert('Proje başarıyla güncellendi.');
+            location.reload();
+          }
+        }
+      });
+    });
+</script>
+
+

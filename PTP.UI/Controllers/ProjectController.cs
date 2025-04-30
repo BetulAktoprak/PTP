@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using PTP.Business.Services;
@@ -88,6 +89,77 @@ namespace PTP.UI.Controllers
 
             _projectService.Add(project);
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            var project = _projectService.GetByID(id);
+            if(project == null) return NotFound();
+
+            var model = new ProjectCreateViewModel
+            {
+                Id = project.Id,
+                ProjectTitle = project.ProjectTitle,
+                ClientName = project.ClientName,
+                ProjectRate = project.ProjectRate ?? 0,
+                ProjectType = project.ProjectType,
+                Priority = project.Priority,
+                ProjectSize = project.ProjectSize,
+                StartingDate = project.StartDate,
+                EndingDate = project.EndDate ?? DateTime.Now,
+                Details = project.Details,
+                ExistingFilePath = project.FilePath,
+                SelectedPersonnelIds = project.Personnels?.Select(p => p.Id).ToList() ?? new List<int>(),
+                PersonnelList = _personnelService.GetAll().Select(p => new SelectListItem
+                {
+                    Value = p.Id.ToString(),
+                    Text = p.FullName
+                }).ToList()
+            };
+
+            return PartialView("_EditProjectPartial", model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(ProjectCreateViewModel model)
+        {
+            var project = _projectService.GetByID(model.Id);
+            if(project == null) return NotFound();
+
+            var selectedPersonnels = _personnelService.GetAll()
+                .Where(p => model.SelectedPersonnelIds.Contains(p.Id)).ToList();
+
+            string filePath = project.FilePath; 
+            if (model.ProjectFile != null && model.ProjectFile.Length > 0)
+            {
+                var uploads = Path.Combine(_environment.WebRootPath, "uploads");
+                Directory.CreateDirectory(uploads);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProjectFile.FileName);
+                filePath = Path.Combine("uploads", uniqueFileName);
+
+                using (var stream = new FileStream(Path.Combine(_environment.WebRootPath, filePath), FileMode.Create))
+                {
+                    await model.ProjectFile.CopyToAsync(stream);
+                }
+            }
+
+            project.ProjectTitle = model.ProjectTitle;
+            project.ClientName = model.ClientName;
+            project.ProjectRate = model.ProjectRate;
+            project.ProjectType = model.ProjectType;
+            project.Priority = model.Priority;
+            project.ProjectSize = model.ProjectSize;
+            project.StartDate = model.StartingDate;
+            project.EndDate = model.EndingDate;
+            project.Details = model.Details;
+            project.Personnels = selectedPersonnels;
+            project.FilePath = filePath;
+
+            _projectService.Update(project);
+            return Json(new { success = true });
+
         }
     }
 }

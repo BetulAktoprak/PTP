@@ -1148,6 +1148,7 @@
                     @RenderBody()
 
                 </div>
+                @RenderSection("Scripts", required: false)
                 
             </div>
             <!-- footer start-->
@@ -1164,6 +1165,8 @@
     </div>
     <!-- latest jquery-->
     <script src="../dashboard/assets/js/jquery.min.js"></script>
+    @* <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> *@
+
     <!-- Bootstrap js-->
     <script src="../dashboard/assets/js/bootstrap/bootstrap.bundle.min.js"></script>
     <!-- feather icon js-->
@@ -1215,6 +1218,9 @@
     <script src="../assets/js/typeahead-search/handlebars.js"></script>
     <script src="../assets/js/typeahead-search/typeahead-custom.js"></script>
     <!-- Plugins JS Ends-->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    
 
 </body>
 </html>

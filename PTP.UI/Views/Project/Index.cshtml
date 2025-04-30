@@ -33,7 +33,9 @@
                             <div class="row">
                                 @foreach (var project in Model)
                                 {
+                                    <div class="col-xxl-4 col-lg-6 box-col-6 ">
                                     @Html.Partial("_ProjectCard", project)
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -42,7 +44,9 @@
                             <div class="row">
                                 @foreach (var project in Model.Where(p => GetCompletionRate(p) > 0 && GetCompletionRate(p) < 100))
                                 {
-                                    @Html.Partial("_ProjectCard", project)
+                                    <div class="col-xxl-4 col-lg-6 box-col-6 ">
+                                        @Html.Partial("_ProjectCard", project)
+                                    </div>
                                 }
                             </div>
                         </div>
@@ -51,7 +55,9 @@
                             <div class="row">
                                 @foreach (var project in Model.Where(p => GetCompletionRate(p) == 100))
                                 {
-                                    @Html.Partial("_ProjectCard", project)
+                                    <div class="col-xxl-4 col-lg-6 box-col-6 ">
+                                        @Html.Partial("_ProjectCard", project)
+                                    </div>
                                 }
                             </div>
                         </div>
