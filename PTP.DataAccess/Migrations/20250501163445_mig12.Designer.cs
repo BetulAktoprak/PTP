@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250501163445_mig12")]
+    partial class mig12
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,9 +151,6 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PersonnelId");
@@ -158,8 +158,6 @@ namespace PTP.DataAccess.Migrations
                     b.HasIndex("ProcessId");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Documents");
                 });
@@ -423,17 +421,11 @@ namespace PTP.DataAccess.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("PTP.EntityLayer.Models.User", "User")
-                        .WithMany("Documents")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Personnel");
 
                     b.Navigation("Process");
 
                     b.Navigation("Project");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Personnel", b =>
@@ -518,8 +510,6 @@ namespace PTP.DataAccess.Migrations
             modelBuilder.Entity("PTP.EntityLayer.Models.User", b =>
                 {
                     b.Navigation("Customer");
-
-                    b.Navigation("Documents");
 
                     b.Navigation("Personnel");
                 });

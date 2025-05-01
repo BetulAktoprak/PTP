@@ -18,6 +18,9 @@ builder.Services.AddAuthentication("MyCookieAuth")
         options.AccessDeniedPath = "/Account/AccessDenied";
     });
 
+builder.Services.AddAuthorization();
+
+
 builder.Services.AddScoped<ProjectRepository>();
 builder.Services.AddScoped<CommentRepository>();
 builder.Services.AddScoped<CustomerRepository>();

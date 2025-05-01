@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250501160307_mig11")]
+    partial class mig11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,6 +84,7 @@ namespace PTP.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
@@ -99,13 +103,7 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -148,9 +146,6 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PersonnelId");
@@ -158,8 +153,6 @@ namespace PTP.DataAccess.Migrations
                     b.HasIndex("ProcessId");
 
                     b.HasIndex("ProjectId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Documents");
                 });
@@ -190,19 +183,17 @@ namespace PTP.DataAccess.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Personnels");
                 });
@@ -395,17 +386,6 @@ namespace PTP.DataAccess.Migrations
                     b.Navigation("Process");
                 });
 
-            modelBuilder.Entity("PTP.EntityLayer.Models.Customer", b =>
-                {
-                    b.HasOne("PTP.EntityLayer.Models.User", "User")
-                        .WithOne("Customer")
-                        .HasForeignKey("PTP.EntityLayer.Models.Customer", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("PTP.EntityLayer.Models.Document", b =>
                 {
                     b.HasOne("PTP.EntityLayer.Models.Personnel", "Personnel")
@@ -423,28 +403,11 @@ namespace PTP.DataAccess.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("PTP.EntityLayer.Models.User", "User")
-                        .WithMany("Documents")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Personnel");
 
                     b.Navigation("Process");
 
                     b.Navigation("Project");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("PTP.EntityLayer.Models.Personnel", b =>
-                {
-                    b.HasOne("PTP.EntityLayer.Models.User", "User")
-                        .WithOne("Personnel")
-                        .HasForeignKey("PTP.EntityLayer.Models.Personnel", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Process", b =>
@@ -513,15 +476,6 @@ namespace PTP.DataAccess.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("Processes");
-                });
-
-            modelBuilder.Entity("PTP.EntityLayer.Models.User", b =>
-                {
-                    b.Navigation("Customer");
-
-                    b.Navigation("Documents");
-
-                    b.Navigation("Personnel");
                 });
 #pragma warning restore 612, 618
         }

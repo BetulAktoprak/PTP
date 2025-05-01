@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using PTP.EntityLayer.Models;
 
 namespace PTP.DataAccess
@@ -67,7 +62,20 @@ namespace PTP.DataAccess
                 .HasForeignKey(d => d.PersonnelId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Document>()
+                .HasOne(d => d.Project)
+                .WithMany(p => p.Documents)
+                .HasForeignKey(d => d.ProjectId)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Personnel)
+                .WithOne(p => p.User)
+                .HasForeignKey<Personnel>(p => p.UserId);
 
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Customer)
+                .WithOne(c => c.User)
+                .HasForeignKey<Customer>(c => c.UserId);
         }
     }
 }
