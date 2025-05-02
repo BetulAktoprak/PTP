@@ -93,7 +93,7 @@
                                     <div class="sidebar-body">
                                             <label asp-for="ProjectTitle" class="form-label col-12 m-0">Proje Adı <span class="txt-danger"> *</span></label>
                                             <div class="col-12 custom-input">
-                                               <input asp-for="ProjectTitle" class="form-control is-invalid" id="productTitle1" type="text" required />
+                                               <input asp-for="ProjectTitle" class="form-control" id="productTitle1" type="text" />
                                                 
                                                 @* <div class="invalid-feedback">Proje adını giriniz.</div> *@
                                             </div>
@@ -117,7 +117,7 @@
                                                 <div class="dz-message needsclick">
                                                     <label asp-for="ProjectFiles" class="form-label"><i class="icon-cloud-up"></i> Upload project file</label>
                                                     <input type="file" asp-for="ProjectFiles" id="projectFiles" class="form-control" multiple />
-                                                    <input type="hidden" id="allFilesBase64" name="AllFilesBase64" />
+                                                   
                                                 </div>
                                         </div>
 
@@ -126,11 +126,9 @@
                                                 <label asp-for="DocumentDetail" class="form-label">Açıklama</label>
                                                 <textarea asp-for="DocumentDetail" class="form-control" rows="8" placeholder="Dosya detayları.."></textarea>
                                             </div>
-                                            <!-- Seçilen dosyalar listesi -->
                                             <div id="selectedFilesList" class="col-6">
                                                 
-
-                                                <!-- Seçilen dosyalar burada listelenecek -->
+                                                <!-- Seçilen dosyalar listesi -->
                                             </div>
 
                                         </div>
@@ -141,23 +139,78 @@
                                     <div class="sidebar-body">
                                             <div class="row g-lg-4 g-3">
                                                 <div class="col-12">
-                                                    <div class="row g-3">
+                                                    <div class="row g-5">
                                                         <div class="col-sm-6">
 
-                                                                    @if (Model.PersonnelList != null)
+                                                            <div class="mb-3">
+                                                                <label for="personnelSelect" class="form-label">Personel Seçin</label>
+                                                                <select id="personnelSelect" class="form-select" name="SelectedPersonnelIds">
+                                                                    <option value="">Personel Seçin</option>
+                                                                    @foreach (var person in Model.PersonnelList) 
                                                                     {
-                                                                            <label asp-for="SelectedPersonnelIds" class="form-label">Personel Atamak İçin Seçiniz</label>
-                                                                            @Html.DropDownListFor(m => m.SelectedPersonnelIds, Model.PersonnelList, "Personel seçiniz", new { @class = "form-control" })
+                                                                        <option value="@person.Value">@person.Text</option>
                                                                     }
-                                                                    else
-                                                                    {
-                                                                        <span>Personel listesi yüklenemedi</span>
-                                                                    }
-                                                                    @* <label class="form-label m-0" for="validationDefault04">Add Category</label> *@
-                                                                
+                                                                </select>
+                                                            </div>
+
                                                         </div>
-                                                        
-                                                     
+
+                                                        <div class="col-sm-6">
+                                                            <div id="selectedPersonnelContainer" class="mt-3">
+                                                                <!-- Seçilen personel listesi -->
+                                                            </div>
+
+                                                            <div id="hiddenSelectedPersonnelInputs"></div>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <div class="category-buton" >
+                                                                <a class="btn button-primary" href="#!" data-bs-toggle="modal" data-bs-target="#add-personnel-modal">
+                                                                    <i class="me-2 fa fa-plus"></i>Yeni Personel Ekle
+                                                                </a>
+                                                            </div>
+                                                            
+
+                                                            <div class="modal fade" id="add-personnel-modal" tabindex="-1" aria-hidden="true">
+                                                                <div class="modal-dialog modal-lg">
+                                                                    <div class="modal-content">
+                                                                        <div id="personnelForm">
+                                                                            <div class="modal-header">
+                                                                                <h3 class="modal-title fs-5">Yeni Personel Ekle</h3>
+                                                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                            </div>
+                                                                            <div class="modal-body custom-input">
+                                                                                <div class="row g-3">
+                                                                                    <div class="col-md-6">
+                                                                                        <label class="form-label">Ad Soyad <span class="text-danger">*</span></label>
+                                                                                        <input type="text" class="form-control" name="FullName" />
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                                                                                        <input type="email" class="form-control" name="Email" />
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <label class="form-label">Telefon</label>
+                                                                                        <input type="text" class="form-control" name="Phone" />
+                                                                                    </div>
+                                                                                    <div class="col-md-6">
+                                                                                        <label class="form-label">Şifre <span class="text-danger">*</span></label>
+                                                                                        <input type="password" class="form-control" name="Password" />
+                                                                                    </div>
+
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button class="btn btn-light" type="button" data-bs-dismiss="modal">İptal</button>
+                                                                                <button id="submitPersonnelBtn" class="btn btn-primary" type="submit">Ekle</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+
                                                     </div>
                                                 </div>
                                                 
@@ -229,43 +282,6 @@
     </div>
 </div>
 
-@* <script> *@
-@*         document.getElementById('projectFiles').addEventListener('change', function () { *@
-@*         const files = this.files; *@
-@*         const list = document.getElementById('selectedFilesList'); *@
-@*         // list.innerHTML = '';  *@
-
-@*         if (files.length > 0) { *@
-@*             const ul = document.createElement('ul'); *@
-@*             ul.classList.add('list-group'); *@
-
-@*             Array.from(files).forEach(file => { *@
-@*                 const li = document.createElement('li'); *@
-@*                 li.classList.add('folder-box', 'd-flex', 'align-items-center'); *@
-
-@*                 const now = new Date(); *@
-@*                 const formattedDate = now.toLocaleString('tr-TR');  *@
-
-@*                 li.innerHTML = ` *@
-@*                     <div class="d-flex align-items-center files-list"> *@
-@*                         <div class="flex-shrink-0 file-left"><i class="f-22 fa fa-folder font-primary"></i></div> *@
-@*                         <div class="flex-grow-1 ms-3"> *@
-@*                             <h6>${file.name}</h6> *@
-@*                             <p>${formattedDate}, ${Math.round(file.size / 1024)} KB</p> *@
-@*                         </div> *@
-@*                     </div> *@
-@*                 `; *@
-@*                 ul.appendChild(li); *@
-@*             }); *@
-@*             list.appendChild(ul); *@
-@*         } else { *@
-@*             list.innerHTML = '<p class="text-muted">Seçilen dosya yok.</p>'; *@
-@*         } *@
-@*     }); *@
-
-@* </script> *@
-
-
 
 <script>
     let selectedFiles = [];
@@ -280,22 +296,56 @@
         });
 
         updateSelectedFilesList();
-        e.target.value = ''; // Aynı dosyayı tekrar seçebilmek için temizle
+        e.target.value = ''; 
     });
 
     function updateSelectedFilesList() {
         const list = document.getElementById('selectedFilesList');
         list.innerHTML = '';
-        selectedFiles.forEach(file => {
-            const div = document.createElement('div');
-            div.textContent = `${file.name} - ${Math.round(file.size / 1024)} KB`;
-            list.appendChild(div);
+        selectedFiles.forEach((file, index) => {
+        const mainDiv = document.createElement('div');
+        mainDiv.className = "d-flex justify-content-between align-items-center border rounded p-2 mb-2 bg-light";
+
+        const icon = document.createElement('i');
+        icon.className = "f-22 fa fa-folder font-primary fs-4 me-3";
+
+        const textWrapper = document.createElement('div');
+        textWrapper.className = "flex-grow-1 text-dark";
+
+        const fileName = document.createElement('div');
+        fileName.className = "fw-semibold text-truncate";
+        fileName.style.maxWidth = "100%";
+        fileName.title = file.name;
+        fileName.textContent = file.name;
+
+        const fileSize = document.createElement('small');
+        fileSize.className = "text-muted";
+        fileSize.textContent = `${Math.round(file.size / 1024)} KB`;
+
+        textWrapper.appendChild(fileName);
+        textWrapper.appendChild(fileSize);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = "btn btn-sm btn-outline-dark ms-3";
+        removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+        removeBtn.title = "Dosyayı kaldır";
+        removeBtn.onclick = () => {
+            selectedFiles.splice(index, 1);
+            updateSelectedFilesList();
+        };
+
+        mainDiv.appendChild(icon);
+        mainDiv.appendChild(textWrapper);
+        mainDiv.appendChild(removeBtn);
+        list.appendChild(mainDiv);
         });
-    }
+ }
+
 
     document.getElementById('projectForm').addEventListener('submit', function (e) {
-        e.preventDefault(); // Sayfa yenilenmesini engelle
+        e.preventDefault();
 
+           
         const form = e.target;
         const formData = new FormData(form);
 
@@ -321,69 +371,102 @@
     });
 </script>
 
+<script>
+    document.getElementById("submitPersonnelBtn").addEventListener("click", function (e) {
+        e.preventDefault();
 
+        const formData = {
+            FullName: document.querySelector('[name="FullName"]').value,
+            Email: document.querySelector('[name="Email"]').value,
+            Phone: document.querySelector('[name="Phone"]').value,
+            Password: document.querySelector('[name="Password"]').value,
+            Role: "Personnel"
+        };
 
+        fetch("/Personnel/Add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Sunucu hatası: " + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const ddl = document.querySelector('[name="SelectedPersonnelIds"]');
+            const option = document.createElement("option");
+            option.value = data.id;
+            option.text = data.fullName;
+            option.selected = true;
+            ddl.appendChild(option);
 
+            const modalElement = document.getElementById("add-personnel-modal");
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+            }
+        })
+        .catch(error => {
+            console.error("Personel eklenirken hata:", error);
+        });
+    });
+</script>
 
-@* <script> *@
-@*     let allFiles = []; *@
+<script>
+    const selectedPersonnel = new Set();
 
-@*     document.getElementById('projectFiles').addEventListener('change', function () { *@
-@*         const newFiles = Array.from(this.files); *@
-@*         allFiles = allFiles.concat(newFiles); // yeni dosyaları biriktir *@
+    document.getElementById('personnelSelect').addEventListener('change', function () {
+        const select = this;
+        const selectedId = select.value;
+        const selectedText = select.options[select.selectedIndex].text;
 
-@*         const list = document.getElementById('selectedFilesList'); *@
-@*         list.innerHTML = ''; *@
+        if (!selectedId || selectedPersonnel.has(selectedId)) {
+            return; 
+        }
 
-@*         const ul = document.createElement('ul'); *@
-@*         ul.classList.add('list-group'); *@
+        selectedPersonnel.add(selectedId);
 
-@*         allFiles.forEach(file => { *@
-@*             const li = document.createElement('li'); *@
-@*             li.classList.add('folder-box', 'd-flex', 'align-items-center'); *@
+        const container = document.getElementById('selectedPersonnelContainer');
 
-@*             const now = new Date(); *@
-@*             const formattedDate = now.toLocaleString('tr-TR'); *@
+        const div = document.createElement('div');
+        div.className = "d-flex justify-content-between align-items-center border rounded p-2 mb-2 bg-light text-dark";
+        div.style.width = "50%";
+        const icon = document.createElement("i");
+        icon.className = "fa fa-user fs-5"; 
 
-@*             li.innerHTML = ` *@
-@*                 <div class="d-flex align-items-center files-list"> *@
-@*                     <div class="flex-shrink-0 file-left"><i class="f-22 fa fa-folder font-primary"></i></div> *@
-@*                     <div class="flex-grow-1 ms-3"> *@
-@*                         <h6>${file.name}</h6> *@
-@*                         <p>${formattedDate}, ${Math.round(file.size / 1024)} KB</p> *@
-@*                     </div> *@
-@*                 </div> *@
-@*             `; *@
-@*             ul.appendChild(li); *@
-@*         }); *@
-@*         list.appendChild(ul); *@
+        div.appendChild(icon);
+        div.dataset.personId = selectedId;
 
-@*         // input dosyaları temizle ki tekrar aynı dosya seçilirse change tetiklenir *@
-@*         this.value = ""; *@
-@*     }); *@
+        const nameDiv = document.createElement('div');
+        nameDiv.textContent = selectedText;
 
-@*     // Form submit'te tüm dosyaları manuel gönder *@
-@*     document.querySelector('form').addEventListener('submit', function (e) { *@
-@*         const formData = new FormData(this); *@
+        const removeBtn = document.createElement('button');
+        removeBtn.className = "btn btn-sm btn-outline-dark";
+        removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+        removeBtn.onclick = function () {
+            container.removeChild(div);
+            selectedPersonnel.delete(selectedId);
+            document.querySelector(`#hiddenSelectedPersonnelInputs input[value="${selectedId}"]`)?.remove();
+        };
 
-@*         allFiles.forEach(file => { *@
-@*             formData.append('ProjectFiles', file); // IFormFile ile eşleşir *@
-@*         }); *@
+        div.appendChild(nameDiv);
+        div.appendChild(removeBtn);
+        container.appendChild(div);
 
-@*         fetch(this.action, { *@
-@*             method: 'POST', *@
-@*             body: formData *@
-@*         }).then(response => { *@
-@*             if (response.redirected) { *@
-@*                 window.location.href = response.url; *@
-@*             } else { *@
-@*                 alert("Yükleme tamamlandı mı kontrol et."); *@
-@*             } *@
-@*         }); *@
+        const hiddenInputs = document.getElementById('hiddenSelectedPersonnelInputs');
+        const hidden = document.createElement('input');
+        hidden.type = 'hidden';
+        hidden.name = 'SelectedPersonnelIds';
+        hidden.value = selectedId;
+        hiddenInputs.appendChild(hidden);
+    });
+</script>
 
-@*         e.preventDefault(); // klasik post'u engelle *@
-@*     }); *@
-@* </script> *@
-
-
+<script>
+    console.log("Script yüklendi");
+</script>
 

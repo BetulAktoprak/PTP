@@ -81,11 +81,10 @@ namespace PTP.UI.Controllers
                 Details = model.Details,
                 DocumentDetail = model.DocumentDetail,
                 Personnels = selectedPersonnels,
+                CreatedBy = userId.ToString()
             };
 
             _projectService.Add(project);
-
-
 
             if (model.ProjectFiles != null && model.ProjectFiles.Any())
             {
@@ -103,13 +102,12 @@ namespace PTP.UI.Controllers
                         await file.CopyToAsync(stream);
                     }
 
-                    // Her dosya için Document kaydı oluştur
                     var document = new Document
                     {
                         FileName = file.FileName,
                         FilePath = relativePath,
                         ProjectId = project.Id,
-                        UserId = userId // Oturumdaki kullanıcıyı al
+                        UserId = userId 
                     };
 
                     _documentService.Add(document);
@@ -139,7 +137,6 @@ namespace PTP.UI.Controllers
                 EndingDate = project.EndDate ?? DateTime.Now,
                 Details = project.Details,
                 DocumentDetail = project.DocumentDetail,
-                //ExistingFilePath = project.FilePath,
                 SelectedPersonnelIds = project.Personnels?.Select(p => p.Id).ToList() ?? new List<int>(),
                 PersonnelList = _personnelService.GetAll().Select(p => new SelectListItem
                 {
@@ -157,23 +154,15 @@ namespace PTP.UI.Controllers
             var project = _projectService.GetByID(model.Id);
             if (project == null) return NotFound();
 
+            project.Personnels.Clear();
+
             var selectedPersonnels = _personnelService.GetAll()
                 .Where(p => model.SelectedPersonnelIds.Contains(p.Id)).ToList();
 
-            //string filePath = project.FilePath;
-            //if (model.ProjectFile != null && model.ProjectFile.Length > 0)
-            //{
-            //    var uploads = Path.Combine(_environment.WebRootPath, "uploads");
-            //    Directory.CreateDirectory(uploads);
-
-            //    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProjectFile.FileName);
-            //    filePath = Path.Combine("uploads", uniqueFileName);
-
-            //    using (var stream = new FileStream(Path.Combine(_environment.WebRootPath, filePath), FileMode.Create))
-            //    {
-            //        await model.ProjectFile.CopyToAsync(stream);
-            //    }
-            //}
+            foreach (var person in selectedPersonnels)
+            {
+                project.Personnels.Add(person);
+            }
 
             project.ProjectTitle = model.ProjectTitle;
             project.ClientName = model.ClientName;
@@ -185,10 +174,40 @@ namespace PTP.UI.Controllers
             project.EndDate = model.EndingDate;
             project.Details = model.Details;
             project.DocumentDetail = model.DocumentDetail;
-            project.Personnels = selectedPersonnels;
-            //project.FilePath = filePath;
+
+            if (model.ProjectFiles != null && model.ProjectFiles.Any())
+            {
+                var uploads = Path.Combine(_environment.WebRootPath, "uploads");
+                Directory.CreateDirectory(uploads);
+
+                foreach (var file in model.ProjectFiles)
+                {
+                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var relativePath = Path.Combine("uploads", uniqueFileName);
+                    var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
+
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+
+                    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                    int userId = int.Parse(userIdClaim.Value);
+
+                    var document = new Document
+                    {
+                        FileName = file.FileName,
+                        FilePath = relativePath,
+                        ProjectId = project.Id,
+                        UserId = userId
+                    };
+
+                    _documentService.Add(document);
+                }
+            }
 
             _projectService.Update(project);
+
             return Json(new { success = true });
 
         }
