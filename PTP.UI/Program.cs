@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using PTP.Business.Abstractions;
 using PTP.Business.Services;
 using PTP.DataAccess;
+using PTP.DataAccess.Abstractions;
 using PTP.DataAccess.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +29,7 @@ builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<DocumentRepository>();
 builder.Services.AddScoped<PersonnelRepository>();
 builder.Services.AddScoped<ProcessRepository>();
+builder.Services.AddScoped<IProcessRepository, ProcessRepository>();
 
 builder.Services.AddScoped<ProjectService>();
 builder.Services.AddScoped<CommentService>();
@@ -35,7 +38,7 @@ builder.Services.AddScoped<DocumentService>();
 builder.Services.AddScoped<PersonnelService>();
 builder.Services.AddScoped<ProcessService>();
 builder.Services.AddScoped<UserService>();
-
+builder.Services.AddScoped<IProcessService, ProcessService>();
 
 var app = builder.Build();
 

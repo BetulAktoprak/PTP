@@ -13,27 +13,79 @@ namespace PTP.UI.Controllers
             _processService = processService;
         }
 
-        public IActionResult Index()
+        //public IActionResult Index()
+        //{
+        //    var processes = _processService.GetAll();
+        //    return View(processes);
+        //}
+
+        public async Task<IActionResult> Index(int projectId)
         {
-            var processes = _processService.GetAll();
+            ViewBag.ProjectId = projectId;
+
+            var processes = await _processService.GetAllByProjectIdAsync(projectId);
             return View(processes);
         }
-        [HttpPost]
-        public IActionResult AddProcess([FromBody] Process process)
+
+
+        public async Task<IActionResult> KanbanBoard(int projectId)
         {
-            _processService.Add(process);
-            return Ok();
+            var allProcess = await _processService.GetAllByProjectIdAsync(projectId);
+
+            var viewModel = new Models.KanbanBoardViewModel
+            {
+                ProjectId = projectId,
+                ToDo = allProcess.Where(p => p.ProcessType == "Todo").ToList(),
+                Working = allProcess.Where(p => p.ProcessType == "Working").ToList(),
+                Done = allProcess.Where(p => p.ProcessType == "Done").ToList()
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
-        public IActionResult UpdateProcessStatus(int id, string status)
+        public IActionResult UpdateProcessStatus(int processId, string newStatus)
         {
-            var process = _processService.GetByID(id);
-            if (process == null) return NotFound();
+            var process = _processService.GetByID(processId);
 
-            process.ProcessType = status;
+            if (process is null) return NotFound();
+
+            process.ProcessType = newStatus;
             _processService.Update(process);
+
             return Ok();
         }
+
+        [HttpPost]
+        public IActionResult Create(Process process)
+        {
+            if (ModelState.IsValid)
+            {
+                _processService.Add(process);
+                return RedirectToAction("Index", new { projectId = process.ProjectId }); // ✅ Modal sonrası geri dönüş
+            }
+
+            // Eğer valid değilse modal form açık kalmayacağından, sayfa üzerinde de bir şey gösterilmeyecek.
+            return RedirectToAction("Index", new { projectId = process.ProjectId });
+        }
+
+
+        //[HttpPost]
+        //public IActionResult AddProcess([FromBody] Process process)
+        //{
+        //    _processService.Add(process);
+        //    return Ok();
+        //}
+
+        //[HttpPost]
+        //public IActionResult UpdateProcessStatus(int id, string status)
+        //{
+        //    var process = _processService.GetByID(id);
+        //    if (process == null) return NotFound();
+
+        //    process.ProcessType = status;
+        //    _processService.Update(process);
+        //    return Ok();
+        //}
     }
 }

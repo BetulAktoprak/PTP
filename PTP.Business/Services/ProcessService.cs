@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PTP.Business.Abstractions;
+﻿using PTP.Business.Abstractions;
 using PTP.DataAccess.Repositories;
 using PTP.EntityLayer.Models;
 
 namespace PTP.Business.Services
 {
-    public class ProcessService : IService<Process>
+    public class ProcessService : IService<Process>, IProcessService
     {
         private readonly ProcessRepository _processRepository;
 
@@ -31,6 +26,11 @@ namespace PTP.Business.Services
         public IEnumerable<Process>? GetAll()
         {
             return _processRepository.GetAll();
+        }
+
+        public async Task<List<Process>> GetAllByProjectIdAsync(int projectId)
+        {
+            return await _processRepository.GetAllByProjectIdAsync(projectId);
         }
 
         public Process? GetByID(int id)
