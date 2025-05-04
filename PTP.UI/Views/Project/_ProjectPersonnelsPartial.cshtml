@@ -1,0 +1,186 @@
+﻿@model PTP.UI.Models.ProjectCreateViewModel
+
+<style>
+    .custom-suggestion-box {
+        border: 1px solid #ccc;
+        padding: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 10px;
+        background: white;
+        border-radius: 5px;
+        font-size: 14px;
+    }
+
+    .custom-suggestion-box div {
+         padding: 10px;
+         cursor: pointer;
+         transition: background-color 0.2s;
+    }
+
+     .custom-suggestion-box div:hover {
+            background-color: #f0f0f0;
+     }
+
+    #personnelTagInput {
+        height: 45px;
+        font-size: 16px;
+    }
+</style>
+
+<div class="tab-pane fade" id="category-product" role="tabpanel" aria-labelledby="category-product-tab">
+    <div class="sidebar-body">
+        <div class="row g-lg-4 g-3">
+            <div class="col-12">
+                <div class="row g-5">
+                    <div class="col-sm-9 offset-sm-1">
+                        <label for="personnelTagInput" class="form-label">Personel Seçin</label>
+                        <div class="mb-3">
+                            <input id="personnelTagInput" name="SelectedPersonnelIds" class="form-control" />
+                            <div id="suggestions-container" class="tagify__suggestions custom-suggestion-box"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-end">
+                        <div class="category-buton">
+                            <a class="btn button-primary" href="#!" data-bs-toggle="modal" data-bs-target="#add-personnel-modal">
+                                <i class="me-2 fa fa-plus"></i>Yeni Personel Ekle
+                            </a>
+                        </div>
+
+
+                        <div class="modal fade" id="add-personnel-modal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div id="personnelForm">
+                                        <div class="modal-header">
+                                            <h3 class="modal-title fs-5">Yeni Personel Ekle</h3>
+                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body custom-input">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Ad Soyad <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="FullName" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                                                    <input type="email" class="form-control" name="Email" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Telefon</label>
+                                                    <input type="text" class="form-control" name="Phone" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Şifre <span class="text-danger">*</span></label>
+                                                    <input type="password" class="form-control" name="Password" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-light" type="button" data-bs-dismiss="modal">İptal</button>
+                                            <button id="submitPersonnelBtn" class="btn btn-primary" type="submit">Ekle</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+@* Personel Ekleme *@
+<script>
+    document.getElementById("submitPersonnelBtn").addEventListener("click", function (e) {
+        e.preventDefault();
+
+        const formData = {
+            FullName: document.querySelector('[name="FullName"]').value,
+            Email: document.querySelector('[name="Email"]').value,
+            Phone: document.querySelector('[name="Phone"]').value,
+            Password: document.querySelector('[name="Password"]').value,
+            Role: "Personnel"
+        };
+
+        fetch("/Personnel/Add", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Sunucu hatası: " + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const ddl = document.querySelector('[name="SelectedPersonnelIds"]');
+            const option = document.createElement("option");
+            option.value = data.id;
+            option.text = data.fullName;
+            option.selected = true;
+            ddl.appendChild(option);
+
+            if (window.tagify) {
+                const newSuggestion = { value: data.id, name: data.fullName };
+                window.tagify.settings.whitelist.push(newSuggestion);
+                window.tagify.dropdown.refilter();
+
+                const suggestionsContainer = document.getElementById("suggestions-container");
+                const div = document.createElement("div");
+                div.textContent = data.fullName;
+                div.dataset.value = data.id;
+                div.classList.add("suggestion-item");
+                div.addEventListener("click", function () {
+                    window.tagify.addTags([{ value: data.id, name: data.fullName }]);
+                });
+                suggestionsContainer.appendChild(div);
+            }
+
+            const modalElement = document.getElementById("add-personnel-modal");
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+            }
+        })
+        .catch(error => {
+            console.error("Personel eklenirken hata:", error);
+        });
+    });
+</script>
+
+@* personel listesi *@
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector("#personnelTagInput");
+        window.tagify = new Tagify(input, {
+            tagTextProp: "name"
+        });
+
+        const suggestions = @Html.Raw(ViewBag.PersonnelListJson);
+
+        const suggestionsContainer = document.getElementById("suggestions-container");
+
+        suggestions.forEach(item => {
+            const div = document.createElement("div");
+            div.textContent = item.name;
+            div.dataset.value = item.value;
+            suggestionsContainer.appendChild(div);
+
+            div.addEventListener("click", function () {
+                tagify.addTags([{ value: item.value, name: item.name }]);
+            });
+        });
+    });
+</script>

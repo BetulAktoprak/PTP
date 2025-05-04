@@ -1,0 +1,300 @@
+﻿
+
+<style>
+    #mainPreviewContainer embed,
+    #mainPreviewContainer img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    #mainPreview {
+        width: 100%;
+        height: 300px; /* Sabit yükseklik */
+        object-fit: contain;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 5px;
+    }
+
+    #fileThumbnails img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+        padding: 3px;
+        border-radius: 6px;
+        transition: 0.2s ease;
+    }
+
+        #fileThumbnails img:hover {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+    .text-center small {
+        font-size: 11px;
+        color: #666;
+    }
+
+    .card-header {
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .list-group-item {
+        border: none;
+        padding: 0.4rem 0.2rem;
+    }
+
+        .list-group-item:not(:last-child) {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .list-group-item i {
+            width: 20px;
+            text-align: center;
+            transition: all 0.6s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+    .hover-bg {
+        transition: all 0.6s ease; /* geçiş tanımı eklendi */
+    }
+    .hover-bg:hover {
+            background-color: #006666;
+            color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        transform: scale(1.0);
+    }
+</style>
+
+
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Önizleme</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div id="mainPreviewContainer"
+                                 style="height: 300px;"
+                                 class="border rounded p-2 mb-3 d-flex justify-content-center align-items-center">
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2 overflow-auto" id="fileThumbnails"></div>
+
+                            <hr />
+                            <ul>
+                                <li class="list-group-item hover-bg">
+                                    <i class="fa fa-align-left me-2 text-secondary" ></i>
+                                    <strong>Dosya Açıklaması:</strong> <span id="modalDocumentDetail"></span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="card shadow-sm border-0">
+                                <div class="card-header bg-primary text-white fw-bold">
+                                    <i class="fa fa-info-circle me-2"></i>
+                                    <span class="d-inline">Proje Adı: <strong id="previewProjectName" class="text-white fw-bold"></strong></span>
+                                </div>
+
+                                <div class="card-body p-3">
+                                    <ul class="list-group small">
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-user me-2 text-secondary"></i>
+                                            <strong>Kullanıcı Adı:</strong> <span id="modalClientName"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-align-left me-2 text-secondary"></i>
+                                            <strong>Açıklama:</strong> <span id="modalDetails"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-users me-2 text-secondary"></i>
+                                            <strong>Personeller:</strong> <span id="modalPersonnelList"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-percentage me-2 text-secondary"></i>
+                                            <strong>Rate:</strong> <span id="modalRate"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-tag me-2 text-secondary"></i>
+                                            <strong>Tip:</strong> <span id="modalType"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-flag me-2 text-secondary"></i>
+                                            <strong>Öncelik:</strong> <span id="modalPriority"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-expand-arrows-alt me-2 text-secondary"></i>
+                                            <strong>Boyut:</strong> <span id="modalSize"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-play me-2 text-secondary"></i>
+                                            <strong>Başlangıç:</strong> <span id="modalStart"></span>
+                                        </li>
+                                        <li class="list-group-item hover-bg">
+                                            <i class="fa fa-stop me-2 text-secondary"></i>
+                                            <strong>Bitiş:</strong> <span id="modalEnd"></span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+                <button type="button" class="btn btn-success" id="btnConfirmSave">Kaydet</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    function showPreview(file) {
+        const reader = new FileReader();
+        const container = document.getElementById("mainPreviewContainer");
+        container.innerHTML = "";
+
+        const fileName = file.name.toLowerCase();
+
+        reader.onload = function (e) {
+            if (fileName.endsWith(".pdf")) {
+                const embed = document.createElement("embed");
+                embed.src = e.target.result;
+                embed.type = "application/pdf";
+                embed.style.width = "100%";
+                embed.style.height = "100%";
+                container.appendChild(embed);
+            } else if (file.type.startsWith("image/")) {
+                const img = document.createElement("img");
+                img.src = e.target.result;
+                img.alt = file.name;
+                img.style.maxWidth = "100%";
+                img.style.maxHeight = "100%";
+                img.style.objectFit = "contain";
+                container.appendChild(img);
+             } else if (file.type === "text/plain") {
+                const textPreview = document.createElement("pre");
+                textPreview.textContent = e.target.result;
+                textPreview.style.whiteSpace = "pre-wrap";
+                textPreview.style.maxHeight = "100%";
+                textPreview.style.overflowY = "auto";
+                textPreview.style.width = "100%";
+                textPreview.style.padding = "10px";
+                textPreview.style.backgroundColor = "#f8f9fa";
+                textPreview.style.border = "1px solid #dee2e6";
+                textPreview.style.borderRadius = "4px";
+                container.appendChild(textPreview);
+            } else {
+                container.textContent = "Bu dosya türü önizlenemiyor.";
+            }
+        };
+
+        if (file.type === "text/plain") {
+            reader.readAsText(file); 
+        } else {
+            reader.readAsDataURL(file); 
+        }
+    }
+
+    document.getElementById("btnPreview").addEventListener("click", function () {
+        const projectName = document.getElementById("productTitle1").value;
+        document.getElementById("previewProjectName").textContent = projectName;
+        document.getElementById("modalClientName").textContent = document.querySelector('[name="ClientName"]').value;
+        document.getElementById("modalDetails").textContent = document.querySelector('[name="Details"]').value;
+        document.getElementById("modalDocumentDetail").textContent = document.querySelector('[name="DocumentDetail"]').value;
+        document.getElementById("modalRate").textContent = document.querySelector('[name="ProjectRate"]').value;
+        document.getElementById("modalType").textContent = document.querySelector('[name="ProjectType"]').value;
+        document.getElementById("modalPriority").textContent = document.querySelector('[name="Priority"]').value;
+        document.getElementById("modalSize").textContent = document.querySelector('[name="ProjectSize"]').value;
+        document.getElementById("modalStart").textContent = document.querySelector('[name="StartingDate"]').value;
+        document.getElementById("modalEnd").textContent = document.querySelector('[name="EndingDate"]').value;
+
+        const personnelInput = document.querySelector('#personnelTagInput');
+        let personnelListText = "";
+
+        try {
+            const selected = JSON.parse(personnelInput.value);
+            personnelListText = selected.map(p => p.name || p.value).join(", ");
+        } catch {
+            personnelListText = personnelInput.value;
+        }
+
+        document.getElementById("modalPersonnelList").textContent = personnelListText;
+
+        const thumbnailsContainer = document.getElementById("fileThumbnails");
+        thumbnailsContainer.innerHTML = "";
+
+        if (selectedFiles.length > 0) {
+            showPreview(selectedFiles[0]);
+        }
+
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "text-center";
+                wrapper.style.width = "75px";
+
+                const img = document.createElement("img");
+                if (file.type.startsWith("image/")) {
+                    img.src = e.target.result;
+                } else if (file.name.toLowerCase().endsWith(".pdf")) {
+                    img.src = "../dashboard/assets/images/pdf-icon.png"; 
+                } else {
+                    img.src = "../dashboard/assets/images/file-icon.png"; 
+                }
+
+                img.alt = file.name;
+                img.className = "rounded border p-1";
+                img.style.width = "70px";
+                img.style.height = "70px";
+                img.style.objectFit = "cover";
+                img.style.cursor = "pointer";
+                img.title = file.name;
+
+                img.addEventListener("click", () => {
+                    showPreview(file);
+                });
+
+                const caption = document.createElement("div");
+                caption.className = "small text-muted mt-1";
+                caption.style.fontSize = "11px";
+                caption.textContent = file.name.length > 15 ? file.name.slice(0, 12) + "..." : file.name;
+
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(caption);
+                thumbnailsContainer.appendChild(wrapper);
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        const modal = new bootstrap.Modal(document.getElementById("confirmModal"));
+        modal.show();
+    });
+
+    document.getElementById("btnConfirmSave").addEventListener("click", function () {
+        document.getElementById("projectForm").submit();
+    });
+</script>
+
+

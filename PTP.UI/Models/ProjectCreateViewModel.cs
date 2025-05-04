@@ -17,7 +17,7 @@ namespace PTP.UI.Models
         public string DocumentDetail { get; set; }
         public string? ExistingFilePath { get; set; }
         public List<IFormFile> ProjectFiles { get; set; }
-        public List<int> SelectedPersonnelIds { get; set; } = new();
+        public string SelectedPersonnelIds { get; set; }
         public List<SelectListItem> PersonnelList { get; set; }
     }
 }

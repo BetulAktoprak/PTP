@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Newtonsoft.Json;
 using PTP.Business.Services;
 using PTP.EntityLayer.Models;
 using PTP.UI.Models;
@@ -33,18 +33,16 @@ namespace PTP.UI.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            var personnels = _personnelService.GetAll();
-            var model = new ProjectCreateViewModel
+            var personnelList = _personnelService.GetAll();
+            var values = personnelList.Select(p => new
             {
-                PersonnelList = personnels.Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.FullName
-                }).ToList()
-            };
+                value = p.Id.ToString(),
+                name = p.FullName
+            }).ToList();
 
+            ViewBag.PersonnelListJson = JsonConvert.SerializeObject(values);
 
-            return View(model);
+            return View();
         }
 
         [HttpPost]
@@ -63,10 +61,19 @@ namespace PTP.UI.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
-            var selectedPersonnels = _personnelService.GetAll()
-                .Where(p => model.SelectedPersonnelIds.Contains(p.Id)).ToList();
+            var selectedList = JsonConvert.DeserializeObject<List<PersonnelTagModel>>(model.SelectedPersonnelIds);
 
-            //var filePaths = new List<string>();
+            foreach (var person in selectedList)
+            {
+                var personId = int.Parse(person.value);
+
+            }
+            var personnelIds = selectedList.Select(x => int.Parse(x.value)).ToList();
+            var selectedPersonnels = _personnelService.GetAll()
+                .Where(p => personnelIds.Contains(p.Id))
+                .ToList();
+
+
 
             var project = new Project
             {
@@ -107,7 +114,7 @@ namespace PTP.UI.Controllers
                         FileName = file.FileName,
                         FilePath = relativePath,
                         ProjectId = project.Id,
-                        UserId = userId 
+                        UserId = userId
                     };
 
                     _documentService.Add(document);
@@ -118,98 +125,103 @@ namespace PTP.UI.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet]
-        public IActionResult Edit(int id)
-        {
-            var project = _projectService.GetByID(id);
-            if (project == null) return NotFound();
+        //[HttpGet]
+        //public IActionResult Edit(int id)
+        //{
+        //    var project = _projectService.GetByID(id);
+        //    if (project == null) return NotFound();
 
-            var model = new ProjectCreateViewModel
-            {
-                Id = project.Id,
-                ProjectTitle = project.ProjectTitle,
-                ClientName = project.ClientName,
-                ProjectRate = project.ProjectRate ?? 0,
-                ProjectType = project.ProjectType,
-                Priority = project.Priority,
-                ProjectSize = project.ProjectSize,
-                StartingDate = project.StartDate,
-                EndingDate = project.EndDate ?? DateTime.Now,
-                Details = project.Details,
-                DocumentDetail = project.DocumentDetail,
-                SelectedPersonnelIds = project.Personnels?.Select(p => p.Id).ToList() ?? new List<int>(),
-                PersonnelList = _personnelService.GetAll().Select(p => new SelectListItem
-                {
-                    Value = p.Id.ToString(),
-                    Text = p.FullName
-                }).ToList()
-            };
+        //    var model = new ProjectCreateViewModel
+        //    {
+        //        Id = project.Id,
+        //        ProjectTitle = project.ProjectTitle,
+        //        ClientName = project.ClientName,
+        //        ProjectRate = project.ProjectRate ?? 0,
+        //        ProjectType = project.ProjectType,
+        //        Priority = project.Priority,
+        //        ProjectSize = project.ProjectSize,
+        //        StartingDate = project.StartDate,
+        //        EndingDate = project.EndDate ?? DateTime.Now,
+        //        Details = project.Details,
+        //        DocumentDetail = project.DocumentDetail,
+        //        SelectedPersonnelIds = project.Personnels?.Select(p => p.Id).ToList() ?? new List<int>(),
+        //        PersonnelList = _personnelService.GetAll().Select(p => new SelectListItem
+        //        {
+        //            Value = p.Id.ToString(),
+        //            Text = p.FullName
+        //        }).ToList()
+        //    };
 
-            return PartialView("_EditProjectPartial", model);
-        }
+        //    return PartialView("_EditProjectPartial", model);
+        //}
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(ProjectCreateViewModel model)
-        {
-            var project = _projectService.GetByID(model.Id);
-            if (project == null) return NotFound();
+        //[HttpPost]
+        //public async Task<IActionResult> Edit(ProjectCreateViewModel model)
+        //{
+        //    var project = _projectService.GetByID(model.Id);
+        //    if (project == null) return NotFound();
 
-            project.Personnels.Clear();
+        //    project.Personnels.Clear();
 
-            var selectedPersonnels = _personnelService.GetAll()
-                .Where(p => model.SelectedPersonnelIds.Contains(p.Id)).ToList();
+        //    var selectedPersonnels = _personnelService.GetAll()
+        //        .Where(p => model.SelectedPersonnelIds.Contains(p.Id)).ToList();
 
-            foreach (var person in selectedPersonnels)
-            {
-                project.Personnels.Add(person);
-            }
+        //    foreach (var person in selectedPersonnels)
+        //    {
+        //        project.Personnels.Add(person);
+        //    }
 
-            project.ProjectTitle = model.ProjectTitle;
-            project.ClientName = model.ClientName;
-            project.ProjectRate = model.ProjectRate;
-            project.ProjectType = model.ProjectType;
-            project.Priority = model.Priority;
-            project.ProjectSize = model.ProjectSize;
-            project.StartDate = model.StartingDate;
-            project.EndDate = model.EndingDate;
-            project.Details = model.Details;
-            project.DocumentDetail = model.DocumentDetail;
+        //    project.ProjectTitle = model.ProjectTitle;
+        //    project.ClientName = model.ClientName;
+        //    project.ProjectRate = model.ProjectRate;
+        //    project.ProjectType = model.ProjectType;
+        //    project.Priority = model.Priority;
+        //    project.ProjectSize = model.ProjectSize;
+        //    project.StartDate = model.StartingDate;
+        //    project.EndDate = model.EndingDate;
+        //    project.Details = model.Details;
+        //    project.DocumentDetail = model.DocumentDetail;
 
-            if (model.ProjectFiles != null && model.ProjectFiles.Any())
-            {
-                var uploads = Path.Combine(_environment.WebRootPath, "uploads");
-                Directory.CreateDirectory(uploads);
+        //    if (model.ProjectFiles != null && model.ProjectFiles.Any())
+        //    {
+        //        var uploads = Path.Combine(_environment.WebRootPath, "uploads");
+        //        Directory.CreateDirectory(uploads);
 
-                foreach (var file in model.ProjectFiles)
-                {
-                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    var relativePath = Path.Combine("uploads", uniqueFileName);
-                    var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
+        //        foreach (var file in model.ProjectFiles)
+        //        {
+        //            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        //            var relativePath = Path.Combine("uploads", uniqueFileName);
+        //            var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
 
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
+        //            using (var stream = new FileStream(fullPath, FileMode.Create))
+        //            {
+        //                await file.CopyToAsync(stream);
+        //            }
 
-                    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-                    int userId = int.Parse(userIdClaim.Value);
+        //            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        //            int userId = int.Parse(userIdClaim.Value);
 
-                    var document = new Document
-                    {
-                        FileName = file.FileName,
-                        FilePath = relativePath,
-                        ProjectId = project.Id,
-                        UserId = userId
-                    };
+        //            var document = new Document
+        //            {
+        //                FileName = file.FileName,
+        //                FilePath = relativePath,
+        //                ProjectId = project.Id,
+        //                UserId = userId
+        //            };
 
-                    _documentService.Add(document);
-                }
-            }
+        //            _documentService.Add(document);
+        //        }
+        //    }
 
-            _projectService.Update(project);
+        //    _projectService.Update(project);
 
-            return Json(new { success = true });
+        //    return Json(new { success = true });
 
-        }
+        //}
+    }
+    public class PersonnelTagModel
+    {
+        public string value { get; set; }
+        public string name { get; set; }
     }
 }

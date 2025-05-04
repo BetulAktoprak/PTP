@@ -1,0 +1,115 @@
+﻿@model PTP.UI.Models.ProjectCreateViewModel
+
+<div class="tab-pane fade" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab">
+    <div class="sidebar-body">
+        <div class="product-upload">
+            <div class="dz-message needsclick">
+                <label asp-for="ProjectFiles" class="form-label"><i class="icon-cloud-up"></i> Upload project file</label>
+                <input type="file" asp-for="ProjectFiles" id="projectFiles" class="form-control" multiple />
+
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-6">
+                <label asp-for="DocumentDetail" class="form-label">Açıklama</label>
+                <textarea asp-for="DocumentDetail" class="form-control" rows="8" placeholder="Dosya detayları.."></textarea>
+            </div>
+            <div id="selectedFilesList" class="col-6">
+
+                <!-- Seçilen dosyalar listesi -->
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+       let selectedFiles = [];
+
+       document.getElementById('projectFiles').addEventListener('change', function (e) {
+           const newFiles = Array.from(e.target.files);
+
+           newFiles.forEach(file => {
+               if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                   selectedFiles.push(file);
+               }
+           });
+
+           updateSelectedFilesList();
+           e.target.value = '';
+       });
+
+       function updateSelectedFilesList() {
+           const list = document.getElementById('selectedFilesList');
+           list.innerHTML = '';
+           selectedFiles.forEach((file, index) => {
+           const mainDiv = document.createElement('div');
+           mainDiv.className = "d-flex justify-content-between align-items-center border rounded p-2 mb-2 bg-light";
+
+           const icon = document.createElement('i');
+           icon.className = "f-22 fa fa-folder font-primary fs-4 me-3";
+
+           const textWrapper = document.createElement('div');
+           textWrapper.className = "flex-grow-1 text-dark";
+
+           const fileName = document.createElement('div');
+           fileName.className = "fw-semibold text-truncate";
+           fileName.style.maxWidth = "100%";
+           fileName.title = file.name;
+           fileName.textContent = file.name;
+
+           const fileSize = document.createElement('small');
+           fileSize.className = "text-muted";
+           fileSize.textContent = `${Math.round(file.size / 1024)} KB`;
+
+           textWrapper.appendChild(fileName);
+           textWrapper.appendChild(fileSize);
+
+           const removeBtn = document.createElement('button');
+           removeBtn.className = "btn btn-sm btn-outline-dark ms-3";
+           removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+           removeBtn.title = "Dosyayı kaldır";
+           removeBtn.onclick = () => {
+               selectedFiles.splice(index, 1);
+               updateSelectedFilesList();
+           };
+
+           mainDiv.appendChild(icon);
+           mainDiv.appendChild(textWrapper);
+           mainDiv.appendChild(removeBtn);
+           list.appendChild(mainDiv);
+           });
+    }
+
+
+       document.getElementById('projectForm').addEventListener('submit', function (e) {
+           e.preventDefault();
+
+
+           const form = e.target;
+           const formData = new FormData(form);
+
+           selectedFiles.forEach(file => {
+               formData.append('ProjectFiles', file);
+           });
+
+           fetch(form.action || window.location.href, {
+               method: 'POST',
+               body: formData
+           })
+           .then(response => {
+               if (response.redirected) {
+                   window.location.href = response.url;
+               } else {
+                   return response.text().then(text => alert("Kayıt tamamlandı mı kontrol edin!"));
+               }
+           })
+           .catch(error => {
+               console.error("Hata:", error);
+               alert("Bir hata oluştu.");
+           });
+       });
+</script>
+
