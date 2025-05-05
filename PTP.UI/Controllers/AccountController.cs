@@ -31,7 +31,8 @@ namespace PTP.UI.Controllers
                 {
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.Role, user.Role),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username)
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, "MyCookieAuth");

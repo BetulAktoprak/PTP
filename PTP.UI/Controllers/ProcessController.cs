@@ -62,10 +62,9 @@ namespace PTP.UI.Controllers
             if (ModelState.IsValid)
             {
                 _processService.Add(process);
-                return RedirectToAction("Index", new { projectId = process.ProjectId }); // ✅ Modal sonrası geri dönüş
+                return RedirectToAction("Index", new { projectId = process.ProjectId }); 
             }
 
-            // Eğer valid değilse modal form açık kalmayacağından, sayfa üzerinde de bir şey gösterilmeyecek.
             return RedirectToAction("Index", new { projectId = process.ProjectId });
         }
 

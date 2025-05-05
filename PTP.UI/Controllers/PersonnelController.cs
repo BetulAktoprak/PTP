@@ -22,21 +22,23 @@ namespace PTP.UI.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] PersonelCreateViewModel model)
+        [HttpGet]
+        public IActionResult Add()
         {
+            return View();
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> Add(PersonelCreateViewModel model, IFormFile ProfileImage)
+        {
             var user = new User
             {
                 Email = model.Email,
-                Username = model.Email,
+                Username = model.FullName,
                 Password = model.Password,
                 Role = model.Role
             };
-
             var result = await _userService.CreateUserAsync(user, model.Password!);
-
-           
 
             var personnel = new Personnel
             {
@@ -46,9 +48,30 @@ namespace PTP.UI.Controllers
                 UserId = user.Id
             };
 
-             _personnelService.Add(personnel);
+            if (ProfileImage != null && ProfileImage.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
 
-            return Json(new { id = personnel.Id, fullName = personnel.FullName });
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProfileImage.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                    await ProfileImage.CopyToAsync(stream);
+
+                personnel.ImagePath = "/uploads/" + fileName;
+            }
+
+            _personnelService.Add(personnel);
+
+            return Json(new
+            {
+                id = personnel.Id,
+                fullName = personnel.FullName,
+                imagePath = personnel.ImagePath
+            });
         }
+
     }
 }
