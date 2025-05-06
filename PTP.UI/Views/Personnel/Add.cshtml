@@ -4,42 +4,56 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form id="personelForm" enctype="multipart/form-data">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Yeni Personel Ekle</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4 text-center">
+                                <input type="file" id="uploadImage" accept="image/*" class="form-control mb-3" />
+                                <div style="max-height: 400px;">
+                                    <img id="image" src="" style="max-width: 100%;" />
+                                </div>
+                                <button type="button" class="btn btn-primary mt-2" onclick="cropImage()">Kırp ve Önizle</button>
+                                <input type="hidden" name="CroppedImage" id="croppedImage" />
+                                <div class="mt-2">
+                                    <img id="previewImage" class="img-thumbnail rounded-circle mt-2" style="width: 150px; height: 150px;" />
 
+                                </div>
+                            </div>
 
-<div class="container mt-5">
-    <div class="card shadow-lg rounded">
-        <div class="card-header bg-dark text-white">
-            <h5 class="mb-0">Yeni Personel Ekle</h5>
-        </div>
-        <div class="card-body">
-            <form id="personelForm" enctype="multipart/form-data">
-                <div class="row g-3">
-                    <div class="col-md-4 text-center">
-                        <img id="previewImage" src="https://via.placeholder.com/150" class="img-thumbnail mb-2" alt="Profil Resmi" />
-                        <input type="file" name="ProfileImage" class="form-control" accept="image/*" onchange="previewFile(this)" required />
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label>Ad Soyad</label>
+                                    <input type="text" name="FullName" class="form-control" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Email</label>
+                                    <input type="email" name="Email" class="form-control" required />
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label>Telefon</label>
+                                    <input type="tel" name="Phone" class="form-control" required />
+                                </div>
+                                <div class="col-md-6 mt-3">
+                                    <label>Şifre</label>
+                                    <input type="password" name="Password" class="form-control" required />
+                                </div>
+                            </div>
+
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-success">Kaydet</button>
+                            </div>
+                        </div>
                     </div>
+                </form>
 
-                    <div class="col-md-8">
-                        <div class="mb-3">
-                            <label>Ad Soyad</label>
-                            <input type="text" name="FullName" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label>Email</label>
-                            <input type="email" name="Email" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label>Telefon</label>
-                            <input type="tel" name="Phone" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label>Şifre</label>
-                            <input type="password" name="Password" class="form-control" required />
-                        </div>
-                        <button type="submit" class="btn btn-success mt-2">Kaydet</button>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -71,11 +85,61 @@
                 alert("Personel başarıyla eklendi!");
                 $('#personelForm')[0].reset();
                 $('#previewImage').attr('src', 'https://via.placeholder.com/150');
+                $('#image').attr('src', '');
+                $('#croppedImage').val('');
+
+                if (cropper) {
+                    cropper.destroy();
+                    cropper = null;
+                }
             },
             error: function () {
                 alert("Bir hata oluştu.");
             }
         });
     });
+
+    let cropper;
+    const image = document.getElementById('image');
+
+    document.getElementById('uploadImage').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            image.src = event.target.result;
+            if (cropper) cropper.destroy();
+            cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                preview: '#previewImage',
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    function cropImage() {
+        if (!cropper) return;
+
+        const squareCanvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+
+        const circularCanvas = document.createElement('canvas');
+        const size = 300;
+        circularCanvas.width = size;
+        circularCanvas.height = size;
+        const ctx = circularCanvas.getContext('2d');
+
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.drawImage(squareCanvas, 0, 0, size, size);
+
+        const base64 = circularCanvas.toDataURL('image/png');
+        document.getElementById('previewImage').src = base64;
+        document.getElementById('croppedImage').value = base64;
+    }
 </script>
 

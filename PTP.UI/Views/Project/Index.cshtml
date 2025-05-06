@@ -4,76 +4,149 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@* <div class="container-fluid"> *@
+@*     <div class="row"> *@
+@*         <div class="col-sm-12"> *@
+@*                 <div class="card"> *@
+@*                   <div class="card-header pb-0"> *@
+@*                     <h4 class="mb-3">Basic Scenario</h4><span>Grid with filtering, editing, inserting, deleting, sorting and paging. Data provided by controller.</span> *@
+@*                   </div> *@
+@*                   <div class="card-body"> *@
+@*                     <div class="basic_table jsgrid" id="basicScenario" style="position: relative; height: auto; width: 100%;"><div class="jsgrid-grid-header jsgrid-header-scrollbar"><table class="jsgrid-table"><tr class="jsgrid-header-row"><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 150px;">Task</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 200px;">Email</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 150px;">Phone</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 160px;">Assign</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 150px;">Date</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 100px;">Price</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 150px;">Status</th><th class="jsgrid-header-cell jsgrid-header-sortable" style="width: 100px;">Progress</th><th class="jsgrid-header-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-mode-button jsgrid-insert-mode-button" type="button" title="Switch to inserting"></th></tr><tr class="jsgrid-filter-row"><td class="jsgrid-cell" style="width: 150px;"><input type="text"></td><td class="jsgrid-cell" style="width: 200px;"><input type="text"></td><td class="jsgrid-cell" style="width: 150px;"><input type="text"></td><td class="jsgrid-cell" style="width: 160px;"><input type="text"></td><td class="jsgrid-cell" style="width: 150px;"><input type="text"></td><td class="jsgrid-cell" style="width: 100px;"><input type="text"></td><td class="jsgrid-cell" style="width: 150px;"></td><td class="jsgrid-cell" style="width: 100px;"><input type="text"></td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-search-button" type="button" title="Search"><input class="jsgrid-button jsgrid-clear-filter-button" type="button" title="Clear filter"></td></tr><tr class="jsgrid-insert-row" style="display: none;"><td class="jsgrid-cell" style="width: 150px;"><input type="text"></td><td class="jsgrid-cell" style="width: 200px;"><input type="text"></td><td class="jsgrid-cell" style="width: 150px;"><input type="text"></td><td class="jsgrid-cell" style="width: 160px;"><input type="text"></td><td class="jsgrid-cell" style="width: 150px;"><input type="text"></td><td class="jsgrid-cell" style="width: 100px;"><input type="text"></td><td class="jsgrid-cell" style="width: 150px;"></td><td class="jsgrid-cell" style="width: 100px;"><input type="text"></td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-insert-button" type="button" title="Insert"></td></tr></table></div><div class="jsgrid-grid-body"><table class="jsgrid-table"><tbody><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Wordpress</td><td class="jsgrid-cell" style="width: 200px;">Pixel@efo.com</td><td class="jsgrid-cell" style="width: 150px;">+91 9152639845</td><td class="jsgrid-cell" style="width: 160px;">Otto Clay</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">100%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">Web Designer</td><td class="jsgrid-cell" style="width: 200px;">Dewvrak12@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 9563256895</td><td class="jsgrid-cell" style="width: 160px;">Mark Jecno</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">60%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Php</td><td class="jsgrid-cell" style="width: 200px;">Lakhsr33@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 8569325641</td><td class="jsgrid-cell" style="width: 160px;">Ruby Rocha</td><td class="jsgrid-cell" style="width: 150px;">12/07/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">42%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">Web Development</td><td class="jsgrid-cell" style="width: 200px;">Fatik02@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 7589563241</td><td class="jsgrid-cell" style="width: 160px;">Connor Johnston</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-danger">Pending</span></td><td class="jsgrid-cell" style="width: 100px;">90%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Wordpress</td><td class="jsgrid-cell" style="width: 200px;">Qmab555@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 6598741235</td><td class="jsgrid-cell" style="width: 160px;">Christopher Mcclure</td><td class="jsgrid-cell" style="width: 150px;">12/07/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-success">Done</span></td><td class="jsgrid-cell" style="width: 100px;">100%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">React</td><td class="jsgrid-cell" style="width: 200px;">Tatypd85@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 9586471230</td><td class="jsgrid-cell" style="width: 160px;">Otto Clay</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-success">Done</span></td><td class="jsgrid-cell" style="width: 100px;">75%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Laravel</td><td class="jsgrid-cell" style="width: 200px;">dohamo6883@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 7152849563</td><td class="jsgrid-cell" style="width: 160px;">Christopher Mcclure</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-danger">Pending</span></td><td class="jsgrid-cell" style="width: 100px;">42%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">Flutter</td><td class="jsgrid-cell" style="width: 200px;">femecom377@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 7594826315</td><td class="jsgrid-cell" style="width: 160px;">Connor Johnston</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">60%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Php</td><td class="jsgrid-cell" style="width: 200px;">gawej29037@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 6235845932</td><td class="jsgrid-cell" style="width: 160px;">Mark Jecno</td><td class="jsgrid-cell" style="width: 150px;">12/07/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">100%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">React</td><td class="jsgrid-cell" style="width: 200px;">pohoca6274@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 7584698512</td><td class="jsgrid-cell" style="width: 160px;">Otto Clay</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-success">Done</span></td><td class="jsgrid-cell" style="width: 100px;">42%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Graphics</td><td class="jsgrid-cell" style="width: 200px;">bonowap375@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 8412369572</td><td class="jsgrid-cell" style="width: 160px;">Ruby Rocha</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-danger">Pending</span></td><td class="jsgrid-cell" style="width: 100px;">75%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">React</td><td class="jsgrid-cell" style="width: 200px;">xatov42918@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 8529631478</td><td class="jsgrid-cell" style="width: 160px;">Ruby Rocha</td><td class="jsgrid-cell" style="width: 150px;">12/07/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">90%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Flutter</td><td class="jsgrid-cell" style="width: 200px;">jodokar148@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 7145632896</td><td class="jsgrid-cell" style="width: 160px;">Mark Jecno</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-success">Done</span></td><td class="jsgrid-cell" style="width: 100px;">42%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-alt-row"><td class="jsgrid-cell" style="width: 150px;">Laravel</td><td class="jsgrid-cell" style="width: 200px;">hapif86263@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 7402258963</td><td class="jsgrid-cell" style="width: 160px;">Otto Clay</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$1598.50</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-success">Done</span></td><td class="jsgrid-cell" style="width: 100px;">60%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr><tr class="jsgrid-row"><td class="jsgrid-cell" style="width: 150px;">Web Designer</td><td class="jsgrid-cell" style="width: 200px;">cehewe9494@gmail.com</td><td class="jsgrid-cell" style="width: 150px;">+91 9563201456</td><td class="jsgrid-cell" style="width: 160px;">Christopher Mcclure</td><td class="jsgrid-cell" style="width: 150px;">26/09/2022</td><td class="jsgrid-cell" style="width: 100px;">$2315.00</td><td class="jsgrid-cell" style="width: 150px;"><span class="font-warning">In progress</span></td><td class="jsgrid-cell" style="width: 100px;">100%</td><td class="jsgrid-cell jsgrid-control-field jsgrid-align-center" style="width: 80px;"><input class="jsgrid-button jsgrid-edit-button" type="button" title="Edit"><input class="jsgrid-button jsgrid-delete-button" type="button" title="Delete"></td></tr></tbody></table></div><div class="jsgrid-pager-container" style=""><div class="jsgrid-pager">Pages: <span class="jsgrid-pager-nav-button jsgrid-pager-nav-inactive-button"><a href="javascript:void(0);">First</a></span> <span class="jsgrid-pager-nav-button jsgrid-pager-nav-inactive-button"><a href="javascript:void(0);">Prev</a></span> <span class="jsgrid-pager-page jsgrid-pager-current-page">1</span><span class="jsgrid-pager-page"><a href="javascript:void(0);">2</a></span><span class="jsgrid-pager-page"><a href="javascript:void(0);">3</a></span><span class="jsgrid-pager-page"><a href="javascript:void(0);">4</a></span><span class="jsgrid-pager-page"><a href="javascript:void(0);">5</a></span><span class="jsgrid-pager-nav-button"><a href="javascript:void(0);">...</a></span> <span class="jsgrid-pager-nav-button"><a href="javascript:void(0);">Next</a></span> <span class="jsgrid-pager-nav-button"><a href="javascript:void(0);">Last</a></span> &nbsp;&nbsp; 1 of 7 </div></div><div class="jsgrid-load-shader" style="display: none; position: absolute; inset: 0px; z-index: 1000;"></div><div class="jsgrid-load-panel" style="display: none; position: absolute; top: 50%; left: 50%; z-index: 1000;">Please, wait...</div></div> *@
+@*                   </div> *@
+@*                 </div> *@
+@*               </div> *@
+@*     </div> *@
+@* </div> *@
 
-<div class="container-fluid">
-    <div class="row project-cards">
-        <div class="col-md-12 project-list">
-            <div class="card">
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="nav nav-tabs border-tab" id="top-tab" role="tablist">
-                            <li class="nav-item"><a class="nav-link active" id="top-home-tab" data-bs-toggle="tab" href="#top-home" role="tab" aria-controls="top-home" aria-selected="true"><i data-feather="target"></i>All</a></li>
-                            <li class="nav-item"><a class="nav-link" id="profile-top-tab" data-bs-toggle="tab" href="#top-profile" role="tab" aria-controls="top-profile" aria-selected="false"><i data-feather="info"></i>Doing</a></li>
-                            <li class="nav-item"><a class="nav-link" id="contact-top-tab" data-bs-toggle="tab" href="#top-contact" role="tab" aria-controls="top-contact" aria-selected="false"><i data-feather="check-circle"></i>Done</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <a class="btn btn-primary" asp-controller="Project" asp-action="Create"><i data-feather="plus-square"></i> Create New Project</a>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div id="jsGrid"></div>
 
-        <div class="col-sm-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="tab-content" id="top-tabContent">
+
+
+@* <div class="container-fluid"> *@
+@*     <div class="row project-cards"> *@
+@*         <div class="col-md-12 project-list"> *@
+@*             <div class="card"> *@
+@*                 <div class="row"> *@
+@*                     <div class="col-md-6"> *@
+@*                         <ul class="nav nav-tabs border-tab" id="top-tab" role="tablist"> *@
+@*                             <li class="nav-item"><a class="nav-link active" id="top-home-tab" data-bs-toggle="tab" href="#top-home" role="tab" aria-controls="top-home" aria-selected="true"><i data-feather="target"></i>All</a></li> *@
+@*                             <li class="nav-item"><a class="nav-link" id="profile-top-tab" data-bs-toggle="tab" href="#top-profile" role="tab" aria-controls="top-profile" aria-selected="false"><i data-feather="info"></i>Doing</a></li> *@
+@*                             <li class="nav-item"><a class="nav-link" id="contact-top-tab" data-bs-toggle="tab" href="#top-contact" role="tab" aria-controls="top-contact" aria-selected="false"><i data-feather="check-circle"></i>Done</a></li> *@
+@*                         </ul> *@
+@*                     </div> *@
+@*                     <div class="col-md-6 text-end"> *@
+@*                         <a class="btn btn-primary" asp-controller="Project" asp-action="Create"><i data-feather="plus-square"></i> Create New Project</a> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+
+@*         <div class="col-sm-12"> *@
+@*             <div class="card"> *@
+@*                 <div class="card-body"> *@
+@*                     <div class="tab-content" id="top-tabContent"> *@
               
-                        <div class="tab-pane fade show active" id="top-home" role="tabpanel">
-                            <div class="row">
-                                @foreach (var project in Model)
-                                {
-                                    <div class="col-xxl-4 col-lg-6 box-col-6 ">
-                                    @Html.Partial("_ProjectCard", project)
-                                    </div>
-                                }
-                            </div>
-                        </div>
+@*                         <div class="tab-pane fade show active" id="top-home" role="tabpanel"> *@
+@*                             <div class="row"> *@
+@*                                 @foreach (var project in Model) *@
+@*                                 { *@
+@*                                     <div class="col-xxl-4 col-lg-6 box-col-6 "> *@
+@*                                     @Html.Partial("_ProjectCard", project) *@
+@*                                     </div> *@
+@*                                 } *@
+@*                             </div> *@
+@*                         </div> *@
 
-                        <div class="tab-pane fade" id="top-profile" role="tabpanel">
-                            <div class="row">
-                                @foreach (var project in Model.Where(p => GetCompletionRate(p) > 0 && GetCompletionRate(p) < 100))
-                                {
-                                    <div class="col-xxl-4 col-lg-6 box-col-6 ">
-                                        @Html.Partial("_ProjectCard", project)
-                                    </div>
-                                }
-                            </div>
-                        </div>
+@*                         <div class="tab-pane fade" id="top-profile" role="tabpanel"> *@
+@*                             <div class="row"> *@
+@*                                 @foreach (var project in Model.Where(p => GetCompletionRate(p) > 0 && GetCompletionRate(p) < 100)) *@
+@*                                 { *@
+@*                                     <div class="col-xxl-4 col-lg-6 box-col-6 "> *@
+@*                                         @Html.Partial("_ProjectCard", project) *@
+@*                                     </div> *@
+@*                                 } *@
+@*                             </div> *@
+@*                         </div> *@
 
-                        <div class="tab-pane fade" id="top-contact" role="tabpanel">
-                            <div class="row">
-                                @foreach (var project in Model.Where(p => GetCompletionRate(p) == 100))
-                                {
-                                    <div class="col-xxl-4 col-lg-6 box-col-6 ">
-                                        @Html.Partial("_ProjectCard", project)
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@*                         <div class="tab-pane fade" id="top-contact" role="tabpanel"> *@
+@*                             <div class="row"> *@
+@*                                 @foreach (var project in Model.Where(p => GetCompletionRate(p) == 100)) *@
+@*                                 { *@
+@*                                     <div class="col-xxl-4 col-lg-6 box-col-6 "> *@
+@*                                         @Html.Partial("_ProjectCard", project) *@
+@*                                     </div> *@
+@*                                 } *@
+@*                             </div> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@
 
-@functions {
-    int GetCompletionRate(PTP.EntityLayer.Models.Project project)
-    {
-        var total = project.Processes?.Count() ?? 0;
-        var done = project.Processes?.Count(p => p.ProcessType == "Done") ?? 0;
-        return total == 0 ? 0 : (done * 100 / total);
-    }
-}
+@* @functions { *@
+@*     int GetCompletionRate(PTP.EntityLayer.Models.Project project) *@
+@*     { *@
+@*         var total = project.Processes?.Count() ?? 0; *@
+@*         var done = project.Processes?.Count(p => p.ProcessType == "Done") ?? 0; *@
+@*         return total == 0 ? 0 : (done * 100 / total); *@
+@*     } *@
+@* } *@
 
+<script>
+    $(function () {
+        $("#jsGrid").jsGrid({
+            width: "100%",
+            height: "auto",
+
+            filtering: true,
+            paging: true,
+            autoload: true,
+            pageSize: 10,
+            pageButtonCount: 5,
+
+            scrolling: true,
+            scrollbarSize: 15,
+
+            controller: {
+                loadData: function (filter) {
+                    return $.ajax({
+                        type: "GET",
+                        url: "/Project/GetProjects",
+                        data: filter,
+                        dataType: "json"
+                    });
+                }
+            },
+
+            fields: [
+                {name: "id", type: "number", title: "Id", width: 700},
+                { name: "projectTitle", type: "text", title: "Proje Adı", width: 700 },
+                { name: "clientName", type: "text", title: "Müşteri", width: 700 },
+                { name: "projectRate", type: "number", title: "Rate", width: 700 },
+                { name: "projectType", type: "text", title: "Tür", width: 700 },
+                { name: "priority", type: "text", title: "Öncelik", width: 700 },
+                { name: "projectSize", type: "text", title: "Boyut", width: 700 },
+                { name: "startDate", type: "text", title: "Başlangıç", width: 700 },
+                { name: "endDate", type: "text", title: "Bitiş", width: 700 },
+                { name: "details", type: "text", title: "Detaylar", width: 700 },
+                { name: "documentDetail", type: "text", title: "Döküman", width: 700 },
+                {
+                    type: "control",
+                    editButton: false,
+                    deleteButton: false,
+                    itemTemplate: function (_, item) {
+                        return $("<div>").append(
+                            $("<a>").attr("href", "/Project/Edit/" + item.Id)
+                                   .html('<i class="fa fa-edit text-primary mx-1"></i>'),
+                            $("<a>").attr("href", "/Project/Delete/" + item.Id)
+                                   .html('<i class="fa fa-trash text-danger mx-1"></i>')
+                        );
+                    }
+                }
+            ]
+        });
+    });
+</script>

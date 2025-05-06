@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PTP.Business.Services;
@@ -19,9 +20,18 @@ namespace PTP.UI.Controllers
         }
         public IActionResult Index()
         {
-            return View();
+            var personnels = _personnelService.GetAll();
+            var viewModel = personnels.Select(p => new PersonelCreateViewModel
+            {
+                FullName = p.FullName,
+                Email = p.Email,
+                CroppedImage = p.ImagePath 
+            }).ToList();
+
+            return View(viewModel);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Add()
         {
@@ -29,7 +39,7 @@ namespace PTP.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(PersonelCreateViewModel model, IFormFile ProfileImage)
+        public async Task<IActionResult> Add(PersonelCreateViewModel model)
         {
             var user = new User
             {
@@ -48,20 +58,23 @@ namespace PTP.UI.Controllers
                 UserId = user.Id
             };
 
-            if (ProfileImage != null && ProfileImage.Length > 0)
+            if (!string.IsNullOrEmpty(model.CroppedImage))
             {
+                var base64 = model.CroppedImage.Split(',')[1]; 
+                var bytes = Convert.FromBase64String(base64);
+
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsFolder))
                     Directory.CreateDirectory(uploadsFolder);
 
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProfileImage.FileName);
+                var fileName = Guid.NewGuid().ToString() + ".png";
                 var filePath = Path.Combine(uploadsFolder, fileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                    await ProfileImage.CopyToAsync(stream);
+                await System.IO.File.WriteAllBytesAsync(filePath, bytes);
 
                 personnel.ImagePath = "/uploads/" + fileName;
             }
+
 
             _personnelService.Add(personnel);
 
@@ -72,6 +85,8 @@ namespace PTP.UI.Controllers
                 imagePath = personnel.ImagePath
             });
         }
+
+
 
     }
 }

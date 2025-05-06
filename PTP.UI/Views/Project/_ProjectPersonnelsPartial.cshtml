@@ -4,7 +4,7 @@
     .custom-suggestion-box {
         border: 1px solid #ccc;
         padding: 8px;
-        max-height: 200px;
+        max-height: 250px;
         overflow-y: auto;
         margin-top: 10px;
         background: white;
@@ -41,52 +41,7 @@
                         </div>
                     </div>
 
-                    <div class="col-12 text-end">
-                        <div class="category-buton">
-                            <a class="btn button-primary" href="#!" data-bs-toggle="modal" data-bs-target="#add-personnel-modal">
-                                <i class="me-2 fa fa-plus"></i>Yeni Personel Ekle
-                            </a>
-                        </div>
-
-
-                        <div class="modal fade" id="add-personnel-modal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-lg">
-                                <div class="modal-content">
-                                    <div id="personnelForm">
-                                        <div class="modal-header">
-                                            <h3 class="modal-title fs-5">Yeni Personel Ekle</h3>
-                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body custom-input">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Ad Soyad <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="FullName" />
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control" name="Email" />
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Telefon</label>
-                                                    <input type="text" class="form-control" name="Phone" />
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Şifre <span class="text-danger">*</span></label>
-                                                    <input type="password" class="form-control" name="Password" />
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-light" type="button" data-bs-dismiss="modal">İptal</button>
-                                            <button id="submitPersonnelBtn" class="btn btn-primary" type="submit">Ekle</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                   
 
 
                 </div>
@@ -99,66 +54,67 @@
 
 
 @* Personel Ekleme *@
-<script>
-    document.getElementById("submitPersonnelBtn").addEventListener("click", function (e) {
-        e.preventDefault();
+@* <script> *@
+    
+@*     document.getElementById("submitPersonnelBtn").addEventListener("click", function (e) { *@
+@*         e.preventDefault(); *@
 
-        const formData = {
-            FullName: document.querySelector('[name="FullName"]').value,
-            Email: document.querySelector('[name="Email"]').value,
-            Phone: document.querySelector('[name="Phone"]').value,
-            Password: document.querySelector('[name="Password"]').value,
-            Role: "Personnel"
-        };
+@*         const formData = { *@
+@*             FullName: document.querySelector('[name="FullName"]').value, *@
+@*             Email: document.querySelector('[name="Email"]').value, *@
+@*             Phone: document.querySelector('[name="Phone"]').value, *@
+@*             Password: document.querySelector('[name="Password"]').value, *@
+@*             Role: "Personnel" *@
+@*         }; *@
 
-        fetch("/Personnel/Add", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Sunucu hatası: " + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const ddl = document.querySelector('[name="SelectedPersonnelIds"]');
-            const option = document.createElement("option");
-            option.value = data.id;
-            option.text = data.fullName;
-            option.selected = true;
-            ddl.appendChild(option);
+@*         fetch("/Personnel/Add", { *@
+@*             method: "POST", *@
+@*             headers: { *@
+@*                 "Content-Type": "application/json", *@
+@*             }, *@
+@*             body: JSON.stringify(formData) *@
+@*         }) *@
+@*         .then(response => { *@
+@*             if (!response.ok) { *@
+@*                 throw new Error("Sunucu hatası: " + response.status); *@
+@*             } *@
+@*             return response.json(); *@
+@*         }) *@
+@*         .then(data => { *@
+@*             const ddl = document.querySelector('[name="SelectedPersonnelIds"]'); *@
+@*             const option = document.createElement("option"); *@
+@*             option.value = data.id; *@
+@*             option.text = data.fullName; *@
+@*             option.selected = true; *@
+@*             ddl.appendChild(option); *@
 
-            if (window.tagify) {
-                const newSuggestion = { value: data.id, name: data.fullName };
-                window.tagify.settings.whitelist.push(newSuggestion);
-                window.tagify.dropdown.refilter();
+@*             if (window.tagify) { *@
+@*                 const newSuggestion = { value: data.id, name: data.fullName }; *@
+@*                 window.tagify.settings.whitelist.push(newSuggestion); *@
+@*                 window.tagify.dropdown.refilter(); *@
 
-                const suggestionsContainer = document.getElementById("suggestions-container");
-                const div = document.createElement("div");
-                div.textContent = data.fullName;
-                div.dataset.value = data.id;
-                div.classList.add("suggestion-item");
-                div.addEventListener("click", function () {
-                    window.tagify.addTags([{ value: data.id, name: data.fullName }]);
-                });
-                suggestionsContainer.appendChild(div);
-            }
+@*                 const suggestionsContainer = document.getElementById("suggestions-container"); *@
+@*                 const div = document.createElement("div"); *@
+@*                 div.textContent = data.fullName; *@
+@*                 div.dataset.value = data.id; *@
+@*                 div.classList.add("suggestion-item"); *@
+@*                 div.addEventListener("click", function () { *@
+@*                     window.tagify.addTags([{ value: data.id, name: data.fullName }]); *@
+@*                 }); *@
+@*                 suggestionsContainer.appendChild(div); *@
+@*             } *@
 
-            const modalElement = document.getElementById("add-personnel-modal");
-            if (modalElement) {
-                const modal = bootstrap.Modal.getInstance(modalElement);
-                modal.hide();
-            }
-        })
-        .catch(error => {
-            console.error("Personel eklenirken hata:", error);
-        });
-    });
-</script>
+@*             const modalElement = document.getElementById("add-personnel-modal"); *@
+@*             if (modalElement) { *@
+@*                 const modal = bootstrap.Modal.getInstance(modalElement); *@
+@*                 modal.hide(); *@
+@*             } *@
+@*         }) *@
+@*         .catch(error => { *@
+@*             console.error("Personel eklenirken hata:", error); *@
+@*         }); *@
+@*     }); *@
+@* </script> *@
 
 @* personel listesi *@
 <script>

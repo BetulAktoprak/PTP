@@ -8,7 +8,6 @@ using System.Security.Claims;
 
 namespace PTP.UI.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class ProjectController : Controller
     {
         private readonly ProjectService _projectService;
@@ -23,13 +22,40 @@ namespace PTP.UI.Controllers
             _personnelService = personnelService;
             _documentService = documentService;
         }
-
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
         public IActionResult Index()
         {
-            var values = _projectService.GetAll();
-            return View(values);
+            return View();
+
+        }
+        [HttpGet]
+        public JsonResult GetProjects()
+        {
+            var projects = _projectService.GetAll().Select(p => new
+            {
+                id = p.Id,
+                projectTitle = p.ProjectTitle,
+                clientName = p.ClientName,
+                projectRate = p.ProjectRate,
+                projectType = p.ProjectType,
+                priority = p.Priority,
+                projectSize = p.ProjectSize,
+                startDate = p.StartDate.ToString("dd/MM/yyyy"),
+                endDate = p.EndDate?.ToString("dd/MM/yyyy"),
+                details = p.Details,
+                documentDetail = p.DocumentDetail,
+            });
+            return Json(projects);
         }
 
+        [Authorize(Roles = "Personel")]
+        public IActionResult PersonnelProject()
+        {
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult Create()
         {
@@ -125,6 +151,7 @@ namespace PTP.UI.Controllers
             return RedirectToAction("Index");
         }
 
+        //[Authorize(Roles = "Admin")]
         //[HttpGet]
         //public IActionResult Edit(int id)
         //{
