@@ -5,7 +5,6 @@ using PTP.Business.Services;
 using PTP.EntityLayer.Models;
 using PTP.UI.Models;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace PTP.UI.Controllers
 {
@@ -15,13 +14,15 @@ namespace PTP.UI.Controllers
         private readonly IWebHostEnvironment _environment;
         private readonly PersonnelService _personnelService;
         private readonly DocumentService _documentService;
+        private readonly UserService _userService;
 
-        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService)
+        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService)
         {
             _projectService = projectService;
             _environment = environment;
             _personnelService = personnelService;
             _documentService = documentService;
+            _userService = userService;
         }
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -61,12 +62,12 @@ namespace PTP.UI.Controllers
 
             if (!int.TryParse(userIdString, out var userId))
             {
-                return Unauthorized(); 
+                return Unauthorized();
             }
 
             var personnel = await _personnelService.GetPersonnelWithProjectsByUserIdAsync(userId);
 
-            if(personnel is null) return NotFound("Personel Bulunamadı");
+            if (personnel is null) return NotFound("Personel Bulunamadı");
 
             var projects = personnel.Projects.ToList();
 
@@ -77,6 +78,9 @@ namespace PTP.UI.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            var userName = User.Identity.Name;
+            ViewBag.UserName = userName;
+
             var personnelList = _personnelService.GetAll();
             var values = personnelList.Select(p => new
             {
@@ -90,13 +94,13 @@ namespace PTP.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, List<string> Description)
         {
             //if (!ModelState.IsValid)
             //{
             //    return View(model);
             //}
-            
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
@@ -106,7 +110,7 @@ namespace PTP.UI.Controllers
             int userId = int.Parse(userIdClaim.Value);
             try
             {
-                
+
 
                 var selectedList = JsonConvert.DeserializeObject<List<PersonnelTagModel>>(model.SelectedPersonnelIds);
 
@@ -125,7 +129,7 @@ namespace PTP.UI.Controllers
                 var project = new Project
                 {
                     ProjectTitle = model.ProjectTitle,
-                    ClientName = model.ClientName,
+                    ClientName = userIdClaim.Value,
                     ProjectRate = model.ProjectRate,
                     ProjectType = model.ProjectType,
                     Priority = model.Priority,
@@ -142,11 +146,15 @@ namespace PTP.UI.Controllers
 
                 if (model.ProjectFiles != null && model.ProjectFiles.Any())
                 {
+
                     var uploads = Path.Combine(_environment.WebRootPath, "uploads");
                     Directory.CreateDirectory(uploads);
 
-                    foreach (var file in model.ProjectFiles)
+                    for (int i = 0; i < model.ProjectFiles.Count; i++)
                     {
+                        var file = model.ProjectFiles[i];
+                        var desc = Description.ElementAtOrDefault(i); // açıklama o indexte varsa al
+
                         var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                         var relativePath = Path.Combine("uploads", uniqueFileName);
                         var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
@@ -160,12 +168,14 @@ namespace PTP.UI.Controllers
                         {
                             FileName = file.FileName,
                             FilePath = relativePath,
+                            Description = desc, // açıklamayı burada ekliyoruz
                             ProjectId = project.Id,
                             UserId = userId
                         };
 
                         _documentService.Add(document);
                     }
+
                 }
 
 
@@ -177,7 +187,7 @@ namespace PTP.UI.Controllers
                 return View(model);
             }
 
-            
+
 
             return RedirectToAction("Index");
         }

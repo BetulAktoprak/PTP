@@ -2,16 +2,18 @@
 
 <div class="tab-pane fade show active" id="detail-product" role="tabpanel" aria-labelledby="detail-product-tab">
     <div class="sidebar-body">
-        <label asp-for="ProjectTitle" class="form-label col-12 m-0">Proje Adı <span class="txt-danger"> *</span></label>
+        <div class="col-12">
+            <label asp-for="ClientName" class="form-label">Kullanıcı: @ViewBag.UserName</label>
+
+        </div>
+        <br />
         <div class="col-12 custom-input">
+            <label asp-for="ProjectTitle" class="form-label col-12 m-0">Proje Adı <span class="txt-danger"> *</span></label>
             <input asp-for="ProjectTitle" class="form-control" id="productTitle1" type="text" />
 
             @* <div class="invalid-feedback">Proje adını giriniz.</div> *@
         </div>
-        <div class="col-12">
-            <label asp-for="ClientName" class="form-label">Kullanıcı Adı</label>
-            <input asp-for="ClientName" class="form-control" placeholder="Kullanıcı veya şirket adı" />
-        </div>
+        
         <br />
         <div class="col-12">
             <label asp-for="Details" class="form-label">Açıklama</label>
