@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,13 @@ namespace PTP.UI.Controllers
     {
         private readonly UserService _userService;
         private readonly PersonnelService _personnelService;
+        private readonly ProcessService _processService;
 
-        public PersonnelController(UserService userService, PersonnelService personnelService)
+        public PersonnelController(UserService userService, PersonnelService personnelService, ProcessService processService)
         {
             _userService = userService;
             _personnelService = personnelService;
+            _processService = processService;
         }
         public IActionResult Index()
         {
@@ -29,6 +32,18 @@ namespace PTP.UI.Controllers
             }).ToList();
 
             return View(viewModel);
+        }
+
+        public async Task<IActionResult> PersonelProcess(int id)
+        {
+            var processes = await _processService.GetAllByProjectIdAsync(id);
+            if (processes == null || !processes.Any())
+            {
+                return NotFound("Proje Bulunamadı");
+
+            }
+            ViewBag.ProjectId = id;
+            return View(processes);
         }
 
         [Authorize(Roles = "Admin")]

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PTP.Business.Abstractions;
+﻿using PTP.Business.Abstractions;
 using PTP.DataAccess.Repositories;
 using PTP.EntityLayer.Models;
 
 namespace PTP.Business.Services
 {
-    public class PersonnelService : IService<Personnel>
+    public class PersonnelService : IService<Personnel>, IPersonnelService
     {
         private readonly PersonnelRepository _personnelRepository;
 
@@ -36,6 +31,11 @@ namespace PTP.Business.Services
         public Personnel? GetByID(int id)
         {
             return _personnelRepository.GetById(id);
+        }
+
+        public Task<Personnel> GetPersonnelWithProjectsByUserIdAsync(int userId)
+        {
+            return _personnelRepository.GetPersonnelWithProjectsByUserIdAsync(userId);
         }
 
         public void Update(Personnel entity)

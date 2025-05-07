@@ -13,4 +13,5 @@ public class Personnel : BaseEntity
     public string? ImagePath { get; set; }
     public ICollection<Project> Projects { get; set; } = new List<Project>();
     public ICollection<Process> Processes { get; set; } = new List<Process>();
+
 }

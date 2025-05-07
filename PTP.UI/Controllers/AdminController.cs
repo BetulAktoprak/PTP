@@ -7,7 +7,7 @@ using PTP.UI.Models;
 
 namespace PTP.UI.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class AdminController : Controller
     {
         private readonly ProjectService _projectService;
@@ -20,17 +20,19 @@ namespace PTP.UI.Controllers
             _processService = processService;
             _personnelService = personnelService;
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult ManageProcesses()
+        public IActionResult ManageProcesses(int id)
         {
+            ViewBag.ProjectId = id;
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAllProjects()
         {
@@ -50,6 +52,7 @@ namespace PTP.UI.Controllers
                 processType = p.ProcessType
             }));
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult UpdateType([FromBody] ProcessUpdateViewModel dto)
         {
@@ -67,7 +70,7 @@ namespace PTP.UI.Controllers
 
             return Ok();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAllPersonnel()
         {
@@ -81,7 +84,7 @@ namespace PTP.UI.Controllers
 
             return Json(users);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult AddProcess([FromBody] ProcessAddViewModel dto)
         {

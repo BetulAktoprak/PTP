@@ -28,6 +28,8 @@
             <div class="modal-header">
                 <h5 class="modal-title" id="addProcessLabel">Yeni İşlem Ekle</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                <input type="hidden" id="selectedProjectId" value="@ViewBag.ProjectId" />
+
             </div>
             <div class="modal-body">
                 <form id="addProcessForm">
@@ -69,17 +71,28 @@
     let kanban = null;
 
     $(document).ready(function () {
+        const projectId = $('#selectedProjectId').val();
+
         $.get('/Admin/GetAllProjects', function (data) {
+
             data.forEach(function (project) {
                 $('#projectSelect').append(`<option value="${project.id}">${project.name}</option>`);
             });
+
+            if (projectId) {
+            $('#projectSelect').val(projectId).trigger('change');
+        }
+
             loadUsers();
+
         });
 
         $('#projectSelect').change(function () {
             const projectId = $(this).val();
+            console.log("Seçilen proje ID:", projectId);
 
             $.get(`/Admin/GetAllByProjectId/${projectId}`, function (processes) {
+                processes = processes || [];
                 if (kanban !== null) {
                     document.getElementById('kanbanBoard').innerHTML = ''; 
                 }

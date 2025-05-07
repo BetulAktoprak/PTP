@@ -5,6 +5,7 @@ using PTP.Business.Services;
 using PTP.EntityLayer.Models;
 using PTP.UI.Models;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace PTP.UI.Controllers
 {
@@ -45,14 +46,31 @@ namespace PTP.UI.Controllers
                 endDate = p.EndDate?.ToString("dd/MM/yyyy"),
                 details = p.Details,
                 documentDetail = p.DocumentDetail,
+                Documents = _documentService.GetAll()
+                       .Where(d => d.ProjectId == p.Id)
+                       .Select(d => d.FilePath)
+                       .ToList()
             });
             return Json(projects);
         }
 
-        [Authorize(Roles = "Personel")]
-        public IActionResult PersonnelProject()
+        [Authorize(Roles = "Personnel")]
+        public async Task<IActionResult> PersonnelProject()
         {
-            return View();
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            if (!int.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized(); 
+            }
+
+            var personnel = await _personnelService.GetPersonnelWithProjectsByUserIdAsync(userId);
+
+            if(personnel is null) return NotFound("Personel Bulunamadı");
+
+            var projects = personnel.Projects.ToList();
+
+            return View(projects);
         }
 
         [Authorize(Roles = "Admin")]
@@ -78,7 +96,7 @@ namespace PTP.UI.Controllers
             //{
             //    return View(model);
             //}
-
+            
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
@@ -86,67 +104,80 @@ namespace PTP.UI.Controllers
             }
 
             int userId = int.Parse(userIdClaim.Value);
-
-            var selectedList = JsonConvert.DeserializeObject<List<PersonnelTagModel>>(model.SelectedPersonnelIds);
-
-            foreach (var person in selectedList)
+            try
             {
-                var personId = int.Parse(person.value);
+                
 
-            }
-            var personnelIds = selectedList.Select(x => int.Parse(x.value)).ToList();
-            var selectedPersonnels = _personnelService.GetAll()
-                .Where(p => personnelIds.Contains(p.Id))
-                .ToList();
+                var selectedList = JsonConvert.DeserializeObject<List<PersonnelTagModel>>(model.SelectedPersonnelIds);
 
-
-
-            var project = new Project
-            {
-                ProjectTitle = model.ProjectTitle,
-                ClientName = model.ClientName,
-                ProjectRate = model.ProjectRate,
-                ProjectType = model.ProjectType,
-                Priority = model.Priority,
-                ProjectSize = model.ProjectSize,
-                StartDate = model.StartingDate,
-                EndDate = model.EndingDate,
-                Details = model.Details,
-                DocumentDetail = model.DocumentDetail,
-                Personnels = selectedPersonnels,
-                CreatedBy = userId.ToString()
-            };
-
-            _projectService.Add(project);
-
-            if (model.ProjectFiles != null && model.ProjectFiles.Any())
-            {
-                var uploads = Path.Combine(_environment.WebRootPath, "uploads");
-                Directory.CreateDirectory(uploads);
-
-                foreach (var file in model.ProjectFiles)
+                foreach (var person in selectedList)
                 {
-                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                    var relativePath = Path.Combine("uploads", uniqueFileName);
-                    var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
+                    var personId = int.Parse(person.value);
 
-                    using (var stream = new FileStream(fullPath, FileMode.Create))
-                    {
-                        await file.CopyToAsync(stream);
-                    }
-
-                    var document = new Document
-                    {
-                        FileName = file.FileName,
-                        FilePath = relativePath,
-                        ProjectId = project.Id,
-                        UserId = userId
-                    };
-
-                    _documentService.Add(document);
                 }
+                var personnelIds = selectedList.Select(x => int.Parse(x.value)).ToList();
+                var selectedPersonnels = _personnelService.GetAll()
+                    .Where(p => personnelIds.Contains(p.Id))
+                    .ToList();
+
+
+
+                var project = new Project
+                {
+                    ProjectTitle = model.ProjectTitle,
+                    ClientName = model.ClientName,
+                    ProjectRate = model.ProjectRate,
+                    ProjectType = model.ProjectType,
+                    Priority = model.Priority,
+                    ProjectSize = model.ProjectSize,
+                    StartDate = model.StartingDate,
+                    EndDate = model.EndingDate,
+                    Details = model.Details,
+                    DocumentDetail = model.DocumentDetail,
+                    Personnels = selectedPersonnels,
+                    CreatedBy = userId.ToString()
+                };
+
+                _projectService.Add(project);
+
+                if (model.ProjectFiles != null && model.ProjectFiles.Any())
+                {
+                    var uploads = Path.Combine(_environment.WebRootPath, "uploads");
+                    Directory.CreateDirectory(uploads);
+
+                    foreach (var file in model.ProjectFiles)
+                    {
+                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                        var relativePath = Path.Combine("uploads", uniqueFileName);
+                        var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
+
+                        using (var stream = new FileStream(fullPath, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+
+                        var document = new Document
+                        {
+                            FileName = file.FileName,
+                            FilePath = relativePath,
+                            ProjectId = project.Id,
+                            UserId = userId
+                        };
+
+                        _documentService.Add(document);
+                    }
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("HATA: " + ex.Message);
+                ModelState.AddModelError("", "Bir hata oluştu, lütfen tekrar deneyin.");
+                return View(model);
             }
 
+            
 
             return RedirectToAction("Index");
         }

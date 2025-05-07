@@ -17,6 +17,7 @@ namespace PTP.DataAccess
         public DbSet<Document> Documents { get; set; }
         public DbSet<User> Users { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
@@ -76,6 +77,7 @@ namespace PTP.DataAccess
                 .HasOne(u => u.Customer)
                 .WithOne(c => c.User)
                 .HasForeignKey<Customer>(c => c.UserId);
+
         }
     }
 }

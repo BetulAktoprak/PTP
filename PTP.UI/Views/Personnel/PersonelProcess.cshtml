@@ -1,0 +1,29 @@
+﻿@using PTP.EntityLayer.Models
+@model List<Process>
+
+@{
+    ViewData["Title"] = "PersonelProcess";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Proje: </h2>
+
+<div class="card">
+    <div class="card-body">
+        @foreach (var process in Model)
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">İşlem: @process.Description</h5>
+
+                    @* <p><strong>Başlangıç Tarihi:</strong> @process..ToShortDateString()</p> *@
+                    @* <p><strong>Bitiş Tarihi:</strong> @(process.EndDate?.ToShortDateString() ?? "Bilinmiyor")</p> *@
+
+                    <p><strong>Personel:</strong> @process.Personnel?.FullName</p>
+                </div>
+            </div>
+        }
+
+    </div>
+</div>
+
