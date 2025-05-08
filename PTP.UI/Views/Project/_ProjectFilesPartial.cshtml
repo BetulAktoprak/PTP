@@ -10,10 +10,12 @@
         </div>
 
         <div id="selectedFilesList" class="mt-3">
-            <!-- Seçilen dosyalar burada listelenecek -->
         </div>
     </div>
 </div>
+
+<input type="hidden" name="Description" id="descriptionHiddenContainer" />
+<input type="hidden" name="ProjectFiles" />
 
 <script>
     let selectedFiles = [];
@@ -37,13 +39,11 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'border rounded p-3 mb-3 bg-light shadow-sm position-relative';
 
-            // Dosya ismi ve büyüklüğü
             const fileInfo = document.createElement('div');
             fileInfo.innerHTML = `
                 <strong>${item.file.name}</strong> <small class="text-muted">(${Math.round(item.file.size / 1024)} KB)</small>
             `;
 
-            // Açıklama alanı
             const description = document.createElement('textarea');
             description.className = 'form-control mt-2';
             description.placeholder = 'Dosya açıklaması...';
@@ -52,7 +52,6 @@
                 selectedFiles[index].description = e.target.value;
             };
 
-            // Silme butonu
             const removeBtn = document.createElement('button');
             removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 m-2';
             removeBtn.innerHTML = '<i class="fa fa-times"></i>';
@@ -76,7 +75,7 @@
 
         selectedFiles.forEach(item => {
             formData.append('ProjectFiles', item.file);
-            formData.append('Description', item.description); // Bu satır önemli!
+            formData.append('Description', item.description); 
         });
 
         fetch(form.action || window.location.href, {
@@ -96,6 +95,7 @@
         });
     });
 </script>
+
 
 
 @* <div class="tab-pane fade" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab"> *@

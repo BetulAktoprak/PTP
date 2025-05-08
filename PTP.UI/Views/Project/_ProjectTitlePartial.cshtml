@@ -4,6 +4,8 @@
     <div class="sidebar-body">
         <div class="col-12">
             <label asp-for="ClientName" class="form-label">Kullanıcı: @ViewBag.UserName</label>
+            <input type="hidden" asp-for="ClientName" value="@ViewBag.UserName" />
+
 
         </div>
         <br />

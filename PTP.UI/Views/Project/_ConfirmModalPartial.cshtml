@@ -216,9 +216,9 @@
         };
 
         if (file.type === "text/plain") {
-            reader.readAsText(file); 
+            reader.readAsText(file);
         } else {
-            reader.readAsDataURL(file); 
+            reader.readAsDataURL(file);
         }
     }
 
@@ -227,7 +227,7 @@
         document.getElementById("previewProjectName").textContent = projectName;
         document.getElementById("modalClientName").textContent = document.querySelector('[name="ClientName"]').value;
         document.getElementById("modalDetails").textContent = document.querySelector('[name="Details"]').value;
-        document.getElementById("modalDocumentDetail").textContent = document.querySelector('[name="DocumentDetail"]').value;
+        document.getElementById("modalDocumentDetail").textContent = document.querySelector('[name="Details"]').value;
         document.getElementById("modalRate").textContent = document.querySelector('[name="ProjectRate"]').value;
         document.getElementById("modalType").textContent = document.querySelector('[name="ProjectType"]').value;
         document.getElementById("modalPriority").textContent = document.querySelector('[name="Priority"]').value;
@@ -250,11 +250,12 @@
         const thumbnailsContainer = document.getElementById("fileThumbnails");
         thumbnailsContainer.innerHTML = "";
 
-        if (selectedFiles.length > 0) {
-            showPreview(selectedFiles[0]);
+        if (selectedFiles && selectedFiles.length > 0 && selectedFiles[0]) {
+            showPreview(selectedFiles[0].file);
         }
 
-        selectedFiles.forEach((file, index) => {
+        selectedFiles.forEach((item, index) => {
+            const file = item.file;
             const reader = new FileReader();
             reader.onload = function (e) {
                 const wrapper = document.createElement("div");
@@ -265,9 +266,9 @@
                 if (file.type.startsWith("image/")) {
                     img.src = e.target.result;
                 } else if (file.name.toLowerCase().endsWith(".pdf")) {
-                    img.src = "../dashboard/assets/images/pdf-icon.png"; 
+                    img.src = "../dashboard/assets/images/pdf-icon.png";
                 } else {
-                    img.src = "../dashboard/assets/images/file-icon.png"; 
+                    img.src = "../dashboard/assets/images/file-icon.png";
                 }
 
                 img.alt = file.name;
@@ -301,8 +302,12 @@
     });
 
     document.getElementById("btnConfirmSave").addEventListener("click", function () {
+         const personnelInput = document.querySelector('#personnelTagInput');
+    const selectedPersonnel = personnelInput.value;
+
+    // JSON olarak sakla
+    document.getElementById("SelectedPersonnelJson").value = selectedPersonnel;
         document.getElementById("projectForm").submit();
     });
 </script>
-
 

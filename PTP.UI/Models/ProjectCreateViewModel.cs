@@ -19,5 +19,6 @@ namespace PTP.UI.Models
         public List<IFormFile> ProjectFiles { get; set; }
         public string SelectedPersonnelIds { get; set; }
         public List<SelectListItem> PersonnelList { get; set; }
+        public string PersonnelPermissionsJson { get; set; }
     }
 }

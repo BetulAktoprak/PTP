@@ -15,14 +15,16 @@ namespace PTP.UI.Controllers
         private readonly PersonnelService _personnelService;
         private readonly DocumentService _documentService;
         private readonly UserService _userService;
+        private readonly ProjectPersonnelService _projectPersonnelService;
 
-        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService)
+        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService, ProjectPersonnelService projectPersonnelService)
         {
             _projectService = projectService;
             _environment = environment;
             _personnelService = personnelService;
             _documentService = documentService;
             _userService = userService;
+            _projectPersonnelService = projectPersonnelService;
         }
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -88,13 +90,13 @@ namespace PTP.UI.Controllers
                 name = p.FullName
             }).ToList();
 
-            ViewBag.PersonnelListJson = JsonConvert.SerializeObject(values);
+            ViewBag.PersonnelListJson = values;
 
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model, List<string> Description)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, List<string> Description, string SelectedPersonnelJson)
         {
             //if (!ModelState.IsValid)
             //{
@@ -112,14 +114,14 @@ namespace PTP.UI.Controllers
             {
 
 
-                var selectedList = JsonConvert.DeserializeObject<List<PersonnelTagModel>>(model.SelectedPersonnelIds);
-
-                foreach (var person in selectedList)
+                List<PersonnelDto> selectedList = new();
+                if (!string.IsNullOrEmpty(SelectedPersonnelJson))
                 {
-                    var personId = int.Parse(person.value);
-
+                    selectedList = JsonConvert.DeserializeObject<List<PersonnelDto>>(SelectedPersonnelJson);
                 }
                 var personnelIds = selectedList.Select(x => int.Parse(x.value)).ToList();
+
+                
                 var selectedPersonnels = _personnelService.GetAll()
                     .Where(p => personnelIds.Contains(p.Id))
                     .ToList();
@@ -129,7 +131,7 @@ namespace PTP.UI.Controllers
                 var project = new Project
                 {
                     ProjectTitle = model.ProjectTitle,
-                    ClientName = userIdClaim.Value,
+                    ClientName = model.ClientName,
                     ProjectRate = model.ProjectRate,
                     ProjectType = model.ProjectType,
                     Priority = model.Priority,
@@ -137,7 +139,7 @@ namespace PTP.UI.Controllers
                     StartDate = model.StartingDate,
                     EndDate = model.EndingDate,
                     Details = model.Details,
-                    DocumentDetail = model.DocumentDetail,
+                    //DocumentDetail = model.DocumentDetail,
                     Personnels = selectedPersonnels,
                     CreatedBy = userId.ToString()
                 };
@@ -153,7 +155,7 @@ namespace PTP.UI.Controllers
                     for (int i = 0; i < model.ProjectFiles.Count; i++)
                     {
                         var file = model.ProjectFiles[i];
-                        var desc = Description.ElementAtOrDefault(i); // açıklama o indexte varsa al
+                        var desc = Description.ElementAtOrDefault(i);
 
                         var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                         var relativePath = Path.Combine("uploads", uniqueFileName);
@@ -168,15 +170,15 @@ namespace PTP.UI.Controllers
                         {
                             FileName = file.FileName,
                             FilePath = relativePath,
-                            Description = desc, // açıklamayı burada ekliyoruz
+                            Description = desc, 
                             ProjectId = project.Id,
                             UserId = userId
                         };
 
                         _documentService.Add(document);
                     }
-
                 }
+
 
 
             }
@@ -191,6 +193,7 @@ namespace PTP.UI.Controllers
 
             return RedirectToAction("Index");
         }
+
 
         //[Authorize(Roles = "Admin")]
         //[HttpGet]

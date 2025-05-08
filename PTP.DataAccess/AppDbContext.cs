@@ -16,6 +16,7 @@ namespace PTP.DataAccess
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<ProjectPersonnel> ProjectPersonnels { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -78,6 +79,18 @@ namespace PTP.DataAccess
                 .WithOne(c => c.User)
                 .HasForeignKey<Customer>(c => c.UserId);
 
+            modelBuilder.Entity<ProjectPersonnel>()
+                .HasKey(pp => new { pp.ProjectId, pp.PersonnelId });
+
+            modelBuilder.Entity<ProjectPersonnel>()
+                .HasOne(pp => pp.Project)
+                .WithMany(p => p.ProjectPersonnels)
+                .HasForeignKey(pp => pp.ProjectId);
+
+            modelBuilder.Entity<ProjectPersonnel>()
+                .HasOne(pp => pp.Personnel)
+                .WithMany(p => p.ProjectPersonnels)
+                .HasForeignKey(pp => pp.PersonnelId);
         }
     }
 }

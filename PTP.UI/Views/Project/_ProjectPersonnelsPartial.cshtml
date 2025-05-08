@@ -1,4 +1,5 @@
-﻿@model PTP.UI.Models.ProjectCreateViewModel
+﻿@using Newtonsoft.Json
+@model PTP.UI.Models.ProjectCreateViewModel
 
 <style>
     .custom-suggestion-box {
@@ -36,12 +37,14 @@
                     <div class="col-sm-9 offset-sm-1">
                         <label for="personnelTagInput" class="form-label">Personel Seçin</label>
                         <div class="mb-3">
-                            <input id="personnelTagInput" name="SelectedPersonnelIds" class="form-control" />
+                            <input type="hidden" id="personnelTagInput" name="SelectedPersonnelIds" class="form-control" />
                             <div id="suggestions-container" class="tagify__suggestions custom-suggestion-box"></div>
                         </div>
                     </div>
 
-                   
+                    <div id="selected-personnel-permissions"></div>
+                    <input type="hidden" name="PersonnelPermissionsJson" id="PersonnelPermissionsJson" />
+
 
 
                 </div>
@@ -53,9 +56,121 @@
 </div>
 
 
+
+@* personel listesi *@
+
+<script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector("#personnelTagInput");
+        window.tagify = new Tagify(input, {
+            tagTextProp: "name"
+        });
+
+        const suggestions = @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson ?? new List<object>()));
+
+
+        console.log("Json:", @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson)));
+
+        const suggestionsContainer = document.getElementById("suggestions-container");
+
+        suggestions.forEach(item => {
+            const div = document.createElement("div");
+            div.textContent = item.name;
+            div.dataset.value = item.value;
+            suggestionsContainer.appendChild(div);
+
+            div.addEventListener("click", function () {
+                tagify.addTags([{ value: item.value, name: item.name }]);
+            });
+        });
+    });
+</script>
+
+@* <script> *@
+@*         document.addEventListener("DOMContentLoaded", function () { *@
+@*         const input = document.querySelector("#personnelTagInput"); *@
+@*         window.tagify = new Tagify(input, { *@
+@*             tagTextProp: "name" *@
+@*         }); *@
+
+@*             let suggestions = []; *@
+@*             const jsonData = '@Html.Raw(ViewBag.PersonnelListJson)'; *@
+@*             if (jsonData.trim() !== "") { *@
+@*                 suggestions = JSON.parse(jsonData); *@
+@*             } else { *@
+@*                 console.error("JSON verisi boş veya geçersiz."); *@
+@*             } *@
+
+@*              if (!Array.isArray(suggestions)) { *@
+@*                 console.error("Veri geçersiz! Liste bir dizi olmalı."); *@
+@*                 return; *@
+@*             } *@
+
+@*         const suggestionsContainer = document.getElementById("suggestions-container"); *@
+
+@*         if (Array.isArray(suggestions)) { *@
+@*             suggestions.forEach(item => { *@
+
+@*             const div = document.createElement("div"); *@
+@*             div.textContent = item.name; *@
+@*             div.dataset.value = item.value; *@
+@*             suggestionsContainer.appendChild(div); *@
+
+@*                 div.addEventListener("click", function () { *@
+@*                 const tag = { value: item.value, name: item.name }; *@
+
+@*                 if (document.querySelector(`[data-id="${tag.value}"]`)) { *@
+@*                     return;   *@
+@*                 } *@
+
+@*                 tagify.addTags([tag]); *@
+
+@*                 const container = document.getElementById("selected-personnel-permissions"); *@
+
+@*                 const permissionHtml = ` *@
+@*                     <div class="card my-2 p-3" data-id="${tag.value}"> *@
+@*                         <strong>${tag.name}</strong> *@
+@*                         <div class="form-check"> *@
+@*                             <input class="form-check-input permission-checkbox" type="checkbox" data-type="read" data-id="${tag.value}"> *@
+@*                             <label class="form-check-label">Okuma Yetkisi</label> *@
+@*                         </div> *@
+@*                         <div class="form-check"> *@
+@*                             <input class="form-check-input permission-checkbox" type="checkbox" data-type="create" data-id="${tag.value}"> *@
+@*                             <label class="form-check-label">Yazma Yetkisi</label> *@
+@*                         </div> *@
+@*                         <div class="form-check"> *@
+@*                             <input class="form-check-input permission-checkbox" type="checkbox" data-type="update" data-id="${tag.value}"> *@
+@*                             <label class="form-check-label">Güncelleme Yetkisi</label> *@
+@*                         </div> *@
+@*                         <div class="form-check"> *@
+@*                             <input class="form-check-input permission-checkbox" type="checkbox" data-type="delete" data-id="${tag.value}"> *@
+@*                             <label class="form-check-label">Silme Yetkisi</label> *@
+@*                         </div> *@
+@*                         <div class="form-check"> *@
+@*                             <input class="form-check-input permission-checkbox" type="checkbox" data-type="comment" data-id="${tag.value}"> *@
+@*                             <label class="form-check-label">Yorum Yetkisi</label> *@
+@*                         </div> *@
+@*                     </div> *@
+@*                 `; *@
+                    
+@*                 container.insertAdjacentHTML("beforeend", permissionHtml); *@
+@*             }); *@
+@*                 tagify.on('remove', function(e) { *@
+@*                 const removedId = e.detail.data.value; *@
+@*                 const card = document.querySelector(`[data-id="${removedId}"]`); *@
+@*                 if (card) card.remove(); *@
+@*             }); *@
+
+            
+@*         }); *@
+@*         } *@
+@*     }); *@
+@* </script> *@
+
+
 @* Personel Ekleme *@
 @* <script> *@
-    
+
 @*     document.getElementById("submitPersonnelBtn").addEventListener("click", function (e) { *@
 @*         e.preventDefault(); *@
 
@@ -115,28 +230,3 @@
 @*         }); *@
 @*     }); *@
 @* </script> *@
-
-@* personel listesi *@
-<script>
-        document.addEventListener("DOMContentLoaded", function () {
-        const input = document.querySelector("#personnelTagInput");
-        window.tagify = new Tagify(input, {
-            tagTextProp: "name"
-        });
-
-        const suggestions = @Html.Raw(ViewBag.PersonnelListJson);
-
-        const suggestionsContainer = document.getElementById("suggestions-container");
-
-        suggestions.forEach(item => {
-            const div = document.createElement("div");
-            div.textContent = item.name;
-            div.dataset.value = item.value;
-            suggestionsContainer.appendChild(div);
-
-            div.addEventListener("click", function () {
-                tagify.addTags([{ value: item.value, name: item.name }]);
-            });
-        });
-    });
-</script>
