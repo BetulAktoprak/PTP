@@ -222,7 +222,8 @@
         }
     }
 
-    document.getElementById("btnPreview").addEventListener("click", function () {
+    document.getElementById("btnPreview").addEventListener("click", function (event) {
+        event.preventDefault();
         const projectName = document.getElementById("productTitle1").value;
         document.getElementById("previewProjectName").textContent = projectName;
         document.getElementById("modalClientName").textContent = document.querySelector('[name="ClientName"]').value;

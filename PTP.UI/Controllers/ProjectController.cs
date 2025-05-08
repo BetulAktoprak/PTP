@@ -114,14 +114,14 @@ namespace PTP.UI.Controllers
             {
 
 
-                List<PersonnelDto> selectedList = new();
+                List<ProjectPersonnelViewModel> selectedList = new();
                 if (!string.IsNullOrEmpty(SelectedPersonnelJson))
                 {
-                    selectedList = JsonConvert.DeserializeObject<List<PersonnelDto>>(SelectedPersonnelJson);
+                    selectedList = JsonConvert.DeserializeObject<List<ProjectPersonnelViewModel>>(SelectedPersonnelJson);
                 }
                 var personnelIds = selectedList.Select(x => int.Parse(x.value)).ToList();
 
-                
+
                 var selectedPersonnels = _personnelService.GetAll()
                     .Where(p => personnelIds.Contains(p.Id))
                     .ToList();
@@ -140,11 +140,12 @@ namespace PTP.UI.Controllers
                     EndDate = model.EndingDate,
                     Details = model.Details,
                     //DocumentDetail = model.DocumentDetail,
-                    Personnels = selectedPersonnels,
+                    //Personnels = selectedPersonnels,
                     CreatedBy = userId.ToString()
                 };
 
                 _projectService.Add(project);
+
 
                 if (model.ProjectFiles != null && model.ProjectFiles.Any())
                 {
@@ -170,7 +171,7 @@ namespace PTP.UI.Controllers
                         {
                             FileName = file.FileName,
                             FilePath = relativePath,
-                            Description = desc, 
+                            Description = desc,
                             ProjectId = project.Id,
                             UserId = userId
                         };
@@ -179,7 +180,20 @@ namespace PTP.UI.Controllers
                     }
                 }
 
-
+                foreach (var person in selectedList)
+                {
+                    var pp = new ProjectPersonnel
+                    {
+                        ProjectId = project.Id,
+                        PersonnelId = int.Parse(person.value),
+                        CanRead = person.CanRead,
+                        CanCreate = person.CanCreate,
+                        CanUpdate = person.CanUpdate,
+                        CanDelete = person.CanDelete,
+                        CanComment = person.CanComment
+                    };
+                    _projectPersonnelService.Add(pp);
+                }
 
             }
             catch (Exception ex)

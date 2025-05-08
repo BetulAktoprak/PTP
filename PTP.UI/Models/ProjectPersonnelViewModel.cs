@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json;
-
-namespace PTP.UI.Models
+﻿namespace PTP.UI.Models
 {
 
     public class ProjectPersonnelViewModel
     {
-        public int Id { get; set; }
+        public string value { get; set; }
+        public string name { get; set; }
         public int ProjectId { get; set; }
         public int PersonnelId { get; set; }
         public bool CanRead { get; set; }

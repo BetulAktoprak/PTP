@@ -34,17 +34,20 @@
         <div class="row g-lg-4 g-3">
             <div class="col-12">
                 <div class="row g-5">
-                    <div class="col-sm-9 offset-sm-1">
-                        <label for="personnelTagInput" class="form-label">Personel Seçin</label>
-                        <div class="mb-3">
-                            <input type="hidden" id="personnelTagInput" name="SelectedPersonnelIds" class="form-control" />
-                            <div id="suggestions-container" class="tagify__suggestions custom-suggestion-box"></div>
-                        </div>
-                    </div>
+                    <div class="col-sm-9 offset-sm-1"> 
+                         <label for="personnelTagInput" class="form-label">Personel Seçin</label> 
+                         <div class="mb-3"> 
+                             <input type="hidden" id="personnelTagInput" name="SelectedPersonnelIds" class="form-control" /> 
+                             <input type="hidden" id="SelectedPersonnelJson" name="SelectedPersonnelJson" /> 
+
+                             <div id="suggestions-container" class="tagify__suggestions custom-suggestion-box"></div> 
+                         </div>
+                     </div> 
 
                     <div id="selected-personnel-permissions"></div>
-                    <input type="hidden" name="PersonnelPermissionsJson" id="PersonnelPermissionsJson" />
+                    @* <input type="hidden" name="PersonnelPermissionsJson" id="PersonnelPermissionsJson" /> *@
 
+                   
 
 
                 </div>
@@ -61,15 +64,15 @@
 
 <script>
         document.addEventListener("DOMContentLoaded", function () {
+            console.log(document.querySelectorAll("input[type=checkbox]"));
         const input = document.querySelector("#personnelTagInput");
         window.tagify = new Tagify(input, {
-            tagTextProp: "name"
+            tagTextProp: "name",
         });
 
         const suggestions = @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson ?? new List<object>()));
 
-
-        console.log("Json:", @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson)));
+        const permissionWrapper = document.getElementById("selected-personnel-permissions");
 
         const suggestionsContainer = document.getElementById("suggestions-container");
 
@@ -81,8 +84,55 @@
 
             div.addEventListener("click", function () {
                 tagify.addTags([{ value: item.value, name: item.name }]);
+                renderPermissionInputs(item.value, item.name);
             });
         });
+
+         function renderPermissionInputs(id, name) {
+            if (document.querySelector(`#permissions-${id}`)) return;
+
+            const permissionDiv = document.createElement("div");
+            permissionDiv.id = `permissions-${id}`;
+            permissionDiv.innerHTML = `
+                <p><strong>${name}</strong> yetkileri:</p>
+                <label><input type="checkbox" id="permission_${id}_CanRead"> Okuma</label>
+                <label><input type="checkbox" id="permission_${id}_CanCreate"> Oluşturma</label>
+                <label><input type="checkbox" id="permission_${id}_CanUpdate"> Güncelleme</label>
+                <label><input type="checkbox" id="permission_${id}_CanDelete"> Silme</label>
+                <label><input type="checkbox" id="permission_${id}_CanComment"> Yorum</label>
+                <hr>
+            `;
+            permissionWrapper.appendChild(permissionDiv);
+        }
+
+        // Form submit olayında yetkileri JSON olarak topla
+        const form = document.querySelector("#projectForm");
+        form.addEventListener("submit", function () {
+            const selected = tagify.value;
+
+            const detailedList = selected.map(tag => {
+                const id = tag.value;
+                return {
+                    value: id,
+                    name: tag.name,
+                    CanRead: getPermissionValue(id, "CanRead"),
+                    CanCreate: getPermissionValue(id, "CanCreate"),
+                    CanUpdate: getPermissionValue(id, "CanUpdate"),
+                    CanDelete: getPermissionValue(id, "CanDelete"),
+                    CanComment: getPermissionValue(id, "CanComment"),
+                };
+            });
+            
+
+            document.getElementById("SelectedPersonnelJson").value = JSON.stringify(detailedList);
+
+            console.log("Detaylı JSON verisi:", detailedList);
+        });
+
+        function getPermissionValue(id, type) {
+            const checkbox = document.querySelector(`#permission_${id}_${type}`);
+            return checkbox ? checkbox.checked : false;
+        }
     });
 </script>
 
