@@ -1,140 +1,107 @@
 ﻿@using Newtonsoft.Json
 @model PTP.UI.Models.ProjectCreateViewModel
 
-<style>
-    .custom-suggestion-box {
-        border: 1px solid #ccc;
-        padding: 8px;
-        max-height: 250px;
-        overflow-y: auto;
-        margin-top: 10px;
-        background: white;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-
-    .custom-suggestion-box div {
-         padding: 10px;
-         cursor: pointer;
-         transition: background-color 0.2s;
-    }
-
-     .custom-suggestion-box div:hover {
-            background-color: #f0f0f0;
-     }
-
-    #personnelTagInput {
-        height: 45px;
-        font-size: 16px;
-    }
-</style>
-
 <div class="tab-pane fade" id="category-product" role="tabpanel" aria-labelledby="category-product-tab">
     <div class="sidebar-body">
         <div class="row g-lg-4 g-3">
             <div class="col-12">
                 <div class="row g-5">
-                    <div class="col-sm-9 offset-sm-1"> 
-                         <label for="personnelTagInput" class="form-label">Personel Seçin</label> 
-                         <div class="mb-3"> 
-                             <input type="hidden" id="personnelTagInput" name="SelectedPersonnelIds" class="form-control" /> 
-                             <input type="hidden" id="SelectedPersonnelJson" name="SelectedPersonnelJson" /> 
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Personel Yetkileri</label>
+                        <div class="mb-3">
+                            <input type="text" id="personnelSearch" class="form-control" placeholder="Personel ara...">
+                        </div>
 
-                             <div id="suggestions-container" class="tagify__suggestions custom-suggestion-box"></div> 
-                         </div>
-                     </div> 
-
-                    <div id="selected-personnel-permissions"></div>
-                    @* <input type="hidden" name="PersonnelPermissionsJson" id="PersonnelPermissionsJson" /> *@
-
-                   
-
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-bordered align-middle text-center mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Personel</th>
+                                        <th>Okuma</th>
+                                        <th>Oluşturma</th>
+                                        <th>Güncelleme</th>
+                                        <th>Silme</th>
+                                        <th>Yorum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="personnelTableBody">
+                                    <!-- JavaScript ile satırlar eklenecek -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
                 </div>
             </div>
-
         </div>
-
     </div>
 </div>
 
-
-
-@* personel listesi *@
+<!-- JSON verisini taşıyacak gizli input -->
+<input type="hidden" name="SelectedPersonnelJson" id="personnelTagInput" />
 
 <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log(document.querySelectorAll("input[type=checkbox]"));
-        const input = document.querySelector("#personnelTagInput");
-        window.tagify = new Tagify(input, {
-            tagTextProp: "name",
+    const personnelList = @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson));
+
+    const tbody = document.getElementById("personnelTableBody");
+
+    personnelList.forEach(p => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td class="text-start">${p.name}<input type="hidden" class="personnel-id" value="${p.value}" /></td>
+            <td><input type="checkbox" class="form-check-input can-read" /></td>
+            <td><input type="checkbox" class="form-check-input can-create" /></td>
+            <td><input type="checkbox" class="form-check-input can-update" /></td>
+            <td><input type="checkbox" class="form-check-input can-delete" /></td>
+            <td><input type="checkbox" class="form-check-input can-comment" /></td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    const form = document.querySelector("#projectForm");
+    form.addEventListener("submit", function () {
+        const rows = document.querySelectorAll("#personnelTableBody tr");
+        const selectedPersonnel = [];
+
+        rows.forEach(row => {
+            const id = row.querySelector(".personnel-id").value;
+            const canRead = row.querySelector(".can-read").checked;
+            const canCreate = row.querySelector(".can-create").checked;
+            const canUpdate = row.querySelector(".can-update").checked;
+            const canDelete = row.querySelector(".can-delete").checked;
+            const canComment = row.querySelector(".can-comment").checked;
+
+            if (canRead || canCreate || canUpdate || canDelete || canComment) {
+                selectedPersonnel.push({
+                    PersonnelId: parseInt(id),
+                    CanRead: canRead,
+                    CanCreate: canCreate,
+                    CanUpdate: canUpdate,
+                    CanDelete: canDelete,
+                    CanComment: canComment
+                });
+            }
         });
 
-        const suggestions = @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson ?? new List<object>()));
-
-        const permissionWrapper = document.getElementById("selected-personnel-permissions");
-
-        const suggestionsContainer = document.getElementById("suggestions-container");
-
-        suggestions.forEach(item => {
-            const div = document.createElement("div");
-            div.textContent = item.name;
-            div.dataset.value = item.value;
-            suggestionsContainer.appendChild(div);
-
-            div.addEventListener("click", function () {
-                tagify.addTags([{ value: item.value, name: item.name }]);
-                renderPermissionInputs(item.value, item.name);
-            });
-        });
-
-         function renderPermissionInputs(id, name) {
-            if (document.querySelector(`#permissions-${id}`)) return;
-
-            const permissionDiv = document.createElement("div");
-            permissionDiv.id = `permissions-${id}`;
-            permissionDiv.innerHTML = `
-                <p><strong>${name}</strong> yetkileri:</p>
-                <label><input type="checkbox" id="permission_${id}_CanRead"> Okuma</label>
-                <label><input type="checkbox" id="permission_${id}_CanCreate"> Oluşturma</label>
-                <label><input type="checkbox" id="permission_${id}_CanUpdate"> Güncelleme</label>
-                <label><input type="checkbox" id="permission_${id}_CanDelete"> Silme</label>
-                <label><input type="checkbox" id="permission_${id}_CanComment"> Yorum</label>
-                <hr>
-            `;
-            permissionWrapper.appendChild(permissionDiv);
-        }
-
-        // Form submit olayında yetkileri JSON olarak topla
-        const form = document.querySelector("#projectForm");
-        form.addEventListener("submit", function () {
-            const selected = tagify.value;
-
-            const detailedList = selected.map(tag => {
-                const id = tag.value;
-                return {
-                    value: id,
-                    name: tag.name,
-                    CanRead: getPermissionValue(id, "CanRead"),
-                    CanCreate: getPermissionValue(id, "CanCreate"),
-                    CanUpdate: getPermissionValue(id, "CanUpdate"),
-                    CanDelete: getPermissionValue(id, "CanDelete"),
-                    CanComment: getPermissionValue(id, "CanComment"),
-                };
-            });
-            
-
-            document.getElementById("SelectedPersonnelJson").value = JSON.stringify(detailedList);
-
-            console.log("Detaylı JSON verisi:", detailedList);
-        });
-
-        function getPermissionValue(id, type) {
-            const checkbox = document.querySelector(`#permission_${id}_${type}`);
-            return checkbox ? checkbox.checked : false;
-        }
+        document.getElementById("SelectedPersonnelJson").value = JSON.stringify(selectedPersonnel);
     });
 </script>
+
+<script>
+    document.getElementById("personnelSearch").addEventListener("keyup", function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#personnelTableBody tr");
+
+        rows.forEach(row => {
+            const nameCell = row.querySelector("td:first-child");
+            const name = nameCell.textContent.toLowerCase();
+            row.style.display = name.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
+
 
 @* <script> *@
 @*         document.addEventListener("DOMContentLoaded", function () { *@

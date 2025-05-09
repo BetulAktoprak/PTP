@@ -100,12 +100,9 @@
                             <div class="d-flex flex-wrap gap-2 overflow-auto" id="fileThumbnails"></div>
 
                             <hr />
-                            <ul>
-                                <li class="list-group-item hover-bg">
-                                    <i class="fa fa-align-left me-2 text-secondary" ></i>
-                                    <strong>Dosya Açıklaması:</strong> <span id="modalDocumentDetail"></span>
-                                </li>
-                            </ul>
+                            
+                                    <ul id="modalDocumentList" class="ps-3 small"></ul>
+
                         </div>
 
                         <div class="col-md-6">
@@ -228,7 +225,15 @@
         document.getElementById("previewProjectName").textContent = projectName;
         document.getElementById("modalClientName").textContent = document.querySelector('[name="ClientName"]').value;
         document.getElementById("modalDetails").textContent = document.querySelector('[name="Details"]').value;
-        document.getElementById("modalDocumentDetail").textContent = document.querySelector('[name="Details"]').value;
+        const modalDocumentList = document.getElementById("modalDocumentList");
+        modalDocumentList.innerHTML = "";
+
+        selectedFiles.forEach((item, index) => {
+            const li = document.createElement("li");
+            li.textContent = `${item.file.name} ➜ ${item.description || "Açıklama yok"}`;
+            modalDocumentList.appendChild(li);
+        });
+
         document.getElementById("modalRate").textContent = document.querySelector('[name="ProjectRate"]').value;
         document.getElementById("modalType").textContent = document.querySelector('[name="ProjectType"]').value;
         document.getElementById("modalPriority").textContent = document.querySelector('[name="Priority"]').value;
@@ -293,7 +298,7 @@
                 wrapper.appendChild(img);
                 wrapper.appendChild(caption);
                 thumbnailsContainer.appendChild(wrapper);
-            };
+                };
 
             reader.readAsDataURL(file);
         });
@@ -303,11 +308,7 @@
     });
 
     document.getElementById("btnConfirmSave").addEventListener("click", function () {
-         const personnelInput = document.querySelector('#personnelTagInput');
-    const selectedPersonnel = personnelInput.value;
-
-    // JSON olarak sakla
-    document.getElementById("SelectedPersonnelJson").value = selectedPersonnel;
+       
         document.getElementById("projectForm").submit();
     });
 </script>

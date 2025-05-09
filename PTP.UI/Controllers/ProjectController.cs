@@ -48,7 +48,6 @@ namespace PTP.UI.Controllers
                 startDate = p.StartDate.ToString("dd/MM/yyyy"),
                 endDate = p.EndDate?.ToString("dd/MM/yyyy"),
                 details = p.Details,
-                documentDetail = p.DocumentDetail,
                 Documents = _documentService.GetAll()
                        .Where(d => d.ProjectId == p.Id)
                        .Select(d => d.FilePath)
@@ -96,13 +95,13 @@ namespace PTP.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model, List<string> Description, string SelectedPersonnelJson)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, List<string> DocumentDescriptions, string SelectedPersonnelJson)
         {
             //if (!ModelState.IsValid)
             //{
             //    return View(model);
             //}
-
+           
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
@@ -110,24 +109,15 @@ namespace PTP.UI.Controllers
             }
 
             int userId = int.Parse(userIdClaim.Value);
+
+            if (model.ProjectFiles == null || DocumentDescriptions == null || model.ProjectFiles.Count != DocumentDescriptions.Count)
+            {
+                ModelState.AddModelError("", "Yüklenen dosyalar ile açıklamalar eşleşmiyor.");
+                return View(model);
+            }
+
             try
             {
-
-
-                List<ProjectPersonnelViewModel> selectedList = new();
-                if (!string.IsNullOrEmpty(SelectedPersonnelJson))
-                {
-                    selectedList = JsonConvert.DeserializeObject<List<ProjectPersonnelViewModel>>(SelectedPersonnelJson);
-                }
-                var personnelIds = selectedList.Select(x => int.Parse(x.value)).ToList();
-
-
-                var selectedPersonnels = _personnelService.GetAll()
-                    .Where(p => personnelIds.Contains(p.Id))
-                    .ToList();
-
-
-
                 var project = new Project
                 {
                     ProjectTitle = model.ProjectTitle,
@@ -139,45 +129,47 @@ namespace PTP.UI.Controllers
                     StartDate = model.StartingDate,
                     EndDate = model.EndingDate,
                     Details = model.Details,
-                    //DocumentDetail = model.DocumentDetail,
-                    //Personnels = selectedPersonnels,
                     CreatedBy = userId.ToString()
                 };
 
                 _projectService.Add(project);
 
+                
 
-                if (model.ProjectFiles != null && model.ProjectFiles.Any())
-                {
-
-                    var uploads = Path.Combine(_environment.WebRootPath, "uploads");
+                var uploads = Path.Combine(_environment.WebRootPath, "uploads");
                     Directory.CreateDirectory(uploads);
 
-                    for (int i = 0; i < model.ProjectFiles.Count; i++)
+
+                for (int i = 0; i < model.ProjectFiles.Count; i++)
+                {
+                    var file = model.ProjectFiles[i];
+                    var desc = DocumentDescriptions[i];
+
+                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var relativePath = Path.Combine("uploads", uniqueFileName);
+                    var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
+
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
                     {
-                        var file = model.ProjectFiles[i];
-                        var desc = Description.ElementAtOrDefault(i);
-
-                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                        var relativePath = Path.Combine("uploads", uniqueFileName);
-                        var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
-
-                        using (var stream = new FileStream(fullPath, FileMode.Create))
-                        {
-                            await file.CopyToAsync(stream);
-                        }
-
-                        var document = new Document
-                        {
-                            FileName = file.FileName,
-                            FilePath = relativePath,
-                            Description = desc,
-                            ProjectId = project.Id,
-                            UserId = userId
-                        };
-
-                        _documentService.Add(document);
+                        await file.CopyToAsync(stream);
                     }
+
+                    var document = new Document
+                    {
+                        FileName = file.FileName,
+                        FilePath = relativePath,
+                        DocumentDescriptions = desc,
+                        ProjectId = project.Id,
+                        UserId = userId
+                    };
+
+                    _documentService.Add(document);
+                }
+
+                List<ProjectPersonnelViewModel> selectedList = new();
+                if (!string.IsNullOrEmpty(SelectedPersonnelJson))
+                {
+                    selectedList = JsonConvert.DeserializeObject<List<ProjectPersonnelViewModel>>(SelectedPersonnelJson);
                 }
 
                 foreach (var person in selectedList)
@@ -185,7 +177,7 @@ namespace PTP.UI.Controllers
                     var pp = new ProjectPersonnel
                     {
                         ProjectId = project.Id,
-                        PersonnelId = int.Parse(person.value),
+                        PersonnelId = person.PersonnelId,
                         CanRead = person.CanRead,
                         CanCreate = person.CanCreate,
                         CanUpdate = person.CanUpdate,

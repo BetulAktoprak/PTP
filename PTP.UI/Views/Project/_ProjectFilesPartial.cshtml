@@ -3,10 +3,10 @@
 <div class="tab-pane fade" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab">
     <div class="sidebar-body">
         <div class="mb-3">
-            <label asp-for="ProjectFiles" class="form-label fw-bold">
+            <label for="projectFiles" class="form-label fw-bold">
                 <i class="fa fa-cloud-upload-alt me-2"></i> Proje Dosyaları
             </label>
-            <input type="file" asp-for="ProjectFiles" id="projectFiles" class="form-control" multiple />
+            <input type="file" id="projectFiles" class="form-control" multiple />
         </div>
 
         <div id="selectedFilesList" class="mt-3">
@@ -14,21 +14,18 @@
     </div>
 </div>
 
-<input type="hidden" name="Description" id="descriptionHiddenContainer" />
-<input type="hidden" name="ProjectFiles" />
-
 <script>
     let selectedFiles = [];
 
     document.getElementById('projectFiles').addEventListener('change', function (e) {
         const newFiles = Array.from(e.target.files);
         newFiles.forEach(file => {
-            if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
-                selectedFiles.push({ file, description: '' });
+            if (!selectedFiles.some(f => f.file.name === file.name && f.file.size === file.size)) {
+                selectedFiles.push({ file: file, description: '' });
             }
         });
         updateSelectedFilesList();
-        e.target.value = '';
+        e.target.value = ''; // Aynı dosya tekrar seçilebilsin diye temizle
     });
 
     function updateSelectedFilesList() {
@@ -41,7 +38,8 @@
 
             const fileInfo = document.createElement('div');
             fileInfo.innerHTML = `
-                <strong>${item.file.name}</strong> <small class="text-muted">(${Math.round(item.file.size / 1024)} KB)</small>
+                <strong>${item.file.name}</strong>
+                <small class="text-muted">(${Math.round(item.file.size / 1024)} KB)</small>
             `;
 
             const description = document.createElement('textarea');
@@ -63,19 +61,20 @@
             wrapper.appendChild(removeBtn);
             wrapper.appendChild(fileInfo);
             wrapper.appendChild(description);
-
             list.appendChild(wrapper);
         });
     }
 
+    // Form submit override
     document.getElementById('projectForm').addEventListener('submit', function (e) {
         e.preventDefault();
+
         const form = document.getElementById('projectForm');
         const formData = new FormData(form);
 
-        selectedFiles.forEach(item => {
-            formData.append('ProjectFiles', item.file);
-            formData.append('Description', item.description); 
+        selectedFiles.forEach((item, index) => {
+            formData.append(`ProjectFiles[${index}]`, item.file);
+            formData.append(`DocumentDescriptions[${index}]`, item.description || "Açıklama yok");
         });
 
         fetch(form.action || window.location.href, {
@@ -95,6 +94,7 @@
         });
     });
 </script>
+
 
 
 

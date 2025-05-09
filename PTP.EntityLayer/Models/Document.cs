@@ -6,7 +6,7 @@ public class Document : BaseEntity
 {
     public string? FileName { get; set; }
     public string? FilePath { get; set; }
-    public string? Description { get; set; }
+    public string? DocumentDescriptions { get; set; }
     public int? ProjectId { get; set; }
     public Project? Project { get; set; }
     public int? ProcessId { get; set; }

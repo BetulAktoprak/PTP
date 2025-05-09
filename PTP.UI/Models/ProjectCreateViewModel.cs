@@ -14,9 +14,9 @@ namespace PTP.UI.Models
         public DateTime StartingDate { get; set; } = DateTime.Now;
         public DateTime EndingDate { get; set; } = DateTime.Now;
         public string Details { get; set; }
-        public string DocumentDetail { get; set; }
         public string? ExistingFilePath { get; set; }
         public List<IFormFile> ProjectFiles { get; set; }
+        public List<string> DocumentDescriptions { get; set; } = new();
         public string SelectedPersonnelIds { get; set; }
         public List<SelectListItem> PersonnelList { get; set; }
         public string PersonnelPermissionsJson { get; set; }
