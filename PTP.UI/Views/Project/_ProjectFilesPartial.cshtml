@@ -1,96 +1,95 @@
 ﻿@model PTP.UI.Models.ProjectCreateViewModel
 
-<div class="tab-pane fade" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab">
+<div class="tab-pane fade show active" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab">
     <div class="sidebar-body">
         <div class="mb-3">
             <label for="projectFiles" class="form-label fw-bold">
                 <i class="fa fa-cloud-upload-alt me-2"></i> Proje Dosyaları
             </label>
-            <input type="file" id="projectFiles" class="form-control" multiple />
+            <input type="file" id="projectFiles" name="ProjectFiles" class="form-control" multiple />
+            <input type="hidden" name="DocumentDescriptionsJson" id="DocumentDescriptionsJson" />
+
+
         </div>
 
-        <div id="selectedFilesList" class="mt-3">
-        </div>
+        <div id="selectedFiles" class="mt-3"></div>
     </div>
 </div>
 
 <script>
-    let selectedFiles = [];
+         let selectedFiles = [];
 
-    document.getElementById('projectFiles').addEventListener('change', function (e) {
-        const newFiles = Array.from(e.target.files);
-        newFiles.forEach(file => {
-            if (!selectedFiles.some(f => f.file.name === file.name && f.file.size === file.size)) {
-                selectedFiles.push({ file: file, description: '' });
-            }
-        });
-        updateSelectedFilesList();
-        e.target.value = ''; // Aynı dosya tekrar seçilebilsin diye temizle
-    });
+    document.addEventListener('DOMContentLoaded', function () {
 
-    function updateSelectedFilesList() {
-        const list = document.getElementById('selectedFilesList');
-        list.innerHTML = '';
-
-        selectedFiles.forEach((item, index) => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'border rounded p-3 mb-3 bg-light shadow-sm position-relative';
-
-            const fileInfo = document.createElement('div');
-            fileInfo.innerHTML = `
-                <strong>${item.file.name}</strong>
-                <small class="text-muted">(${Math.round(item.file.size / 1024)} KB)</small>
-            `;
-
-            const description = document.createElement('textarea');
-            description.className = 'form-control mt-2';
-            description.placeholder = 'Dosya açıklaması...';
-            description.value = item.description || '';
-            description.oninput = (e) => {
-                selectedFiles[index].description = e.target.value;
-            };
-
-            const removeBtn = document.createElement('button');
-            removeBtn.className = 'btn btn-sm btn-danger position-absolute top-0 end-0 m-2';
-            removeBtn.innerHTML = '<i class="fa fa-times"></i>';
-            removeBtn.onclick = () => {
-                selectedFiles.splice(index, 1);
-                updateSelectedFilesList();
-            };
-
-            wrapper.appendChild(removeBtn);
-            wrapper.appendChild(fileInfo);
-            wrapper.appendChild(description);
-            list.appendChild(wrapper);
-        });
-    }
-
-    // Form submit override
-    document.getElementById('projectForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-
-        const form = document.getElementById('projectForm');
-        const formData = new FormData(form);
-
-        selectedFiles.forEach((item, index) => {
-            formData.append(`ProjectFiles[${index}]`, item.file);
-            formData.append(`DocumentDescriptions[${index}]`, item.description || "Açıklama yok");
+        // Dosya seçildiğinde listeye ekle
+        document.getElementById('projectFiles').addEventListener('change', function () {
+            const newFiles = Array.from(this.files);
+            newFiles.forEach(file => {
+                if (!selectedFiles.some(f => f.file.name === file.name && f.file.size === file.size)) {
+                    selectedFiles.push({ file: file, description: "" });
+                }
+            });
+            renderSelectedFiles();
+            this.value = ""; // tekrar aynı dosya seçilebilsin diye sıfırlıyoruz
         });
 
-        fetch(form.action || window.location.href, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.redirected) {
-                window.location.href = response.url;
-            } else {
-                return response.text().then(text => alert("Kayıt tamamlandı mı kontrol edin!"));
-            }
-        })
-        .catch(error => {
-            console.error("Hata:", error);
-            alert("Bir hata oluştu.");
+        // Açıklama güncelle
+        window.updateDescription = function (index, value) {
+            selectedFiles[index].description = value;
+        }
+
+        // Listele
+        function renderSelectedFiles() {
+            const fileListContainer = document.getElementById('selectedFiles');
+            fileListContainer.innerHTML = '';
+            selectedFiles.forEach((item, index) => {
+                const fileDiv = document.createElement('div');
+                fileDiv.classList.add('mb-2');
+                fileDiv.innerHTML = `
+                    <div class="card p-2">
+                        <p class="mb-1 fw-semibold">Dosya: ${item.file.name}</p>
+                        <label>Açıklama</label>
+                        <input type="text" class="form-control" placeholder="Belge açıklaması girin"
+                            value="${item.description}"
+                            oninput="updateDescription(${index}, this.value)" />
+                    </div>`;
+                fileListContainer.appendChild(fileDiv);
+            });
+        }
+
+        // Modal'da onayla butonuna basıldığında veriyi hazırla ve gönder
+        document.getElementById('btnConfirmSave').addEventListener('click', function (e) {
+            e.preventDefault();
+            const formElement = document.getElementById('projectForm');
+            const formData = new FormData(formElement);
+
+            // Dosyaları ve açıklamaları FormData'ya ekle
+            selectedFiles.forEach((item, index) => {
+                formData.append('ProjectFiles', item.file);
+                formData.append(`DocumentDescriptions[${index}]`, item.description);
+            });
+
+            // Gerekirse console’da kontrol edebilirsin:
+            // for (let pair of formData.entries()) {
+            //     console.log(pair[0]+ ':', pair[1]);
+            // }
+
+            fetch('/Project/Create', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Dosyalar başarıyla yüklendi!');
+                    window.location.href = "/Project"; // Başarılıysa yönlendir
+                } else {
+                    alert('Yükleme başarısız oldu.');
+                }
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                alert('Bir hata oluştu.');
+            });
         });
     });
 </script>

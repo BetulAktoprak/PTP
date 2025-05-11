@@ -5,6 +5,7 @@ namespace PTP.UI.Models
     public class ProjectCreateViewModel
     {
         public int Id { get; set; }
+        public List<IFormFile> ProjectFiles { get; set; } = new();
         public string ProjectTitle { get; set; }
         public string ClientName { get; set; }
         public decimal ProjectRate { get; set; }
@@ -15,7 +16,6 @@ namespace PTP.UI.Models
         public DateTime EndingDate { get; set; } = DateTime.Now;
         public string Details { get; set; }
         public string? ExistingFilePath { get; set; }
-        public List<IFormFile> ProjectFiles { get; set; }
         public List<string> DocumentDescriptions { get; set; } = new();
         public string SelectedPersonnelIds { get; set; }
         public List<SelectListItem> PersonnelList { get; set; }

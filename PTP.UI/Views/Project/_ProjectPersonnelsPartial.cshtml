@@ -1,6 +1,10 @@
 ﻿@using Newtonsoft.Json
 @model PTP.UI.Models.ProjectCreateViewModel
 
+@{
+    var personnelJson = JsonConvert.SerializeObject(ViewBag.PersonnelListJson);
+}
+
 <div class="tab-pane fade" id="category-product" role="tabpanel" aria-labelledby="category-product-tab">
     <div class="sidebar-body">
         <div class="row g-lg-4 g-3">
@@ -41,7 +45,7 @@
 <input type="hidden" name="SelectedPersonnelJson" id="personnelTagInput" />
 
 <script>
-    const personnelList = @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson));
+    const personnelList = @Html.Raw(personnelJson);
 
     const tbody = document.getElementById("personnelTableBody");
 

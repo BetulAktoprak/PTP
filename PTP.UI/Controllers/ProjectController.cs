@@ -95,13 +95,9 @@ namespace PTP.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model, List<string> DocumentDescriptions, string SelectedPersonnelJson)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson, List<IFormFile> ProjectFiles, string DocumentDescriptionsJson)
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return View(model);
-            //}
-           
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim == null)
             {
@@ -110,7 +106,11 @@ namespace PTP.UI.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
-            if (model.ProjectFiles == null || DocumentDescriptions == null || model.ProjectFiles.Count != DocumentDescriptions.Count)
+
+            var descriptions = JsonConvert.DeserializeObject<List<string>>(DocumentDescriptionsJson);
+            var files = Request.Form.Files;
+
+            if (files == null || descriptions == null)
             {
                 ModelState.AddModelError("", "Yüklenen dosyalar ile açıklamalar eşleşmiyor.");
                 return View(model);
@@ -134,16 +134,16 @@ namespace PTP.UI.Controllers
 
                 _projectService.Add(project);
 
-                
+
 
                 var uploads = Path.Combine(_environment.WebRootPath, "uploads");
-                    Directory.CreateDirectory(uploads);
+                Directory.CreateDirectory(uploads);
 
 
-                for (int i = 0; i < model.ProjectFiles.Count; i++)
+                for (int i = 0; i < files.Count; i++)
                 {
-                    var file = model.ProjectFiles[i];
-                    var desc = DocumentDescriptions[i];
+                    var file = files[i];
+                    var desc = descriptions[i];
 
                     var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
                     var relativePath = Path.Combine("uploads", uniqueFileName);
