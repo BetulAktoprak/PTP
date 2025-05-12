@@ -56,24 +56,7 @@ namespace PTP.UI.Controllers
             return Json(projects);
         }
 
-        [Authorize(Roles = "Personnel")]
-        public async Task<IActionResult> PersonnelProject()
-        {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier).Value;
-
-            if (!int.TryParse(userIdString, out var userId))
-            {
-                return Unauthorized();
-            }
-
-            var personnel = await _personnelService.GetPersonnelWithProjectsByUserIdAsync(userId);
-
-            if (personnel is null) return NotFound("Personel Bulunamadı");
-
-            var projects = personnel.Projects.ToList();
-
-            return View(projects);
-        }
+       
 
         [Authorize(Roles = "Admin")]
         [HttpGet]

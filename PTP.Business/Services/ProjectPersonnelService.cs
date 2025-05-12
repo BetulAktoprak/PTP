@@ -9,7 +9,7 @@ using PTP.EntityLayer.Models;
 
 namespace PTP.Business.Services
 {
-    public class ProjectPersonnelService : IService<ProjectPersonnel>
+    public class ProjectPersonnelService : IService<ProjectPersonnel>, IProjectPersonnelService
     {
         private readonly ProjectPersonnelRepository _projectPersonnelRepository;
 
@@ -36,6 +36,16 @@ namespace PTP.Business.Services
         public ProjectPersonnel? GetByID(int id)
         {
             return _projectPersonnelRepository.GetById(id);
+        }
+
+        public async Task<ProjectPersonnel> GetProjectPersonnelByUserIdAndProjectIdAsync(int personnelId, int projectId)
+        {
+            return await _projectPersonnelRepository.GetProjectPersonnelByUserIdAndProjectIdAsync(personnelId, projectId);
+        }
+
+        public async Task<List<Project>> GetProjectsByUserIdAsync(int userId)
+        {
+            return await _projectPersonnelRepository.GetProjectsByUserIdAsync(userId);
         }
 
         public void Update(ProjectPersonnel entity)

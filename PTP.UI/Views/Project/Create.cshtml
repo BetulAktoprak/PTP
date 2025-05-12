@@ -1,7 +1,9 @@
-﻿@model PTP.UI.Models.ProjectCreateViewModel
+﻿@using Newtonsoft.Json
+@model PTP.UI.Models.ProjectCreateViewModel
 @{
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var personnelJson = JsonConvert.SerializeObject(ViewBag.PersonnelListJson);
 }
 
 <style>
@@ -101,7 +103,7 @@
                                 @await Html.PartialAsync("_ProjectTitlePartial")
 
                                 @* @await Html.PartialAsync("_ProjectFilesPartial") *@
-                                    <div class="tab-pane fade show active" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab">
+                                    <div class="tab-pane fade" id="gallery-product" role="tabpanel" aria-labelledby="gallery-product-tab">
                                         <div class="sidebar-body">
                                             <div class="mb-3">
                                                 <label for="projectFiles" class="form-label fw-bold">
@@ -117,7 +119,43 @@
                                         </div>
                                     </div>
 
-                                @await Html.PartialAsync("_ProjectPersonnelsPartial")
+                                @* @await Html.PartialAsync("_ProjectPersonnelsPartial") *@
+                                    <div class="tab-pane fade" id="category-product" role="tabpanel" aria-labelledby="category-product-tab">
+                                        <div class="sidebar-body">
+                                            <div class="row g-lg-4 g-3">
+                                                <div class="col-12">
+                                                    <div class="row g-5">
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-bold">Personel Yetkileri</label>
+                                                            <div class="mb-3">
+                                                                <input type="text" id="personnelSearch" class="form-control" placeholder="Personel ara...">
+                                                            </div>
+
+                                                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                                                <table class="table table-bordered align-middle text-center mb-0">
+                                                                    <thead class="table-light sticky-top">
+                                                                        <tr>
+                                                                            <th>Personel</th>
+                                                                            <th>Okuma</th>
+                                                                            <th>Oluşturma</th>
+                                                                            <th>Güncelleme</th>
+                                                                            <th>Silme</th>
+                                                                            <th>Yorum</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody id="personnelTableBody">
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="SelectedPersonnelJson" id="SelectedPersonnelJson" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    
 
                                 <div class="tab-pane fade" id="pricings" role="tabpanel" aria-labelledby="pricings-tab">
                                     <div class="sidebar-body">
@@ -233,83 +271,41 @@
 </div>
 
 
-@* <script> *@
-@*          let selectedFiles = []; *@
+<script>
+    const personnelList = @Html.Raw(personnelJson);
 
-@*     document.addEventListener('DOMContentLoaded', function () { *@
+    const tbody = document.getElementById("personnelTableBody");
 
-@*         // Dosya seçildiğinde listeye ekle *@
-@*         document.getElementById('projectFiles').addEventListener('change', function () { *@
-@*             const newFiles = Array.from(this.files); *@
-@*             newFiles.forEach(file => { *@
-@*                 if (!selectedFiles.some(f => f.file.name === file.name && f.file.size === file.size)) { *@
-@*                     selectedFiles.push({ file: file, description: "" }); *@
-@*                 } *@
-@*             }); *@
-@*             renderSelectedFiles(); *@
-@*             this.value = ""; // tekrar aynı dosya seçilebilsin diye sıfırlıyoruz *@
-@*         }); *@
+    personnelList.forEach(p => {
+        const row = document.createElement("tr");
 
-@*         // Açıklama güncelle *@
-@*         window.updateDescription = function (index, value) { *@
-@*             selectedFiles[index].description = value; *@
-@*         } *@
+        row.innerHTML = `
+            <td class="text-start">${p.name}<input type="hidden" class="personnel-id" value="${p.value}" /></td>
+            <td><input type="checkbox" class="form-check-input can-read" /></td>
+            <td><input type="checkbox" class="form-check-input can-create" /></td>
+            <td><input type="checkbox" class="form-check-input can-update" /></td>
+            <td><input type="checkbox" class="form-check-input can-delete" /></td>
+            <td><input type="checkbox" class="form-check-input can-comment" /></td>
+        `;
 
-@*         // Listele *@
-@*         function renderSelectedFiles() { *@
-@*             const fileListContainer = document.getElementById('selectedFiles'); *@
-@*             fileListContainer.innerHTML = ''; *@
-@*             selectedFiles.forEach((item, index) => { *@
-@*                 const fileDiv = document.createElement('div'); *@
-@*                 fileDiv.classList.add('mb-2'); *@
-@*                 fileDiv.innerHTML = ` *@
-@*                     <div class="card p-2"> *@
-@*                         <p class="mb-1 fw-semibold">Dosya: ${item.file.name}</p> *@
-@*                         <label>Açıklama</label> *@
-@*                         <input type="text" class="form-control" placeholder="Belge açıklaması girin" *@
-@*                             value="${item.description}" *@
-@*                             oninput="updateDescription(${index}, this.value)" /> *@
-@*                     </div>`; *@
-@*                 fileListContainer.appendChild(fileDiv); *@
-@*             }); *@
-@*         } *@
+        tbody.appendChild(row);
+    });
 
-@*         // Modal'da onayla butonuna basıldığında veriyi hazırla ve gönder *@
-@*         document.getElementById('btnConfirmSave').addEventListener('click', function (e) { *@
-@*             e.preventDefault(); *@
-@*             const formElement = document.getElementById('projectForm'); *@
-@*             const formData = new FormData(formElement); *@
+   
+</script>
 
-@*             // Dosyaları ve açıklamaları FormData'ya ekle *@
-@*             selectedFiles.forEach((item, index) => { *@
-@*                 formData.append('ProjectFiles', item.file); *@
-@*                 formData.append(`DocumentDescriptions[${index}]`, item.description); *@
-@*             }); *@
+<script>
+    document.getElementById("personnelSearch").addEventListener("keyup", function () {
+        const searchValue = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#personnelTableBody tr");
 
-@*             // Gerekirse console’da kontrol edebilirsin: *@
-@*             // for (let pair of formData.entries()) { *@
-@*             //     console.log(pair[0]+ ':', pair[1]); *@
-@*             // } *@
-
-@*             fetch('/Project/Create', { *@
-@*                 method: 'POST', *@
-@*                 body: formData *@
-@*             }) *@
-@*             .then(response => { *@
-@*                 if (response.ok) { *@
-@*                     alert('Dosyalar başarıyla yüklendi!'); *@
-@*                     window.location.href = "/Project"; // Başarılıysa yönlendir *@
-@*                 } else { *@
-@*                     alert('Yükleme başarısız oldu.'); *@
-@*                 } *@
-@*             }) *@
-@*             .catch(error => { *@
-@*                 console.error('Hata:', error); *@
-@*                 alert('Bir hata oluştu.'); *@
-@*             }); *@
-@*         }); *@
-@*     }); *@
-@* </script> *@
+        rows.forEach(row => {
+            const nameCell = row.querySelector("td:first-child");
+            const name = nameCell.textContent.toLowerCase();
+            row.style.display = name.includes(searchValue) ? "" : "none";
+        });
+    });
+</script>
 
 
 <script>
@@ -322,15 +318,13 @@
                 }
             });
             renderSelectedFiles();
-            this.value = ""; // tekrar aynı dosya seçilebilsin diye sıfırlıyoruz
+            this.value = ""; 
      });
 
-        // Açıklama güncelle
         window.updateDescription = function (index, value) {
             selectedFiles[index].description = value;
         }
 
-        // Listele
         function renderSelectedFiles() {
             const fileListContainer = document.getElementById('selectedFiles');
             fileListContainer.innerHTML = '';
@@ -417,7 +411,7 @@
         document.getElementById("modalStart").textContent = document.querySelector('[name="StartingDate"]').value;
         document.getElementById("modalEnd").textContent = document.querySelector('[name="EndingDate"]').value;
 
-        const personnelInput = document.querySelector('#personnelTagInput');
+        const personnelInput = document.querySelector('#SelectedPersonnelJson');
         let personnelListText = "";
 
         try {
@@ -483,20 +477,49 @@
         modal.show();
     });
 
+    function prepareSelectedPersonnelJson(){
+        const rows = document.querySelectorAll("#personnelTableBody tr");
+        const selectedPersonnel = [];
+
+        rows.forEach(row => {
+            const id = row.querySelector(".personnel-id").value;
+            const canRead = row.querySelector(".can-read").checked;
+            const canCreate = row.querySelector(".can-create").checked;
+            const canUpdate = row.querySelector(".can-update").checked;
+            const canDelete = row.querySelector(".can-delete").checked;
+            const canComment = row.querySelector(".can-comment").checked;
+
+            if (canRead || canCreate || canUpdate || canDelete || canComment) {
+                selectedPersonnel.push({
+                    PersonnelId: parseInt(id),
+                    CanRead: canRead,
+                    CanCreate: canCreate,
+                    CanUpdate: canUpdate,
+                    CanDelete: canDelete,
+                    CanComment: canComment
+                });
+            }
+        });
+
+        document.getElementById("SelectedPersonnelJson").value = JSON.stringify(selectedPersonnel);
+    }
+
     document.getElementById("btnConfirmSave").addEventListener("click", function (e) {
             e.preventDefault();
+
+            prepareSelectedPersonnelJson();
+
             const descriptions = selectedFiles.map(item => item.description || "");
         document.getElementById("DocumentDescriptionsJson").value = JSON.stringify(descriptions);
             const formElement = document.getElementById('projectForm');
                 const formData = new FormData(formElement);
 
-                // Dosyaları ve açıklamaları FormData'ya ekle
                 selectedFiles.forEach((item, index) => {
                     formData.append(`ProjectFiles[${index}]`, item.file);
                     formData.append(`DocumentDescriptions[${index}]`, item.description);
                 });
-            
-        
+
+
         fetch(formElement.action, { method: "POST", body: formData })
         .then(r => r.ok ? location.href = "/Project/Index"
                         : r.text().then(t => alert("Hata:\n" + t)));

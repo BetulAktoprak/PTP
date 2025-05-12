@@ -4,6 +4,6 @@ namespace PTP.Business.Abstractions
 {
     public interface IPersonnelService
     {
-        Task<Personnel> GetPersonnelWithProjectsByUserIdAsync(int userId);
+        Task<Personnel> GetPersonnelByUserIdAsync(int userId);
     }
 }

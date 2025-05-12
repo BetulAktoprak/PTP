@@ -13,11 +13,10 @@ namespace PTP.DataAccess.Repositories
             _context = context;
         }
 
-        public async Task<Personnel> GetPersonnelWithProjectsByUserIdAsync(int userId)
+        public async Task<Personnel> GetPersonnelByUserIdAsync(int userId)
         {
-            return await _context.Personnels
-            .Include(p => p.Projects)
-            .FirstOrDefaultAsync(p => p.UserId == userId);
+            return await _context.Personnels.FirstOrDefaultAsync(p => p.UserId == userId);
         }
+
     }
 }

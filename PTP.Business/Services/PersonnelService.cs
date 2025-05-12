@@ -33,9 +33,9 @@ namespace PTP.Business.Services
             return _personnelRepository.GetById(id);
         }
 
-        public Task<Personnel> GetPersonnelWithProjectsByUserIdAsync(int userId)
+        public async Task<Personnel> GetPersonnelByUserIdAsync(int userId)
         {
-            return _personnelRepository.GetPersonnelWithProjectsByUserIdAsync(userId);
+            return await _personnelRepository.GetPersonnelByUserIdAsync(userId);
         }
 
         public void Update(Personnel entity)
