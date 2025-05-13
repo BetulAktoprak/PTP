@@ -4,6 +4,7 @@ using PTP.Business.Services;
 using PTP.DataAccess;
 using PTP.DataAccess.Abstractions;
 using PTP.DataAccess.Repositories;
+using PTP.EntityLayer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,7 @@ builder.Services.AddScoped<CustomerRepository>();
 builder.Services.AddScoped<DocumentRepository>();
 builder.Services.AddScoped<PersonnelRepository>();
 builder.Services.AddScoped<ProcessRepository>();
+builder.Services.AddScoped<ProcessStageRepository>();
 builder.Services.AddScoped<ProjectPersonnelRepository>();
 builder.Services.AddScoped<IProcessRepository, ProcessRepository>();
 
@@ -39,6 +41,7 @@ builder.Services.AddScoped<CustomerService>();
 builder.Services.AddScoped<DocumentService>();
 builder.Services.AddScoped<PersonnelService>();
 builder.Services.AddScoped<ProcessService>();
+builder.Services.AddScoped<ProcessStageService>();
 builder.Services.AddScoped<ProjectPersonnelService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IProcessService, ProcessService>();

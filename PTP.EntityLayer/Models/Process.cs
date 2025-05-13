@@ -6,7 +6,8 @@ public class Process : BaseEntity
 {
     public string? Title { get; set; }
     public string? Description { get; set; }
-    public string? ProcessType { get; set; }
+    public int ProcessStageId { get; set; }
+    public ProcessStage ProcessStage { get; set; } = null!;
     public int ProjectId { get; set; }
     public Project? Project { get; set; }
     public int PersonnelId { get; set; }

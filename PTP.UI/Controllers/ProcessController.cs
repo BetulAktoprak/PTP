@@ -35,9 +35,9 @@ namespace PTP.UI.Controllers
             var viewModel = new Models.KanbanBoardViewModel
             {
                 ProjectId = projectId,
-                ToDo = allProcess.Where(p => p.ProcessType == "Todo").ToList(),
-                Working = allProcess.Where(p => p.ProcessType == "Working").ToList(),
-                Done = allProcess.Where(p => p.ProcessType == "Done").ToList()
+                ToDo = allProcess.Where(p => p.ProcessStage.Name == "Todo").ToList(),
+                Working = allProcess.Where(p => p.ProcessStage.Name == "Working").ToList(),
+                Done = allProcess.Where(p => p.ProcessStage.Name == "Done").ToList()
             };
 
             return View(viewModel);
@@ -50,7 +50,7 @@ namespace PTP.UI.Controllers
 
             if (process is null) return NotFound();
 
-            process.ProcessType = newStatus;
+            process.ProcessStage.Name = newStatus;
             _processService.Update(process);
 
             return Ok();

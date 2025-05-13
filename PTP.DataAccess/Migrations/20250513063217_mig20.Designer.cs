@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250513063217_mig20")]
+    partial class mig20
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -290,9 +293,6 @@ namespace PTP.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ProjectId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -301,9 +301,7 @@ namespace PTP.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("ProcessStages");
+                    b.ToTable("ProcessStage");
 
                     b.HasData(
                         new
@@ -593,15 +591,6 @@ namespace PTP.DataAccess.Migrations
                     b.Navigation("Personnel");
 
                     b.Navigation("ProcessStage");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("PTP.EntityLayer.Models.ProcessStage", b =>
-                {
-                    b.HasOne("PTP.EntityLayer.Models.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId");
 
                     b.Navigation("Project");
                 });

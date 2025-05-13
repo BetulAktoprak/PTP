@@ -42,6 +42,11 @@
             scrolling: true,
             scrollbarSize: 15,
 
+             rowClick: function (args) {
+                const projectId = args.item.id;
+                window.location.href = "/Admin/ManageProcesses?id=" + projectId;
+            },
+
             controller: {
                 loadData: function (filter) {
                     return $.ajax({

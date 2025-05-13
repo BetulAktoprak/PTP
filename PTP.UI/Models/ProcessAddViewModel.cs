@@ -7,5 +7,6 @@
         public string Description { get; set; }
         public string ProcessType { get; set; }
         public int AssignedUserId { get; set; }
+        public int ProcessStageId { get; set; }
     }
 }

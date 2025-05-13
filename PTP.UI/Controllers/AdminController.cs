@@ -1,7 +1,9 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PTP.Business.Services;
+using PTP.DataAccess;
 using PTP.EntityLayer.Models;
 using PTP.UI.Models;
 
@@ -13,12 +15,16 @@ namespace PTP.UI.Controllers
         private readonly ProjectService _projectService;
         private readonly ProcessService _processService;
         private readonly PersonnelService _personnelService;
+        private readonly ProcessStageService _processStageService;
+        private readonly AppDbContext _appDbContext;
 
-        public AdminController(ProjectService projectService, ProcessService processService, PersonnelService personnelService)
+        public AdminController(ProjectService projectService, ProcessService processService, PersonnelService personnelService, ProcessStageService processStageService, AppDbContext appDbContext)
         {
             _projectService = projectService;
             _processService = processService;
             _personnelService = personnelService;
+            _processStageService = processStageService;
+            _appDbContext = appDbContext;
         }
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
@@ -28,17 +34,54 @@ namespace PTP.UI.Controllers
 
         public IActionResult ManageProcesses(int id)
         {
+            var project = _projectService.GetByID(id);
+
+            var viewModel = new ManageProcessViewModel
+            {
+                ProjectTitle = project.ProjectTitle
+            };
             ViewBag.ProjectId = id;
-            return View();
+
+            return View(viewModel);
         }
 
-        [Authorize(Roles = "Admin")]
-        [HttpGet]
-        public IActionResult GetAllProjects()
+        //[Authorize(Roles = "Admin")]
+        //[HttpGet]
+        //public IActionResult GetAllProjects()
+        //{
+        //    var projects = _projectService.GetAll();
+        //    return Json(projects.Select(p => new { id = p.Id, name = p.ProjectTitle }));
+        //}
+
+        //YENİ
+        [HttpPost]
+        public IActionResult AddStage([FromBody] ProcessStage stage)
         {
-            var projects = _projectService.GetAll();
-            return Json(projects.Select(p => new { id = p.Id, name = p.ProjectTitle }));
+            if (stage.ProjectId == null)
+                return BadRequest("Proje ID gerekli");
+
+            _processStageService.Add(stage);
+
+            return Ok();
         }
+
+        //YENİ
+
+        [HttpGet]
+        public IActionResult GetStagesByProjectId(int id)
+        {
+            var stages = _appDbContext.ProcessStages
+                .Where(x => x.ProjectId == id)
+                .Select(x => new {
+                    x.Id,
+                    x.Name,
+                    x.ColorHex
+                })
+                .ToList();
+
+            return Ok(stages);
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAllByProjectId(int id)
@@ -49,9 +92,39 @@ namespace PTP.UI.Controllers
                 id = p.Id,
                 title = p.Title,
                 description = p.Description,
-                processType = p.ProcessType
+                processType = p.ProcessStage.Name,
+                color = p.ProcessStage.ColorHex
             }));
         }
+
+        [HttpGet]
+        public IActionResult GetAllStages()
+        {
+            var stages = _processStageService.GetAll();
+            return Json(stages.Select(s => new { id = s.Id, name = s.Name, colorHex = s.ColorHex }));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult AddProcessStage([FromBody] ProcessStage model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Name)) return BadRequest();
+
+            var newStage = new ProcessStage
+            {
+                Name = model.Name,
+                ColorHex = model.ColorHex ?? "#CCCCCC"
+            };
+            model.CreatedDate = DateTime.Now;
+
+            _processStageService.Add(newStage);
+            return Ok();
+        }
+
+        
+
+
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult UpdateType([FromBody] ProcessUpdateViewModel dto)
@@ -59,7 +132,7 @@ namespace PTP.UI.Controllers
             var process = _processService.GetByID(dto.Id);
             if (process == null) return NotFound();
 
-            process.ProcessType = dto.NewType;
+            process.ProcessStageId = dto.NewProcessStageId;
 
             process.UpdatedDate = DateTime.Now;
             var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -70,6 +143,7 @@ namespace PTP.UI.Controllers
 
             return Ok();
         }
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetAllPersonnel()
@@ -84,6 +158,7 @@ namespace PTP.UI.Controllers
 
             return Json(users);
         }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public IActionResult AddProcess([FromBody] ProcessAddViewModel dto)
@@ -95,7 +170,7 @@ namespace PTP.UI.Controllers
                 Title = dto.Title,
                 Description = dto.Description,
                 ProjectId = dto.ProjectId,
-                ProcessType = dto.ProcessType,
+                ProcessStageId = dto.ProcessStageId,
                 PersonnelId = dto.AssignedUserId,
                 CreatedBy = userId,
                 CreatedDate = DateTime.Now,

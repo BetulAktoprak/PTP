@@ -20,7 +20,7 @@
             <div class="col-6"><span>Sorun </span></div>
             <div class="col-6 font-primary">@Model.Processes?.Count()</div>
             <div class="col-6"><span>Çözüm</span></div>
-            <div class="col-6 font-primary">@Model.Processes?.Count(p => p.ProcessType == "Çözüldü")</div>
+            <div class="col-6 font-primary">@Model.Processes?.Count(p => p.ProcessStage.Name == "Çözüldü")</div>
             <div class="col-6"><span>Yorum</span></div>
             <div class="col-6 font-primary">@Model.Processes?.Sum(p => p.Comments?.Count())</div>
         </div>
@@ -65,7 +65,7 @@
     int GetCompletionRate(PTP.EntityLayer.Models.Project project)
     {
         var total = project.Processes?.Count() ?? 0;
-        var done = project.Processes?.Count(p => p.ProcessType == "Tamamlandı") ?? 0;
+        var done = project.Processes?.Count(p => p.ProcessStage.Name == "Tamamlandı") ?? 0;
         return total == 0 ? 0 : (done * 100 / total);
     }
 

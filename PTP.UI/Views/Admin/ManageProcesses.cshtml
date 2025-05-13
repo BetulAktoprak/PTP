@@ -1,8 +1,12 @@
-﻿
+﻿@model PTP.UI.Models.ManageProcessViewModel
+
+
 @{
     ViewData["Title"] = "ManageProcesses";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
+
 
 <style>
     .event-wrapper {
@@ -55,17 +59,17 @@
 </style>
 
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://unpkg.com/jkanban@1.3.1/dist/jkanban.min.css" rel="stylesheet">
-<script src="https://unpkg.com/jkanban@1.3.1/dist/jkanban.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+ <link href="https://unpkg.com/jkanban@1.3.1/dist/jkanban.min.css" rel="stylesheet">
+ <script src="https://unpkg.com/jkanban@1.3.1/dist/jkanban.min.js"></script> 
+
+
+
 
 
 <div class="container mt-4">
-    <select id="projectSelect" class="form-select mb-3">
-        <option selected disabled>Bir proje seçin...</option>
-    </select>
-
+    <div class="d-flex mb-2">
+        <h2>@Model.ProjectTitle</h2>
+    </div>
     <div class="d-flex mb-2">
         <button id="addBoardBtn" class="btn btn-primary me-2">+ Yeni Kolon</button>
     </div>
@@ -73,6 +77,36 @@
 
     <div id="kanbanBoard"></div>
 </div>
+
+<!-- Yeni Kolon Modal -->
+<div class="modal fade" id="addStageModal" tabindex="-1" aria-labelledby="addStageLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="addStageForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Yeni Kolon Ekle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="stageProjectId" value="" />
+
+                    <div class="mb-3">
+                        <label>Kolon Adı</label>
+                        <input type="text" class="form-control" name="name" required />
+                    </div>
+                    <div class="mb-3">
+                        <label>Renk Seç</label>
+                        <input type="color" class="form-control form-control-color" name="colorHex" value="#CCCCCC" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Ekle</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <div class="modal fade" id="addProcessModal" tabindex="-1" aria-labelledby="addProcessLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
@@ -157,123 +191,123 @@
 <script>
     let kanban = null;
 
-    $(document).ready(function () {
-        const projectId = $('#selectedProjectId').val();
 
-        $.get('/Admin/GetAllProjects', function (data) {
+    //Kanban sayfası
+        $(document).ready(function () {
+        // URL'den proje ID'sini al
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('id'); // ?id=...
 
-            data.forEach(function (project) {
-                $('#projectSelect').append(`<option value="${project.id}">${project.name}</option>`);
-            });
-
-            if (projectId) {
-            $('#projectSelect').val(projectId).trigger('change');
+        if (!projectId) {
+            alert("Geçerli bir proje ID'si bulunamadı.");
+            return;
         }
 
-            loadUsers();
+        console.log("Seçilen proje ID:", projectId);
 
+        $('#addStageModal').on('show.bs.modal', function () {
+            $('#stageProjectId').val(projectId);
         });
 
-        $('#projectSelect').change(function () {
-            const projectId = $(this).val();
-            console.log("Seçilen proje ID:", projectId);
 
-            $.get(`/Admin/GetAllByProjectId/${projectId}`, function (processes) {
-                processes = processes || [];
-                if (kanban !== null) {
-                    document.getElementById('kanbanBoard').innerHTML = ''; 
-                }
+        // Veriyi yükle
+        $.get(`/Admin/GetAllByProjectId/${projectId}`, function (processes) {
+            processes = processes || [];
+            if (kanban !== null) {
+                document.getElementById('kanbanBoard').innerHTML = '';
+            }
 
-                kanban = new jKanban({
-                    element: '#kanbanBoard',
-                    boards: [
-                        {
-                            id: '_todo',
-                            title:  `
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>To Do</span>
-                                    <button class="btn btn-sm btn-light border-light-subtle text-dark add-task-btn" data-type="ToDo">+ Yeni İşlem Ekle</button>
-                                </div>
-                            `,
-                            class: 'bg-subtle',
-                            item: processes.filter(p => p.processType === 'ToDo').map(p => ({
-                                id: 'process-' + p.id,
-                                title: getCardHTML(p)
-                            }))
+
+
+            // Kanban kurulumu burada olacak
+            kanban = new jKanban({
+                element: '#kanbanBoard',
+                boards: [
+                    {
+                        id: '_todo',
+                        title: `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>To Do</span>
+                                <button class="btn btn-sm btn-light border-light-subtle text-dark add-task-btn" data-type="ToDo">+ Yeni İşlem Ekle</button>
+                            </div>
+                        `,
+                        class: 'bg-subtle',
+                        item: processes.filter(p => p.processType === 'ToDo').map(p => ({
+                            id: 'process-' + p.id,
+                            title: getCardHTML(p)
+                        }))
+                    },
+                    {
+                        id: '_inprogress',
+                        title: `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>In Progress</span>
+                                <button class="btn btn-sm btn-light border-light-subtle text-light add-task-btn" data-type="InProgress">+ Yeni İşlem Ekle</button>
+                            </div>
+                        `,
+                        class: 'bg-warning',
+                        item: processes.filter(p => p.processType === 'InProgress').map(p => ({
+                            id: 'process-' + p.id,
+                            title: getCardHTML(p)
+                        }))
+                    },
+                    {
+                        id: '_done',
+                        title: `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Done</span>
+                                <button class="btn btn-sm btn-light border-light-subtle text-light add-task-btn" data-type="Done">+ Yeni İşlem Ekle</button>
+                            </div>
+                        `,
+                        class: 'bg-success',
+                        item: processes.filter(p => p.processType === 'Done').map(p => ({
+                            id: 'process-' + p.id,
+                            title: getCardHTML(p)
+                        }))
+                    }
+                ],
+                dragEl: function (el, source) {
+                    el.classList.add("dragging");
+                },
+                dragendEl: function (el) {
+                    el.classList.remove("dragging");
+                },
+                dropEl: function (el, target, source, sibling) {
+                    const id = parseInt(el.querySelector('[data-eid]').dataset.eid);
+                    const boardId = target.closest('.kanban-board').getAttribute('data-id');
+                    const newType = getColumnType(boardId);
+
+                    const badge = el.querySelector('.badge');
+                    badge.textContent = newType;
+
+                    badge.className = 'badge';
+                    if (newType === 'ToDo') badge.classList.add('bg-secondary');
+                    else if (newType === 'InProgress') badge.classList.add('bg-warning');
+                    else if (newType === 'Done') badge.classList.add('bg-success');
+
+                    $.ajax({
+                        url: '/Admin/UpdateType',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({ id: id, newType: newType }),
+                        success: function () {
                         },
-                        {
-                            id: '_inprogress',
-                            title: `
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>In Progress</span>
-                                    <button class="btn btn-sm btn-light border-light-subtle text-light add-task-btn" data-type="InProgress">+ Yeni İşlem Ekle</button>
-                                </div>
-                            `,
-                            class: 'bg-warning',
-                            item: processes.filter(p => p.processType === 'InProgress').map(p => ({
-                                id: 'process-' + p.id,
-                                title: getCardHTML(p)
-                            }))
-                        },
-                        {
-                            id: '_done',
-                            title: `
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>Done</span>
-                                    <button class="btn btn-sm btn-light border-light-subtle text-light add-task-btn" data-type="Done">+ Yeni İşlem Ekle</button>
-                                </div>
-                            `,
-                            class: 'bg-success',
-                            item: processes.filter(p => p.processType === 'Done').map(p => ({
-                                id: 'process-' + p.id,
-                                title: getCardHTML(p)
-                            }))
+                        error: function () {
+                            alert("Güncellenirken hata oluştu");
                         }
-                    ],
-                    dragEl: function (el, source) {
-                        el.classList.add("dragging");
-                    },
-                    dragendEl: function (el) {
-                        el.classList.remove("dragging");
-                    },
-                    dropEl: function (el, target, source, sibling) {
-                        const id = parseInt(el.querySelector('[data-eid]').dataset.eid);
-                        const boardId = target.closest('.kanban-board').getAttribute('data-id');
-                        const newType = getColumnType(boardId);
+                    });
+                },
+                afterRender: function () {
+                    document.querySelectorAll('.kanban-board').forEach(board => {
+                        const title = board.querySelector('.kanban-title-board')?.innerText.trim();
+                        let dataId = '';
+                        if (title?.includes('To Do')) dataId = '_todo';
+                        else if (title?.includes('In Progress')) dataId = '_inprogress';
+                        else if (title?.includes('Done')) dataId = '_done';
 
-                        const badge = el.querySelector('.badge');
-                        badge.textContent = newType;
-
-                        badge.className = 'badge';
-                        if (newType === 'ToDo') badge.classList.add('bg-secondary');
-                        else if (newType === 'InProgress') badge.classList.add('bg-warning');
-                        else if (newType === 'Done') badge.classList.add('bg-success');
-
-                        $.ajax({
-                            url: '/Admin/UpdateType',
-                            method: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({ id: id, newType: newType }),
-                            success: function () {
-                            },
-                            error: function () {
-                                alert("Güncellenirken hata oluştu");
-                            }
-                        });
-                    },
-                    afterRender: function () {
-                        document.querySelectorAll('.kanban-board').forEach(board => {
-                            const title = board.querySelector('.kanban-title-board')?.innerText.trim();
-                            let dataId = '';
-                            if (title?.includes('To Do')) dataId = '_todo';
-                            else if (title?.includes('In Progress')) dataId = '_inprogress';
-                            else if (title?.includes('Done')) dataId = '_done';
-
-                            board.setAttribute('data-id', dataId);
-                         });
-
-                     }
-                });
+                        board.setAttribute('data-id', dataId);
+                    });
+                }
             });
         });
 
@@ -286,33 +320,34 @@
             }
         }
 
-            function getBadgeClass(processType) {
-        switch (processType) {
-            case 'ToDo': return 'bg-secondary';
-            case 'InProgress': return 'bg-warning';
-            case 'Done': return 'bg-success';
-            default: return 'bg-secondary';
+        function getBadgeClass(processType) {
+            switch (processType) {
+                case 'ToDo': return 'bg-secondary';
+                case 'InProgress': return 'bg-warning';
+                case 'Done': return 'bg-success';
+                default: return 'bg-secondary';
+            }
         }
-    }
 
         function getCardHTML(p) {
             return `
-               <div class="kanban-card-content" data-eid="${p.id}">
-            <div class="d-flex justify-content-between">
-                <small class="text-muted">24/7/20</small>
-                <span class="badge ${getBadgeClass(p.processType)}">${p.processType}</span>
-            </div>
-            <h6 class="mt-2 mb-1">${p.title}</h6>
-            <small class="text-muted">${p.description || 'Açıklama yok'}</small>
-            <div class="mt-2 d-flex justify-content-between align-items-center">
-                <div class="icons text-muted">
-                    💬 2 &nbsp; 📎 1 &nbsp; 👁️ 4
-                </div>
-                <div>+5</div>
-            </div>
-        </div>`;
+                <div class="kanban-card-content" data-eid="${p.id}">
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">24/7/20</small>
+                        <span class="badge ${getBadgeClass(p.processType)}">${p.processType}</span>
+                    </div>
+                    <h6 class="mt-2 mb-1">${p.title}</h6>
+                    <small class="text-muted">${p.description || 'Açıklama yok'}</small>
+                    <div class="mt-2 d-flex justify-content-between align-items-center">
+                        <div class="icons text-muted">
+                            💬 2 &nbsp; 📎 1 &nbsp; 👁️ 4
+                        </div>
+                        <div>+5</div>
+                    </div>
+                </div>`;
         }
     });
+    //Kanban bitiş
 
         $('#addBoardBtn').click(function () {
         const boardName = prompt("Yeni kolon adı girin:");
@@ -341,6 +376,34 @@
             ]);
         });
 
+        //kolon ekleme
+
+             $('#addStageForm').submit(function (e) {
+                e.preventDefault();
+
+                const formData = {
+                    name: $(this).find('[name="name"]').val(),
+                    colorHex: $(this).find('[name="colorHex"]').val(),
+                    projectId: $('#stageProjectId').val()
+                };
+
+                $.ajax({
+                    url: '/Admin/AddStage', // Backend'de bu endpoint olacak
+                    type: 'POST',
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    success: function () {
+                        $('#addStageModal').modal('hide');
+                        location.reload(); // Alternatif: sadece Kanban'ı yeniden yükle
+                    },
+                    error: function () {
+                        alert("Kolon eklenirken bir hata oluştu.");
+                    }
+                });
+            });
+
+
+        //Kolon bitiş
 
             $(document).on('click', '.add-task-btn', function () {
                 const type = $(this).data('type');
