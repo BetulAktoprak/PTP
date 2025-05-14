@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PTP.Business.Services;
 using PTP.EntityLayer.Models;
@@ -16,8 +17,9 @@ namespace PTP.UI.Controllers
         private readonly DocumentService _documentService;
         private readonly UserService _userService;
         private readonly ProjectPersonnelService _projectPersonnelService;
+        private readonly ProcessStageService _processStageService;
 
-        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService, ProjectPersonnelService projectPersonnelService)
+        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService, ProjectPersonnelService projectPersonnelService, ProcessStageService processStageService  )
         {
             _projectService = projectService;
             _environment = environment;
@@ -25,6 +27,7 @@ namespace PTP.UI.Controllers
             _documentService = documentService;
             _userService = userService;
             _projectPersonnelService = projectPersonnelService;
+            _processStageService = processStageService;
         }
         [Authorize(Roles = "Admin")]
         [HttpGet]
@@ -117,7 +120,14 @@ namespace PTP.UI.Controllers
 
                 _projectService.Add(project);
 
+                var defaultStages = new List<ProcessStage>
+                {
+                    new ProcessStage { Name = "ToDo", ColorHex = "#6c757d", ProjectId = project.Id },
+                    new ProcessStage { Name = "InProgress", ColorHex = "#ffc107", ProjectId = project.Id },
+                    new ProcessStage { Name = "Done", ColorHex = "#198754", ProjectId = project.Id }
+                };
 
+                _processStageService.AddRange(defaultStages);
 
                 var uploads = Path.Combine(_environment.WebRootPath, "uploads");
                 Directory.CreateDirectory(uploads);

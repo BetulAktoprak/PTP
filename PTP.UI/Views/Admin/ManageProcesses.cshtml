@@ -24,19 +24,20 @@
 
     .activity-item {
         padding: 6px 12px;
-        background-color: #f1f1f1;
-        border-radius: 6px;
+        border-radius: 20px;
+        background-color: #e2e8f0;
         cursor: pointer;
-        transition: all 0.2s;
-        border: 1px solid #ccc;
+        transition: background-color 0.2s ease;
     }
 
+        .activity-item:hover {
+            background-color: #cbd5e0;
+        }
 
     .selected-activity {
-        background-color: grey;
-        color: white;
+        background-color: #4299e1;
+        color: #fff;
     }
-
     .activity-content {
         max-height: 380px;
         overflow-y: auto;
@@ -56,6 +57,134 @@
     #addProcessModal textarea {
         resize: vertical;
     }
+
+    #saveProcessBtn {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+        font-weight: 600;
+        padding: 0.5rem 1.25rem;
+        transition: background-color 0.2s ease;
+    }
+
+        #saveProcessBtn:hover {
+            background-color: #2563eb;
+        }
+
+
+    .add-task-btn:hover {
+        color: #000 !important;
+    }
+
+    .add-board-btn {
+        font-size: 2.5rem;
+        width: 48px;
+        padding: 0;
+        text-align: center;
+        line-height: 48px;
+        top: 70%;
+        transform: translateY(210%);
+        border: 1px solid black;
+    }
+
+    .container {
+        position: relative;
+    }
+
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2d3748;
+    }
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        background-color: #f9fafb;
+    }
+
+    label.form-label {
+        font-weight: 600;
+    }
+
+    input.form-control, select.form-select, textarea.form-control {
+        border-radius: 6px;
+        border-color: #ccc;
+        transition: border-color 0.2s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: #5a67d8;
+        box-shadow: 0 0 0 0.15rem rgba(90, 103, 216, 0.25);
+    }
+
+    .alert-info {
+        background-color: #ebf8ff;
+        border-color: #bee3f8;
+        color: #2b6cb0;
+        border-radius: 6px;
+    }
+
+    .file-drop-area {
+        background-color: #f8f9fa;
+        border: 2px dashed #ced4da;
+        transition: background-color 0.3s, border-color 0.3s;
+        cursor: pointer;
+    }
+
+        .file-drop-area:hover {
+            background-color: #eef2f7;
+            border-color: #86b7fe;
+        }
+
+        .file-drop-area.dragover {
+            background-color: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+    #fileList li {
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #fileList button {
+        border: none;
+        background: none;
+        font-size: 1rem;
+        cursor: pointer;
+    }
+
+
+        #fileList li a {
+            color: #0d6efd;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+    .btn-dot {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        line-height: 1;
+        padding: 0;
+        margin-left: 8px;
+    }
+
+    .kanban-board-header .dropdown-menu {
+        min-width: auto;
+        font-size: 0.875rem;
+    }
+
+    .dropdown-menu .dropdown-item {
+        font-size: 0.875rem;
+        padding: 6px 12px;
+    }
+
+
 </style>
 
 
@@ -66,16 +195,14 @@
 
 
 
-<div class="container mt-4">
-    <div class="d-flex mb-2">
+<div class="container mt-2">
+    <div class="d-flex mb-3">
         <h2>@Model.ProjectTitle</h2>
     </div>
-    <div class="d-flex mb-2">
-        <button id="addBoardBtn" class="btn btn-primary me-2">+ Yeni Kolon</button>
+    <div class="d-flex align-items-start">
+        <button id="addBoardBtn" class="btn btn-white me-2 add-board-btn">+</button>
+        <div id="kanbanBoard" class="flex-grow-1"></div>
     </div>
-
-
-    <div id="kanbanBoard"></div>
 </div>
 
 <!-- Yeni Kolon Modal -->
@@ -171,6 +298,19 @@
                                 </div>
                             </div>
                             <div class="mb-3">
+                                <label class="form-label">Dosya Ekle</label>
+                                <div id="fileDropArea" class="file-drop-area text-center p-4 border rounded">
+                                    <span class="d-block mb-2 text-muted">Dosyaları buraya bırakın veya</span>
+                                    <label class="btn btn-outline-primary btn-sm">
+                                        Dosya Seç
+                                        <input type="file" id="processFiles" class="d-none" multiple />
+                                    </label>
+                                    <ul id="fileList" class="list-unstyled mt-3 small text-start"></ul>
+                                </div>
+                            </div>
+
+
+                            <div class="mb-3">
                                 <label class="form-label">Güncellemeler</label>
                                 <div class="alert alert-info p-2 small">Oluşturulma ve güncelleme bilgileri burada gösterilecek.</div>
                             </div>
@@ -193,10 +333,9 @@
 
 
     //Kanban sayfası
-        $(document).ready(function () {
-        // URL'den proje ID'sini al
+    $(document).ready(function () {
         const urlParams = new URLSearchParams(window.location.search);
-        const projectId = urlParams.get('id'); // ?id=...
+        const projectId = urlParams.get('id');
 
         if (!projectId) {
             alert("Geçerli bir proje ID'si bulunamadı.");
@@ -205,128 +344,208 @@
 
         console.log("Seçilen proje ID:", projectId);
 
+        // Modal açıldığında proje ID'sini gizli inputa yaz
         $('#addStageModal').on('show.bs.modal', function () {
             $('#stageProjectId').val(projectId);
         });
 
+        // Kanban panosunu yükle
 
-        // Veriyi yükle
-        $.get(`/Admin/GetAllByProjectId/${projectId}`, function (processes) {
-            processes = processes || [];
+        $.get(`/Admin/GetAllByProjectId/${projectId}`, function (data) {
+            const processes = data.processes || [];
+            const stages = data.stages || [];
+
             if (kanban !== null) {
                 document.getElementById('kanbanBoard').innerHTML = '';
             }
 
+            const boards = stages.map(stage => ({
+                id: '_' + stage.name.toLowerCase().replace(/\s+/g, ''),
+                title: `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${stage.name}</span>
+                        <button class="btn btn-sm btn btn-outline-light text-light add-task-btn" data-type="${stage.name}">+ Yeni İşlem</button>
+                    </div>
+                `,
+                class: '',
+                item: []
+            }));
 
+             for (const p of processes) {
+                const boardId = '_' + p.processType.toLowerCase();
+                const board = boards.find(b => b.id === boardId);
+                if (board) {
+                    board.item.push({
+                        id: 'process-' + p.id,
+                        title: getCardHTML(p)
+                    });
+                }
+            }
 
-            // Kanban kurulumu burada olacak
             kanban = new jKanban({
                 element: '#kanbanBoard',
-                boards: [
-                    {
-                        id: '_todo',
-                        title: `
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>To Do</span>
-                                <button class="btn btn-sm btn-light border-light-subtle text-dark add-task-btn" data-type="ToDo">+ Yeni İşlem Ekle</button>
-                            </div>
-                        `,
-                        class: 'bg-subtle',
-                        item: processes.filter(p => p.processType === 'ToDo').map(p => ({
-                            id: 'process-' + p.id,
-                            title: getCardHTML(p)
-                        }))
-                    },
-                    {
-                        id: '_inprogress',
-                        title: `
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>In Progress</span>
-                                <button class="btn btn-sm btn-light border-light-subtle text-light add-task-btn" data-type="InProgress">+ Yeni İşlem Ekle</button>
-                            </div>
-                        `,
-                        class: 'bg-warning',
-                        item: processes.filter(p => p.processType === 'InProgress').map(p => ({
-                            id: 'process-' + p.id,
-                            title: getCardHTML(p)
-                        }))
-                    },
-                    {
-                        id: '_done',
-                        title: `
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span>Done</span>
-                                <button class="btn btn-sm btn-light border-light-subtle text-light add-task-btn" data-type="Done">+ Yeni İşlem Ekle</button>
-                            </div>
-                        `,
-                        class: 'bg-success',
-                        item: processes.filter(p => p.processType === 'Done').map(p => ({
-                            id: 'process-' + p.id,
-                            title: getCardHTML(p)
-                        }))
+                boards: boards,
+                dragEl: el => el.classList.add("dragging"),
+                dragendEl: el => el.classList.remove("dragging"),
+                dropEl: handleDrop,
+                
+            });
+            setTimeout(() => {
+                stages.forEach(stage => {
+                    const boardId = '_' + stage.name.toLowerCase().replace(/\s+/g, '');
+                    const boardElement = document.querySelector(`[data-id="${boardId}"] .kanban-board-header`);
+                    const mainElement = document.querySelector(`[data-id="${boardId}"] .kanban-drag`);
+                    if (boardElement) {
+                        // Rengi stil üzerinden uygula
+                        boardElement.style.setProperty('background-color', stage.colorHex);
+                        boardElement.style.setProperty('color', '#fff'); // Yazıyı beyaz yap
                     }
-                ],
-                dragEl: function (el, source) {
-                    el.classList.add("dragging");
-                },
-                dragendEl: function (el) {
-                    el.classList.remove("dragging");
-                },
-                dropEl: function (el, target, source, sibling) {
-                    const id = parseInt(el.querySelector('[data-eid]').dataset.eid);
-                    const boardId = target.closest('.kanban-board').getAttribute('data-id');
-                    const newType = getColumnType(boardId);
 
-                    const badge = el.querySelector('.badge');
-                    badge.textContent = newType;
+                    if (mainElement) {
+                        // Kanban panelinin ana kısmına arka plan rengini uygula
+                        const lightColor = lightenColor(stage.colorHex, 0.7);
+                        mainElement.style.setProperty('background-color', lightColor);
 
-                    badge.className = 'badge';
-                    if (newType === 'ToDo') badge.classList.add('bg-secondary');
-                    else if (newType === 'InProgress') badge.classList.add('bg-warning');
-                    else if (newType === 'Done') badge.classList.add('bg-success');
+                    }
+                });
+            }, 100);
+        });
 
-                    $.ajax({
-                        url: '/Admin/UpdateType',
-                        method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({ id: id, newType: newType }),
-                        success: function () {
-                        },
-                        error: function () {
-                            alert("Güncellenirken hata oluştu");
+        // Yeni kolon ekle butonu
+        $('#addBoardBtn').click(function () {
+            $('#addStageModal').modal('show');
+        });
+
+        // Yeni kolon ekleme işlemi
+        $('#addStageForm').submit(function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: $(this).find('[name="name"]').val(),
+                colorHex: $(this).find('[name="colorHex"]').val(),
+                projectId: $('#stageProjectId').val()
+            };
+
+            $.ajax({
+                url: '/Admin/AddStage',
+                type: 'POST',
+                data: JSON.stringify(formData),
+                contentType: 'application/json',
+                success: function (createdId) {
+                    $('#addStageModal').modal('hide');
+
+                    const boardId = '_' + formData.name.toLowerCase().replace(/\s+/g, '');
+
+                    if (document.querySelector(`[data-id="${boardId}"]`)) {
+                        alert("Bu isimde bir kolon zaten var.");
+                        return;
+                    }
+
+                    const boardTitle = `
+                        <span>${formData.name}</span>
+                            <div class="dropdown float-end">
+                            <button class="btn btn-sm btn-light btn-dot" type="button" data-bs-toggle="dropdown">
+                                ⋯
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item add-task-btn" href="#" data-type="${formData.name}">➕ Yeni İşlem</a></li>
+                                <li><a class="dropdown-item text-danger delete-board-btn" href="#" data-stageid="${createdId}" data-boardid="${boardId}">❌ Sil</a></li>
+                            </ul>
+                        </div>
+                    `;
+
+                    kanban.addBoards([
+                        {
+                            id: boardId,
+                            title: boardTitle,
+                            class: '',
+                            item: []
                         }
-                    });
-                },
-                afterRender: function () {
-                    document.querySelectorAll('.kanban-board').forEach(board => {
-                        const title = board.querySelector('.kanban-title-board')?.innerText.trim();
-                        let dataId = '';
-                        if (title?.includes('To Do')) dataId = '_todo';
-                        else if (title?.includes('In Progress')) dataId = '_inprogress';
-                        else if (title?.includes('Done')) dataId = '_done';
+                    ]);
 
-                        board.setAttribute('data-id', dataId);
-                    });
+                    setTimeout(() => {
+                    const boardSelector = `[data-id="${boardId}"]`;
+                    const boardHeader = document.querySelector(`${boardSelector} .kanban-board-header`);
+                    const boardMain = document.querySelector(`${boardSelector} .kanban-drag`);
+
+                    if (boardHeader) {
+                        boardHeader.style.setProperty('background-color', formData.colorHex);
+                        boardHeader.style.setProperty('color', '#fff');
+                    }
+
+                    if (boardMain) {
+                        // %20 açılmış rengi uygula
+                        const lightColor = lightenColor(formData.colorHex, 0.2);
+                        boardMain.style.setProperty('background-color', lightColor);
+                    }
+                }, 100);
+
+                },
+                error: function () {
+                    alert("Kolon eklenirken bir hata oluştu.");
                 }
             });
         });
 
-        function getColumnType(boardId) {
-            switch (boardId) {
-                case '_todo': return 'ToDo';
-                case '_inprogress': return 'InProgress';
-                case '_done': return 'Done';
-                default: return 'ToDo';
+        //Kolon Silme
+        $(document).on('click', '.delete-board-btn', function (e) {
+            e.preventDefault();
+            const stageId = $(this).data('stageid'); // veritabanındaki ID
+            const boardId = $(this).data('boardid'); // UI'deki ID
+
+            if (confirm("Bu kolonu silmek istediğinize emin misiniz?")) {
+                kanban.removeBoard(boardId);
+
+                $.ajax({
+                    url: '/Admin/DeleteStage',
+                    type: 'POST',
+                    data: JSON.stringify({ id: stageId }),
+                    contentType: 'application/json',
+                    success: () => console.log("Silme başarılı"),
+                    error: () => alert("Silme hatası")
+                });
             }
+        });
+
+        //Kolon Silme
+
+
+        // ↓↓↓ Yardımcı Fonksiyonlar ↓↓↓
+
+        
+        //Kolon renk açma
+        function lightenColor(hex, percent) {
+        // HEX başındaki # işaretini kaldır
+            hex = hex.replace(/^#/, '');
+
+            // Renk 3 haneliyse 6 haneye çevir (#abc → #aabbcc)
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+
+            // RGB bileşenlerine ayır
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+
+            // Renk değerlerini belirtilen yüzde kadar aç
+            const newR = Math.min(255, Math.floor(r + (255 - r) * percent));
+            const newG = Math.min(255, Math.floor(g + (255 - g) * percent));
+            const newB = Math.min(255, Math.floor(b + (255 - b) * percent));
+
+            // Yeni rengi HEX olarak geri döndür
+            return '#' + [newR, newG, newB].map(x => x.toString(16).padStart(2, '0')).join('');
         }
 
-        function getBadgeClass(processType) {
-            switch (processType) {
-                case 'ToDo': return 'bg-secondary';
-                case 'InProgress': return 'bg-warning';
-                case 'Done': return 'bg-success';
-                default: return 'bg-secondary';
-            }
+         //Kolon renk açma
+
+        function getBoardTitle(name) {
+            return `
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>${name}</span>
+                    <button class="btn btn-sm btn-light border-light-subtle text-dark add-task-btn" data-type="${name}">+ Yeni İşlem Ekle</button>
+                </div>
+            `;
         }
 
         function getCardHTML(p) {
@@ -334,76 +553,51 @@
                 <div class="kanban-card-content" data-eid="${p.id}">
                     <div class="d-flex justify-content-between">
                         <small class="text-muted">24/7/20</small>
-                        <span class="badge ${getBadgeClass(p.processType)}">${p.processType}</span>
+                        <span class="badge bg-secondary">${p.processType}</span>
                     </div>
                     <h6 class="mt-2 mb-1">${p.title}</h6>
                     <small class="text-muted">${p.description || 'Açıklama yok'}</small>
                     <div class="mt-2 d-flex justify-content-between align-items-center">
-                        <div class="icons text-muted">
-                            💬 2 &nbsp; 📎 1 &nbsp; 👁️ 4
-                        </div>
+                        <div class="icons text-muted">💬 2 &nbsp; 📎 1 &nbsp; 👁️ 4</div>
                         <div>+5</div>
                     </div>
-                </div>`;
+                </div>
+            `;
+        }
+
+
+        function handleDrop(el, target) {
+            const id = parseInt(el.querySelector('[data-eid]').dataset.eid);
+            const boardId = target.closest('.kanban-board').getAttribute('data-id');
+            const newType = boardId.replace(/^_/, ''); // _todo → todo
+
+            const stage = stages.find(s => s.name.toLowerCase() === newType.toLowerCase());
+            const badge = el.querySelector('.badge');
+
+            if (stage && badge) {
+                badge.textContent = stage.name;
+                badge.style.backgroundColor = stage.colorHex;
+                badge.style.color = 'white';
+            }
+
+            $.ajax({
+                url: '/Admin/UpdateType',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id, newType: capitalize(newType) }),
+                error: () => alert("Güncellenirken hata oluştu")
+            });
+        }
+
+      
+
+        function capitalize(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
         }
     });
-    //Kanban bitiş
-
-        $('#addBoardBtn').click(function () {
-        const boardName = prompt("Yeni kolon adı girin:");
-        if (!boardName) return;
-
-        const boardId = '_' + boardName.toLowerCase().replace(/\s+/g, '');
-
-        // Yeni kolon zaten varsa eklemeyi engelle
-        if (document.querySelector(`[data-id="${boardId}"]`)) {
-            alert("Bu isimde bir kolon zaten var.");
-            return;
-        }
-
-        kanban.addBoards([
-                {
-                    id: boardId,
-                    title: `
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span>${boardName}</span>
-                            <button class="btn btn-sm btn-light border-light-subtle text-dark add-task-btn" data-type="${boardName}">+ Yeni İşlem Ekle</button>
-                        </div>
-                    `,
-                    class: 'bg-light',
-                    item: []
-                }
-            ]);
-        });
-
-        //kolon ekleme
-
-             $('#addStageForm').submit(function (e) {
-                e.preventDefault();
-
-                const formData = {
-                    name: $(this).find('[name="name"]').val(),
-                    colorHex: $(this).find('[name="colorHex"]').val(),
-                    projectId: $('#stageProjectId').val()
-                };
-
-                $.ajax({
-                    url: '/Admin/AddStage', // Backend'de bu endpoint olacak
-                    type: 'POST',
-                    data: JSON.stringify(formData),
-                    contentType: 'application/json',
-                    success: function () {
-                        $('#addStageModal').modal('hide');
-                        location.reload(); // Alternatif: sadece Kanban'ı yeniden yükle
-                    },
-                    error: function () {
-                        alert("Kolon eklenirken bir hata oluştu.");
-                    }
-                });
-            });
 
 
-        //Kolon bitiş
+        //Kolon ekleme bitiş
 
             $(document).on('click', '.add-task-btn', function () {
                 const type = $(this).data('type');
@@ -446,14 +640,7 @@
         });
     }
 
-        function getBadgeClass(processType) {
-        const colors = {
-            'ToDo': 'bg-secondary',
-            'InProgress': 'bg-warning',
-            'Done': 'bg-success'
-        };
-        return colors[processType] || 'bg-info'; // Yeni tipler için varsayılan renk
-    }
+        
 
 </script>
 
@@ -527,4 +714,65 @@
         renderContent("Tümü");
     });
 </script>
+
+@* Modal Dosya Ekleme alanı *@
+<script>
+    const dropArea = document.getElementById('fileDropArea');
+    const fileInput = document.getElementById('processFiles');
+    const fileList = document.getElementById('fileList');
+    let selectedFiles = [];
+
+    function updateFileList() {
+        fileList.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('d-flex', 'justify-content-between', 'align-items-center');
+
+            const link = document.createElement('a');
+            link.textContent = file.name;
+            link.href = URL.createObjectURL(file);
+            link.target = '_blank';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.innerHTML = '❌';
+            removeBtn.classList.add('btn', 'btn-sm', 'btn-link', 'text-danger', 'p-0', 'ms-2');
+            removeBtn.title = "Kaldır";
+            removeBtn.onclick = function () {
+                selectedFiles.splice(index, 1);
+                updateFileList();
+            };
+
+            listItem.appendChild(link);
+            listItem.appendChild(removeBtn);
+            fileList.appendChild(listItem);
+        });
+    }
+
+
+    fileInput.addEventListener('change', () => {
+        selectedFiles = Array.from(fileInput.files);
+        updateFileList();
+    });
+
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('dragover');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('dragover');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('dragover');
+
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        selectedFiles = selectedFiles.concat(droppedFiles);
+
+        // Unique dosya isimleri filtrelenebilir istersen
+        updateFileList();
+    });
+</script>
+
 

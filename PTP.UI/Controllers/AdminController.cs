@@ -16,15 +16,13 @@ namespace PTP.UI.Controllers
         private readonly ProcessService _processService;
         private readonly PersonnelService _personnelService;
         private readonly ProcessStageService _processStageService;
-        private readonly AppDbContext _appDbContext;
 
-        public AdminController(ProjectService projectService, ProcessService processService, PersonnelService personnelService, ProcessStageService processStageService, AppDbContext appDbContext)
+        public AdminController(ProjectService projectService, ProcessService processService, PersonnelService personnelService, ProcessStageService processStageService)
         {
             _projectService = projectService;
             _processService = processService;
             _personnelService = personnelService;
             _processStageService = processStageService;
-            _appDbContext = appDbContext;
         }
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
@@ -45,15 +43,7 @@ namespace PTP.UI.Controllers
             return View(viewModel);
         }
 
-        //[Authorize(Roles = "Admin")]
-        //[HttpGet]
-        //public IActionResult GetAllProjects()
-        //{
-        //    var projects = _projectService.GetAll();
-        //    return Json(projects.Select(p => new { id = p.Id, name = p.ProjectTitle }));
-        //}
-
-        //YENİ
+        //YENİ Kolon Ekleme
         [HttpPost]
         public IActionResult AddStage([FromBody] ProcessStage stage)
         {
@@ -62,66 +52,51 @@ namespace PTP.UI.Controllers
 
             _processStageService.Add(stage);
 
-            return Ok();
+            return Ok(stage.Id);
         }
 
-        //YENİ
-
-        [HttpGet]
-        public IActionResult GetStagesByProjectId(int id)
-        {
-            var stages = _appDbContext.ProcessStages
-                .Where(x => x.ProjectId == id)
-                .Select(x => new {
-                    x.Id,
-                    x.Name,
-                    x.ColorHex
-                })
-                .ToList();
-
-            return Ok(stages);
-        }
-
+        //YENİ Projeye göre kolonları getirme
 
         [HttpGet]
         public async Task<IActionResult> GetAllByProjectId(int id)
         {
             var processes = await _processService.GetAllByProjectIdAsync(id);
-            return Json(processes.Select(p => new
+            var stages = await _processStageService.GetAllByProjectIdAsync(id);
+            
+            return Json(new
             {
-                id = p.Id,
-                title = p.Title,
-                description = p.Description,
-                processType = p.ProcessStage.Name,
-                color = p.ProcessStage.ColorHex
-            }));
+                processes = processes.Select(p => new
+                {
+                    id = p.Id,
+                    title = p.Title,
+                    description = p.Description,
+                    processType = p.ProcessStage.Name,
+                    color = p.ProcessStage.ColorHex
+                }),
+                stages = stages.Select(s => new
+                {
+                    id = s.Id,
+                    name = s.Name,
+                    colorHex = s.ColorHex,
+                })
+            });
         }
 
-        [HttpGet]
-        public IActionResult GetAllStages()
+
+        public class DeleteStageRequest
         {
-            var stages = _processStageService.GetAll();
-            return Json(stages.Select(s => new { id = s.Id, name = s.Name, colorHex = s.ColorHex }));
+            public int Id { get; set; }
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public IActionResult AddProcessStage([FromBody] ProcessStage model)
+        public IActionResult DeleteStage([FromBody] DeleteStageRequest request)
         {
-            if (string.IsNullOrWhiteSpace(model.Name)) return BadRequest();
-
-            var newStage = new ProcessStage
-            {
-                Name = model.Name,
-                ColorHex = model.ColorHex ?? "#CCCCCC"
-            };
-            model.CreatedDate = DateTime.Now;
-
-            _processStageService.Add(newStage);
+            _processStageService.Delete(request.Id);
             return Ok();
         }
 
-        
+
+
 
 
 
