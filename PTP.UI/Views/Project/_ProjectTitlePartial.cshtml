@@ -12,20 +12,22 @@
         <div class="col-12 custom-input">
             <label asp-for="ProjectTitle" class="form-label col-12 m-0">Proje Adı <span class="txt-danger"> *</span></label>
             <input asp-for="ProjectTitle" class="form-control" id="productTitle1" type="text" />
+            <input type="hidden" asp-for="ProjectId" />
 
             @* <div class="invalid-feedback">Proje adını giriniz.</div> *@
         </div>
         
         <br />
-        <div class="col-12">
+        <div class="col-12 mb-3">
             <label asp-for="Details" class="form-label">Açıklama</label>
             <textarea asp-for="Details" class="form-control" rows="8" placeholder="Proje açıklaması.."></textarea>
 
         </div>
         <div id="stagesContainer">
-            <div class="stage-row mb-2">
+            <div class="stage-row mb-2 d-flex align-items-center">
                 <input type="text" name="Stages[0].ProcessStageName" placeholder="Kolon adı" class="form-control d-inline w-50" />
-                <input type="color" name="Stages[0].ColorHex" value="#007bff" class="form-control d-inline w-25" />
+                <input type="color" name="Stages[0].ColorHex" value="#007bff" class="form-control d-inline w-25 mx-2" />
+                <span class="remove-stage text-danger" style="cursor: pointer; font-size: 1.2rem;" onclick="removeStageRow(this)">&#10006;</span>
             </div>
         </div>
         <button type="button" onclick="addStageRow()" class="btn btn-secondary btn-sm mt-2">+ Kolon Ekle</button>

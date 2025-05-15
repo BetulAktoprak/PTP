@@ -126,7 +126,7 @@
                     deleteButton: false,
                     itemTemplate: function (_, item) {
                         return $("<div>").append(
-                            $("<a>").attr("href", "/Project/Edit/" + item.id)
+                            $("<a>").attr("href", "/Project/Create?id=" + item.id)
                                    .html('<i class="fa fa-edit text-primary mx-1"></i>'),
                             $("<a>").attr("href", "/Project/Delete/" + item.id)
                                    .html('<i class="fa fa-trash text-danger mx-1"></i>')

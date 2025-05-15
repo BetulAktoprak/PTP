@@ -4,7 +4,7 @@ namespace PTP.UI.Models
 {
     public class ProjectCreateViewModel
     {
-        public int Id { get; set; }
+        public int ProjectId { get; set; }
         public List<IFormFile> ProjectFiles { get; set; } = new();
         public string ProjectTitle { get; set; }
         public string ClientName { get; set; }

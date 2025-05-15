@@ -270,19 +270,36 @@
     </div>
 </div>
 
+@* Kolon Silme *@
 <script>
-    let stageIndex = 1;
-
     function addStageRow() {
         const container = document.getElementById("stagesContainer");
         const row = document.createElement("div");
-        row.className = "stage-row mb-2";
+        row.className = "stage-row mb-2 d-flex align-items-center";
         row.innerHTML = `
-            <input type="text" name="Stages[${stageIndex}].ProcessStageName" placeholder="Kolon adı" class="form-control d-inline w-50" />
-            <input type="color" name="Stages[${stageIndex}].ColorHex" value="#007bff" class="form-control d-inline w-25" />
+            <input type="text" placeholder="Kolon adı" class="form-control d-inline w-50" />
+            <input type="color" value="#007bff" class="form-control d-inline w-25 mx-2" />
+            <span class="remove-stage text-danger" style="cursor: pointer; font-size: 1.2rem;" onclick="removeStageRow(this)">&#10006;</span>
         `;
         container.appendChild(row);
-        stageIndex++;
+        reIndexStages();
+    }
+
+    function removeStageRow(element) {
+        const row = element.parentElement;
+        row.remove();
+        reIndexStages(); 
+    }
+
+    function reIndexStages() {
+        const rows = document.querySelectorAll("#stagesContainer .stage-row");
+        rows.forEach((row, index) => {
+            const textInput = row.querySelector('input[type="text"]');
+            const colorInput = row.querySelector('input[type="color"]');
+
+            textInput.name = `Stages[${index}].ProcessStageName`;
+            colorInput.name = `Stages[${index}].ColorHex`;
+        });
     }
 </script>
 
@@ -322,6 +339,22 @@
     });
 </script>
 
+<script>
+    $(document).ready(function () {
+        var existingDocuments = @Html.Raw(ViewBag.ExistingDocuments ?? "[]");
+
+        existingDocuments.forEach(function (doc, index) {
+            var fileDiv = `
+                <div class="mb-2 border p-2 rounded bg-light">
+                    <p><strong>Dosya:</strong> <a href="${doc.FilePath}" target="_blank">${doc.FileName}</a></p>
+                    <p><strong>Açıklama:</strong> ${doc.Description}</p>
+                    <!--<button type="button" class="btn btn-danger btn-sm">Sil</button>-->
+                </div>`;
+            $('#selectedFiles').append(fileDiv);
+        });
+    });
+</script>
+
 
 <script>
     let selectedFiles = [];
@@ -349,7 +382,6 @@
                 fileDiv.innerHTML = `
                     <div class="card p-2">
                         <p class="mb-1 fw-semibold">Dosya: ${item.file.name}</p>
-                        <label>Açıklama</label>
                         <input type="text" class="form-control" placeholder="Belge açıklaması girin"
                             value="${item.description}"
                             oninput="updateDescription(${index}, this.value)" />

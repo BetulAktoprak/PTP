@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using PTP.Business.Services;
 using PTP.EntityLayer.Models;
@@ -19,7 +18,7 @@ namespace PTP.UI.Controllers
         private readonly ProjectPersonnelService _projectPersonnelService;
         private readonly ProcessStageService _processStageService;
 
-        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService, ProjectPersonnelService projectPersonnelService, ProcessStageService processStageService  )
+        public ProjectController(ProjectService projectService, IWebHostEnvironment environment, PersonnelService personnelService, DocumentService documentService, UserService userService, ProjectPersonnelService projectPersonnelService, ProcessStageService processStageService)
         {
             _projectService = projectService;
             _environment = environment;
@@ -59,11 +58,11 @@ namespace PTP.UI.Controllers
             return Json(projects);
         }
 
-       
+
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(int? id)
         {
             var userName = User.Identity.Name;
             ViewBag.UserName = userName;
@@ -77,11 +76,72 @@ namespace PTP.UI.Controllers
 
             ViewBag.PersonnelListJson = values;
 
-            return View();
+            if (id is null)
+            {
+                return View(new ProjectCreateViewModel());
+            }
+            else
+            {
+                var project = _projectService.GetByID(id.Value);
+                if (project == null)
+                {
+                    return NotFound();
+                }
+
+                var model = new ProjectCreateViewModel
+                {
+                    ProjectId = project.Id,
+                    ProjectTitle = project.ProjectTitle,
+                    ClientName = project.ClientName,
+                    ProjectRate = Convert.ToDecimal(project.ProjectRate),
+                    ProjectType = project.ProjectType,
+                    Priority = project.Priority,
+                    ProjectSize = project.ProjectSize,
+                    StartingDate = project.StartDate,
+                    EndingDate = Convert.ToDateTime(project.EndDate),
+                    Details = project.Details,
+                    ProcessStageName = project.ProcessStageName,
+                    Stages = _processStageService.GetAll().Where(p => p.ProjectId == project.Id)
+                                .Select(s => new ProcessStageViewModel
+                                {
+                                    ProcessStageName = s.Name,
+                                    ColorHex = s.ColorHex
+                                }).ToList()
+                };
+
+                var existingDocuments = _documentService.GetAll()
+                    .Where(d => d.ProjectId == id.Value)
+                    .Select(d => new
+                    {
+                        FileName = d.FileName,
+                        FilePath = d.FilePath,
+                        Description = d.DocumentDescriptions
+                    }).ToList();
+
+                ViewBag.ExistingDocuments = JsonConvert.SerializeObject(existingDocuments);
+
+
+                // Projeye atanmış personelleri ViewBag ile gönder
+                var selectedPersonnel = _projectPersonnelService.GetAll()
+                                            .Where(p => p.ProjectId == id)
+                                            .Select(p => new ProjectPersonnelViewModel
+                                            {
+                                                PersonnelId = p.PersonnelId,
+                                                CanRead = p.CanRead,
+                                                CanCreate = p.CanCreate,
+                                                CanUpdate = p.CanUpdate,
+                                                CanDelete = p.CanDelete,
+                                                CanComment = p.CanComment
+                                            }).ToList();
+
+                ViewBag.SelectedPersonnel = JsonConvert.SerializeObject(selectedPersonnel);
+
+                return View(model);
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson, List<IFormFile> ProjectFiles, string DocumentDescriptionsJson)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson, string DocumentDescriptionsJson)
         {
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -104,22 +164,51 @@ namespace PTP.UI.Controllers
 
             try
             {
-                var project = new Project
-                {
-                    ProcessStageName = model.ProcessStageName,
-                    ProjectTitle = model.ProjectTitle,
-                    ClientName = model.ClientName,
-                    ProjectRate = model.ProjectRate,
-                    ProjectType = model.ProjectType,
-                    Priority = model.Priority,
-                    ProjectSize = model.ProjectSize,
-                    StartDate = model.StartingDate,
-                    EndDate = model.EndingDate,
-                    Details = model.Details,
-                    CreatedBy = userId.ToString()
-                };
+                Project project;
 
-                _projectService.Add(project);
+                if (model.ProjectId == 0)
+                {
+                    project = new Project
+                    {
+                        ProcessStageName = model.ProcessStageName,
+                        ProjectTitle = model.ProjectTitle,
+                        ClientName = model.ClientName,
+                        ProjectRate = model.ProjectRate,
+                        ProjectType = model.ProjectType,
+                        Priority = model.Priority,
+                        ProjectSize = model.ProjectSize,
+                        StartDate = model.StartingDate,
+                        EndDate = model.EndingDate,
+                        Details = model.Details,
+                        CreatedBy = userId.ToString()
+                    };
+
+                    _projectService.Add(project);
+                }
+                else
+                {
+                    // Var olan projeyi güncelle
+                    project = _projectService.GetByID(model.ProjectId);
+                    if (project == null)
+                    {
+                        return NotFound();
+                    }
+
+                    project.ProcessStageName = model.ProcessStageName;
+                    project.ProjectTitle = model.ProjectTitle;
+                    project.ClientName = model.ClientName;
+                    project.ProjectRate = model.ProjectRate;
+                    project.ProjectType = model.ProjectType;
+                    project.Priority = model.Priority;
+                    project.ProjectSize = model.ProjectSize;
+                    project.StartDate = model.StartingDate;
+                    project.EndDate = model.EndingDate;
+                    project.Details = model.Details;
+
+                    _projectService.Update(project);
+
+
+                }
 
                 foreach (var stage in model.Stages)
                 {
@@ -212,66 +301,127 @@ namespace PTP.UI.Controllers
         //public IActionResult Edit(int id)
         //{
         //    var project = _projectService.GetByID(id);
-        //    if (project == null) return NotFound();
+        //    if (project == null)
+        //    {
+        //        return NotFound();
+        //    }
 
         //    var model = new ProjectCreateViewModel
         //    {
-        //        Id = project.Id,
+        //        ProjectId = project.Id,
         //        ProjectTitle = project.ProjectTitle,
         //        ClientName = project.ClientName,
-        //        ProjectRate = project.ProjectRate ?? 0,
+        //        ProjectRate = Convert.ToDecimal(project.ProjectRate),
         //        ProjectType = project.ProjectType,
         //        Priority = project.Priority,
         //        ProjectSize = project.ProjectSize,
         //        StartingDate = project.StartDate,
-        //        EndingDate = project.EndDate ?? DateTime.Now,
+        //        EndingDate = Convert.ToDateTime(project.EndDate),
         //        Details = project.Details,
-        //        DocumentDetail = project.DocumentDetail,
-        //        SelectedPersonnelIds = project.Personnels?.Select(p => p.Id).ToList() ?? new List<int>(),
-        //        PersonnelList = _personnelService.GetAll().Select(p => new SelectListItem
-        //        {
-        //            Value = p.Id.ToString(),
-        //            Text = p.FullName
-        //        }).ToList()
+        //        ProcessStageName = project.ProcessStageName,
+        //        Stages = _processStageService.GetAll().Where(p => p.ProjectId == project.Id)
+        //                    .Select(s => new ProcessStageViewModel
+        //                    {
+        //                        ProcessStageName = s.Name,
+        //                        ColorHex = s.ColorHex
+        //                    }).ToList()
         //    };
 
-        //    return PartialView("_EditProjectPartial", model);
+        //    // Personel bilgilerini dropdown ya da seçilebilir formatta gönder
+        //    var personnelList = _personnelService.GetAll();
+        //    var values = personnelList.Select(p => new
+        //    {
+        //        value = p.Id.ToString(),
+        //        name = p.FullName
+        //    }).ToList();
+        //    ViewBag.PersonnelListJson = values;
+
+        //    // Projeye atanmış personelleri ViewBag ile gönder
+        //    var selectedPersonnel = _projectPersonnelService.GetAll()
+        //                                .Where(p => p.ProjectId == id)
+        //                                .Select(p => new ProjectPersonnelViewModel
+        //                                {
+        //                                    PersonnelId = p.PersonnelId,
+        //                                    CanRead = p.CanRead,
+        //                                    CanCreate = p.CanCreate,
+        //                                    CanUpdate = p.CanUpdate,
+        //                                    CanDelete = p.CanDelete,
+        //                                    CanComment = p.CanComment
+        //                                }).ToList();
+
+        //    ViewBag.SelectedPersonnel = JsonConvert.SerializeObject(selectedPersonnel);
+
+        //    return View(model);
         //}
 
+
         //[HttpPost]
-        //public async Task<IActionResult> Edit(ProjectCreateViewModel model)
+        //public async Task<IActionResult> Edit(ProjectCreateViewModel model, string SelectedPersonnelJson, List<IFormFile> ProjectFiles, string DocumentDescriptionsJson)
         //{
-        //    var project = _projectService.GetByID(model.Id);
-        //    if (project == null) return NotFound();
+        //    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        //    if (userIdClaim == null)
+        //        return Unauthorized();
 
-        //    project.Personnels.Clear();
+        //    if (!int.TryParse(userIdClaim.Value, out int userId))
+        //        return Unauthorized();
 
-        //    var selectedPersonnels = _personnelService.GetAll()
-        //        .Where(p => model.SelectedPersonnelIds.Contains(p.Id)).ToList();
+        //    var project = _projectService.GetByID(model.ProjectId);
+        //    if (project == null)
+        //        return NotFound();
 
-        //    foreach (var person in selectedPersonnels)
+        //    var descriptions = JsonConvert.DeserializeObject<List<string>>(DocumentDescriptionsJson);
+        //    var files = Request.Form.Files;
+
+        //    if (files == null || descriptions == null || files.Count != descriptions.Count)
         //    {
-        //        project.Personnels.Add(person);
+        //        ModelState.AddModelError("", "Dosya ve açıklama sayıları uyuşmuyor.");
+        //        return View(model);
         //    }
 
-        //    project.ProjectTitle = model.ProjectTitle;
-        //    project.ClientName = model.ClientName;
-        //    project.ProjectRate = model.ProjectRate;
-        //    project.ProjectType = model.ProjectType;
-        //    project.Priority = model.Priority;
-        //    project.ProjectSize = model.ProjectSize;
-        //    project.StartDate = model.StartingDate;
-        //    project.EndDate = model.EndingDate;
-        //    project.Details = model.Details;
-        //    project.DocumentDetail = model.DocumentDetail;
-
-        //    if (model.ProjectFiles != null && model.ProjectFiles.Any())
+        //    try
         //    {
+        //        // Proje güncelle
+        //        project.ProjectTitle = model.ProjectTitle;
+        //        project.ClientName = model.ClientName;
+        //        project.ProjectRate = model.ProjectRate;
+        //        project.ProjectType = model.ProjectType;
+        //        project.Priority = model.Priority;
+        //        project.ProjectSize = model.ProjectSize;
+        //        project.StartDate = model.StartingDate;
+        //        project.EndDate = model.EndingDate;
+        //        project.Details = model.Details;
+        //        project.ProcessStageName = model.ProcessStageName;
+
+        //        _projectService.Update(project);
+
+        //        // Eski sahneleri sil
+        //        var existingStages = _processStageService.GetAll().Where(p => p.ProjectId == project.Id).ToList();
+        //        foreach (var stage in existingStages)
+        //        {
+        //            _processStageService.Delete(stage.Id);
+        //        }
+
+        //        // Yeni sahneleri ekle
+        //        foreach (var stage in model.Stages)
+        //        {
+        //            var newStage = new ProcessStage
+        //            {
+        //                Name = stage.ProcessStageName,
+        //                ColorHex = stage.ColorHex,
+        //                ProjectId = project.Id
+        //            };
+        //            _processStageService.Add(newStage);
+        //        }
+
+        //        // Dosya yükleme
         //        var uploads = Path.Combine(_environment.WebRootPath, "uploads");
         //        Directory.CreateDirectory(uploads);
 
-        //        foreach (var file in model.ProjectFiles)
+        //        for (int i = 0; i < files.Count; i++)
         //        {
+        //            var file = files[i];
+        //            var desc = descriptions[i];
+
         //            var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
         //            var relativePath = Path.Combine("uploads", uniqueFileName);
         //            var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
@@ -281,26 +431,57 @@ namespace PTP.UI.Controllers
         //                await file.CopyToAsync(stream);
         //            }
 
-        //            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        //            int userId = int.Parse(userIdClaim.Value);
-
         //            var document = new Document
         //            {
         //                FileName = file.FileName,
         //                FilePath = relativePath,
+        //                DocumentDescriptions = desc,
         //                ProjectId = project.Id,
         //                UserId = userId
         //            };
 
         //            _documentService.Add(document);
         //        }
+
+        //        // Önceki personelleri sil
+        //        var existingPersonnel = _projectPersonnelService.GetAll().Where(p => p.ProjectId == project.Id).ToList();
+        //        foreach (var p in existingPersonnel)
+        //        {
+        //            _projectPersonnelService.Delete(p);
+        //        }
+
+        //        // Yeni personelleri ekle
+        //        List<ProjectPersonnelViewModel> selectedList = new();
+        //        if (!string.IsNullOrEmpty(SelectedPersonnelJson))
+        //        {
+        //            selectedList = JsonConvert.DeserializeObject<List<ProjectPersonnelViewModel>>(SelectedPersonnelJson);
+        //        }
+
+        //        foreach (var person in selectedList)
+        //        {
+        //            var pp = new ProjectPersonnel
+        //            {
+        //                ProjectId = project.Id,
+        //                PersonnelId = person.PersonnelId,
+        //                CanRead = person.CanRead,
+        //                CanCreate = person.CanCreate,
+        //                CanUpdate = person.CanUpdate,
+        //                CanDelete = person.CanDelete,
+        //                CanComment = person.CanComment
+        //            };
+        //            _projectPersonnelService.Add(pp);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("HATA: " + ex.ToString());
+        //        ModelState.AddModelError("", "Bir hata oluştu, lütfen tekrar deneyin.");
+        //        return View(model);
         //    }
 
-        //    _projectService.Update(project);
-
-        //    return Json(new { success = true });
-
+        //    return RedirectToAction("Index");
         //}
+
     }
     public class PersonnelTagModel
     {
