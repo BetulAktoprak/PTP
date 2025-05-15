@@ -15,4 +15,5 @@ public class Document : BaseEntity
     public Personnel? Personnel { get; set; }
     public int? UserId { get; set; }
     public User? User { get; set; }
+
 }

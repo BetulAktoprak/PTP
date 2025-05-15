@@ -11,5 +11,6 @@ namespace PTP.DataAccess.Abstractions
     {
         Task<List<Project>> GetProjectsByUserIdAsync(int userId);
         Task<ProjectPersonnel> GetProjectPersonnelByUserIdAndProjectIdAsync(int personnelId, int projectId);
+        List<ProjectPersonnel> GetAllWithPersonnelByProjectId(int projectId);
     }
 }

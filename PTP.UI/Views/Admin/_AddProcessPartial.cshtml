@@ -1,0 +1,100 @@
+﻿@model PTP.UI.Models.ProcessAddViewModel
+
+
+<form id="addProcessForm" enctype="multipart/form-data" method="post">
+    <input type="hidden" name="ProjectId" id="projectId" value="@Model.ProjectId" />
+    <input type="hidden" name="ProcessId" id="processId" value="@Model.ProcessId" />
+
+    <div class="row">
+        <!-- SOL KISIM -->
+        <div class="col-md-6 border-end pe-3" style="max-height: 500px; overflow-y: auto;">
+            <div class="mb-3">
+                <label for="Title" class="form-label">Başlık</label>
+                <input type="text" class="form-control" id="Title" name="Title" value="@Model.Title" required />
+            </div>
+            
+
+            <div class="mb-3">
+                <label for="Description" class="form-label">Açıklama</label>
+                <textarea class="form-control" id="Description" name="Description" rows="6">@Model.Description</textarea>
+            </div>
+            <!-- Yorum -->
+            <div class="mb-3">
+                <label for="Text" class="form-label">Yorum</label>
+                <textarea class="form-control" id="Text" name="Text" rows="3">@Model.Text</textarea>
+                <input type="hidden" name="PersonnelId" value="@Model.PersonnelId" />
+            </div>
+            <!-- Etkinlik sekmeleri -->
+            <div class="mb-3">
+                <label class="form-label">Etkinlik</label>
+                <div class="event-wrapper">
+                    <div id="activityTabs" class="d-flex gap-2 flex-wrap tab-list">
+                        <div class="activity-item selected-activity">Tümü</div>
+                        <div class="activity-item">Yorumlar</div>
+                        <div class="activity-item">Geçmiş</div>
+                        <div class="activity-item">Dosyalar</div>
+                    </div>
+                    <div id="activityContent" class="activity-content">
+                        @* JavaScript ile doldurulacak *@
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ KISIM -->
+        <div class="col-md-6 ps-3" style="max-height: 500px; overflow-y: auto;">
+            <div class="mb-3">
+                <label class="form-label">Ayrıntılar</label>
+                <div class="mb-2">
+                    <label for="AssignedUserId" class="form-label">Atanacak Kişi</label>
+                    @if (Model.ProjectPersonnels != null && Model.ProjectPersonnels.Any())
+                    {
+                        <select class="form-select" id="AssignedUserId" name="AssignedUserId" asp-for="AssignedUserId" asp-items="Model.ProjectPersonnels">
+                            <option value="">Seçiniz</option>
+                        </select>
+                    }
+                    else
+                    {
+                        <select class="form-select" id="AssignedUserId" name="AssignedUserId">
+                            <option>Personel bulunamadı</option>
+                        </select>
+                    }
+
+                </div>
+                <div class="mb-2 text-muted">
+                    <label class="form-label">Durum:</label>
+                    <span id="processTypeLabel"></span>
+                    <input type="hidden" id="processStageId" name="ProcessStageId" />
+                </div>
+                
+            </div>
+
+            <!-- Dosya alanı -->
+            <div class="mb-3">
+                <label class="form-label">Dosya Ekle</label>
+                <div class="file-drop-area text-center p-4 border rounded">
+                    <span class="d-block mb-2 text-muted">Dosyaları buraya bırakın veya</span>
+                    <label class="btn btn-outline-primary btn-sm">
+                        Dosya Seç
+                        <input type="file" id="processFiles" name="Files" class="d-none" multiple />
+                    </label>
+                    <ul id="fileList" class="list-unstyled mt-3 small text-start"></ul>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="DocumentDescriptions" class="form-label">Dosya açıklaması</label>
+                <textarea class="form-control" id="DocumentDescriptions" name="DocumentDescriptions" rows="3">@Model.DocumentDescriptions</textarea>
+            </div>
+           
+
+            <div class="mb-3">
+                <label class="form-label">Güncellemeler</label>
+                <div class="alert alert-info p-2 small">Oluşturulma ve güncelleme bilgileri burada gösterilecek.</div>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+

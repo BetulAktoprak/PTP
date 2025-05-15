@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using PTP.Business.Abstractions;
@@ -31,6 +32,16 @@ namespace PTP.Business.Services
         public IEnumerable<ProjectPersonnel>? GetAll()
         {
             return _projectPersonnelRepository.GetAll();
+        }
+
+        public IEnumerable<ProjectPersonnel> GetAll(Expression<Func<ProjectPersonnel, bool>>? filter = null)
+        {
+            return _projectPersonnelRepository.GetAll(filter);
+        }
+
+        public List<ProjectPersonnel> GetAllWithPersonnelByProjectId(int projectId)
+        {
+            return _projectPersonnelRepository.GetAllWithPersonnelByProjectId(projectId);
         }
 
         public ProjectPersonnel? GetByID(int id)

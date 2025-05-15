@@ -10,6 +10,7 @@ public class Project : BaseEntity
     public string? ProjectType { get; set; }
     public string? Priority { get; set; }
     public string? ProjectSize { get; set; }
+    public string? ProcessStageName { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public string? Details { get; set; }

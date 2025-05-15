@@ -22,6 +22,12 @@
             <textarea asp-for="Details" class="form-control" rows="8" placeholder="Proje açıklaması.."></textarea>
 
         </div>
-
+        <div id="stagesContainer">
+            <div class="stage-row mb-2">
+                <input type="text" name="Stages[0].ProcessStageName" placeholder="Kolon adı" class="form-control d-inline w-50" />
+                <input type="color" name="Stages[0].ColorHex" value="#007bff" class="form-control d-inline w-25" />
+            </div>
+        </div>
+        <button type="button" onclick="addStageRow()" class="btn btn-secondary btn-sm mt-2">+ Kolon Ekle</button>
     </div>
 </div>

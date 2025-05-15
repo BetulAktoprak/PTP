@@ -270,6 +270,21 @@
     </div>
 </div>
 
+<script>
+    let stageIndex = 1;
+
+    function addStageRow() {
+        const container = document.getElementById("stagesContainer");
+        const row = document.createElement("div");
+        row.className = "stage-row mb-2";
+        row.innerHTML = `
+            <input type="text" name="Stages[${stageIndex}].ProcessStageName" placeholder="Kolon adı" class="form-control d-inline w-50" />
+            <input type="color" name="Stages[${stageIndex}].ColorHex" value="#007bff" class="form-control d-inline w-25" />
+        `;
+        container.appendChild(row);
+        stageIndex++;
+    }
+</script>
 
 <script>
     const personnelList = @Html.Raw(personnelJson);

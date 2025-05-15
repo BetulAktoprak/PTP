@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +40,15 @@ namespace PTP.DataAccess.Repositories
         public IEnumerable<T> GetAll()
         {
             return _dbSet.ToList();
+        }
+
+        public IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null)
+        {
+            var query = _context.Set<T>().AsQueryable();
+            if (filter != null)
+                query = query.Where(filter);
+
+            return query.ToList();
         }
 
         public T? GetById(int id)

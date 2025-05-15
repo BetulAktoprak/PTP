@@ -1,4 +1,5 @@
-﻿using PTP.Business.Abstractions;
+﻿using System.Linq.Expressions;
+using PTP.Business.Abstractions;
 using PTP.DataAccess.Repositories;
 using PTP.EntityLayer.Models;
 
@@ -31,6 +32,11 @@ namespace PTP.Business.Services
         public IEnumerable<ProcessStage>? GetAll()
         {
             return _processStageRepository.GetAll();
+        }
+
+        public IEnumerable<ProcessStage> GetAll(Expression<Func<ProcessStage, bool>>? filter = null)
+        {
+            return _processStageRepository.GetAll(filter);
         }
 
         public async Task<List<ProcessStage>> GetAllByProjectIdAsync(int projectId)

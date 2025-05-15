@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using PTP.EntityLayer.Abstractions;
@@ -14,5 +15,7 @@ namespace PTP.DataAccess.Abstractions
         void Delete(int id);
         T? GetById(int id);
         IEnumerable<T> GetAll();
+        IEnumerable<T> GetAll(Expression<Func<T, bool>>? filter = null);
+
     }
 }

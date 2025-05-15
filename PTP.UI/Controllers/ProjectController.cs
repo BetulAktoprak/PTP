@@ -106,6 +106,7 @@ namespace PTP.UI.Controllers
             {
                 var project = new Project
                 {
+                    ProcessStageName = model.ProcessStageName,
                     ProjectTitle = model.ProjectTitle,
                     ClientName = model.ClientName,
                     ProjectRate = model.ProjectRate,
@@ -120,14 +121,26 @@ namespace PTP.UI.Controllers
 
                 _projectService.Add(project);
 
-                var defaultStages = new List<ProcessStage>
+                foreach (var stage in model.Stages)
                 {
-                    new ProcessStage { Name = "ToDo", ColorHex = "#6c757d", ProjectId = project.Id },
-                    new ProcessStage { Name = "InProgress", ColorHex = "#ffc107", ProjectId = project.Id },
-                    new ProcessStage { Name = "Done", ColorHex = "#198754", ProjectId = project.Id }
-                };
+                    var newStage = new ProcessStage
+                    {
+                        Name = stage.ProcessStageName,
+                        ColorHex = stage.ColorHex,
+                        ProjectId = project.Id
+                    };
 
-                _processStageService.AddRange(defaultStages);
+                    _processStageService.Add(newStage);
+                }
+
+                //var defaultStages = new List<ProcessStage>
+                //{
+                //    new ProcessStage { Name = "ToDo", ColorHex = "#6c757d", ProjectId = project.Id },
+                //    new ProcessStage { Name = "InProgress", ColorHex = "#ffc107", ProjectId = project.Id },
+                //    new ProcessStage { Name = "Done", ColorHex = "#198754", ProjectId = project.Id }
+                //};
+
+                //_processStageService.AddRange(defaultStages);
 
                 var uploads = Path.Combine(_environment.WebRootPath, "uploads");
                 Directory.CreateDirectory(uploads);

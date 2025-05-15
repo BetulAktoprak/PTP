@@ -12,6 +12,7 @@ namespace PTP.UI.Models
         public string ProjectType { get; set; }
         public string Priority { get; set; }
         public string ProjectSize { get; set; }
+        public string ProcessStageName { get; set; }
         public DateTime StartingDate { get; set; } = DateTime.Now;
         public DateTime EndingDate { get; set; } = DateTime.Now;
         public string Details { get; set; }
@@ -20,5 +21,6 @@ namespace PTP.UI.Models
         public string SelectedPersonnelIds { get; set; }
         public List<SelectListItem> PersonnelList { get; set; }
         public string PersonnelPermissionsJson { get; set; }
+        public List<ProcessStageViewModel> Stages { get; set; } = new();
     }
 }

@@ -174,9 +174,16 @@
         margin-left: 8px;
     }
 
-    .kanban-board-header .dropdown-menu {
-        min-width: auto;
-        font-size: 0.875rem;
+    .kanban-board-header {
+        overflow: visible !important;
+        position: relative;
+        z-index: 2;
+    }
+
+    .dropdown-menu {
+        max-width: none;
+        min-width: 150px; 
+        z-index: 9999;
     }
 
     .dropdown-menu .dropdown-item {
@@ -200,39 +207,39 @@
         <h2>@Model.ProjectTitle</h2>
     </div>
     <div class="d-flex align-items-start">
-        <button id="addBoardBtn" class="btn btn-white me-2 add-board-btn">+</button>
+        @* <button id="addBoardBtn" class="btn btn-white me-2 add-board-btn">+</button> *@
         <div id="kanbanBoard" class="flex-grow-1"></div>
     </div>
 </div>
 
 <!-- Yeni Kolon Modal -->
-<div class="modal fade" id="addStageModal" tabindex="-1" aria-labelledby="addStageLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="addStageForm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Yeni Kolon Ekle</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="stageProjectId" value="" />
+@* <div class="modal fade" id="addStageModal" tabindex="-1" aria-labelledby="addStageLabel" aria-hidden="true"> *@
+@*     <div class="modal-dialog"> *@
+@*         <form id="addStageForm"> *@
+@*             <div class="modal-content"> *@
+@*                 <div class="modal-header"> *@
+@*                     <h5 class="modal-title">Yeni Kolon Ekle</h5> *@
+@*                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button> *@
+@*                 </div> *@
+@*                 <div class="modal-body"> *@
+@*                     <input type="hidden" id="stageProjectId" value="" /> *@
 
-                    <div class="mb-3">
-                        <label>Kolon Adı</label>
-                        <input type="text" class="form-control" name="name" required />
-                    </div>
-                    <div class="mb-3">
-                        <label>Renk Seç</label>
-                        <input type="color" class="form-control form-control-color" name="colorHex" value="#CCCCCC" />
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Ekle</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+@*                     <div class="mb-3"> *@
+@*                         <label>Kolon Adı</label> *@
+@*                         <input type="text" class="form-control" name="name" required /> *@
+@*                     </div> *@
+@*                     <div class="mb-3"> *@
+@*                         <label>Renk Seç</label> *@
+@*                         <input type="color" class="form-control form-control-color" name="colorHex" value="#CCCCCC" /> *@
+@*                     </div> *@
+@*                 </div> *@
+@*                 <div class="modal-footer"> *@
+@*                     <button type="submit" class="btn btn-primary">Ekle</button> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </form> *@
+@*     </div> *@
+@* </div> *@
 
 
 <div class="modal fade" id="addProcessModal" tabindex="-1" aria-labelledby="addProcessLabel" aria-hidden="true">
@@ -244,79 +251,7 @@
                 <input type="hidden" id="selectedProjectId" value="@ViewBag.ProjectId" />
             </div>
             <div class="modal-body">
-                <form id="addProcessForm">
-                    <div class="row">
-                        <div class="col-md-6 border-end pe-3" style="max-height: 500px; overflow-y: auto;">
-                            <div class="mb-3">
-                                <label for="processTitle" class="form-label">Başlık</label>
-                                <input type="text" class="form-control" id="processTitle" required />
-                            </div>
-                            <div class="mb-3">
-                                <label for="processDescription" class="form-label">Açıklama</label>
-                                <textarea class="form-control" id="processDescription" rows="6"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Etkinlik</label>
-                                <div class="event-wrapper">
-                                    <div id="activityTabs" class="d-flex gap-2 flex-wrap tab-list">
-                                        <div class="activity-item selected-activity">Tümü</div>
-                                        <div class="activity-item">Yorumlar</div>
-                                        <div class="activity-item">Geçmiş</div>
-                                        <div class="activity-item">Çalışma kaydı</div>
-                                    </div>
-
-                                    <div id="activityContent" class="activity-content">
-                                        <!-- Dinamik içerik buraya gelecek -->
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 ps-3" style="max-height: 500px; overflow-y: auto;">
-                            <div class="mb-3">
-                                <label class="form-label">Ayrıntılar</label>
-                                <div class="mb-2">
-                                    <label for="assignedUserId" class="form-label">Atanan Kişi</label>
-                                    <select class="form-select" id="assignedUserId" required>
-                                        <option value="" disabled selected>Seç...</option>
-                                    </select>
-                                </div>
-                                <div class="mb-2">
-                                    <label for="reporterId" class="form-label">Raporlayıcı</label>
-                                    <select class="form-select" id="reporterId">
-                                        <option value="" disabled selected>Seç...</option>
-                                    </select>
-                                </div>
-                                <div class="mb-2">
-                                    <label for="processType" class="form-label">Durum</label>
-                                    <select class="form-select" id="processType" required>
-                                        <option value="ToDo">To Do</option>
-                                        <option value="InProgress">In Progress</option>
-                                        <option value="Done">Done</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Dosya Ekle</label>
-                                <div id="fileDropArea" class="file-drop-area text-center p-4 border rounded">
-                                    <span class="d-block mb-2 text-muted">Dosyaları buraya bırakın veya</span>
-                                    <label class="btn btn-outline-primary btn-sm">
-                                        Dosya Seç
-                                        <input type="file" id="processFiles" class="d-none" multiple />
-                                    </label>
-                                    <ul id="fileList" class="list-unstyled mt-3 small text-start"></ul>
-                                </div>
-                            </div>
-
-
-                            <div class="mb-3">
-                                <label class="form-label">Güncellemeler</label>
-                                <div class="alert alert-info p-2 small">Oluşturulma ve güncelleme bilgileri burada gösterilecek.</div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                @await Html.PartialAsync("_AddProcessPartial", new PTP.UI.Models.ProcessAddViewModel())
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
@@ -351,25 +286,42 @@
 
         // Kanban panosunu yükle
 
+        let processes = [];
+        let stages = [];
+
         $.get(`/Admin/GetAllByProjectId/${projectId}`, function (data) {
-            const processes = data.processes || [];
-            const stages = data.stages || [];
+            processes = data.processes || [];
+            stages = data.stages || [];
 
             if (kanban !== null) {
                 document.getElementById('kanbanBoard').innerHTML = '';
             }
 
-            const boards = stages.map(stage => ({
-                id: '_' + stage.name.toLowerCase().replace(/\s+/g, ''),
-                title: `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>${stage.name}</span>
-                        <button class="btn btn-sm btn btn-outline-light text-light add-task-btn" data-type="${stage.name}">+ Yeni İşlem</button>
-                    </div>
-                `,
-                class: '',
-                item: []
-            }));
+                const boards = stages.map(stage => {
+                    const stageName = stage.name;
+                    const stageId = stage.id;
+                    const boardId = '_' + stageName.toLowerCase().replace(/\s+/g, '');
+                    return {
+                        id: boardId,
+                        title: `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>${stageName}</span>
+                                <div class="dropdown float-end">
+                                    <button class="btn btn-sm btn-light btn-dot" type="button" data-bs-toggle="dropdown">
+                                        ⋯
+                                    </button>
+                                    <ul class="dropdown-menu" style="left: auto; right: 0;">
+                                         <li><a class="dropdown-item add-task-btn" asp-action="AddProcess" data-stageid="${stageId}" data-stagename="${stageName}">➕ Yeni İşlem</a></li>
+                                        <li><a class="dropdown-item text-danger delete-board-btn" href="#" data-stageid="${stageId}" data-boardid="${boardId}">❌ Sil</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `,
+                        class: '',
+                        item: []
+                    };
+                });
+
 
              for (const p of processes) {
                 const boardId = '_' + p.processType.toLowerCase();
@@ -412,102 +364,99 @@
         });
 
         // Yeni kolon ekle butonu
-        $('#addBoardBtn').click(function () {
-            $('#addStageModal').modal('show');
-        });
+        // $('#addBoardBtn').click(function () {
+        //     $('#addStageModal').modal('show');
+        // });
 
         // Yeni kolon ekleme işlemi
-        $('#addStageForm').submit(function (e) {
-            e.preventDefault();
+        // $('#addStageForm').submit(function (e) {
+        //     e.preventDefault();
 
-            const formData = {
-                name: $(this).find('[name="name"]').val(),
-                colorHex: $(this).find('[name="colorHex"]').val(),
-                projectId: $('#stageProjectId').val()
-            };
+        //     const formData = {
+        //         name: $(this).find('[name="name"]').val(),
+        //         colorHex: $(this).find('[name="colorHex"]').val(),
+        //         projectId: $('#stageProjectId').val()
+        //     };
 
-            $.ajax({
-                url: '/Admin/AddStage',
-                type: 'POST',
-                data: JSON.stringify(formData),
-                contentType: 'application/json',
-                success: function (createdId) {
-                    $('#addStageModal').modal('hide');
+        //     $.ajax({
+        //         url: '/Admin/AddStage',
+        //         type: 'POST',
+        //         data: JSON.stringify(formData),
+        //         contentType: 'application/json',
+        //         success: function (createdId) {
+        //             $('#addStageModal').modal('hide');
 
-                    const boardId = '_' + formData.name.toLowerCase().replace(/\s+/g, '');
+        //             const boardId = '_' + formData.name.toLowerCase().replace(/\s+/g, '');
 
-                    if (document.querySelector(`[data-id="${boardId}"]`)) {
-                        alert("Bu isimde bir kolon zaten var.");
-                        return;
-                    }
+        //             if (document.querySelector(`[data-id="${boardId}"]`)) {
+        //                 alert("Bu isimde bir kolon zaten var.");
+        //                 return;
+        //             }
 
-                    const boardTitle = `
-                        <span>${formData.name}</span>
-                            <div class="dropdown float-end">
-                            <button class="btn btn-sm btn-light btn-dot" type="button" data-bs-toggle="dropdown">
-                                ⋯
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item add-task-btn" href="#" data-type="${formData.name}">➕ Yeni İşlem</a></li>
-                                <li><a class="dropdown-item text-danger delete-board-btn" href="#" data-stageid="${createdId}" data-boardid="${boardId}">❌ Sil</a></li>
-                            </ul>
-                        </div>
-                    `;
+        //             const boardTitle = `
+        //                 <span>${formData.name}</span>
+        //                     <div class="dropdown float-end">
+        //                     <button class="btn btn-sm btn-light btn-dot" type="button" data-bs-toggle="dropdown">
+        //                         ⋯
+        //                     </button>
+        //                     <ul class="dropdown-menu dropdown-menu-end">
+        //                         <li><a class="dropdown-item add-task-btn" href="#" data-type="${formData.name}">➕ Yeni İşlem</a></li>
+        //                         <li><a class="dropdown-item text-danger delete-board-btn" href="#" data-stageid="${createdId}" data-boardid="${boardId}">❌ Sil</a></li>
+        //                     </ul>
+        //                 </div>
+        //             `;
 
-                    kanban.addBoards([
-                        {
-                            id: boardId,
-                            title: boardTitle,
-                            class: '',
-                            item: []
-                        }
-                    ]);
+        //             kanban.addBoards([
+        //                 {
+        //                     id: boardId,
+        //                     title: boardTitle,
+        //                     class: '',
+        //                     item: []
+        //                 }
+        //             ]);
 
-                    setTimeout(() => {
-                    const boardSelector = `[data-id="${boardId}"]`;
-                    const boardHeader = document.querySelector(`${boardSelector} .kanban-board-header`);
-                    const boardMain = document.querySelector(`${boardSelector} .kanban-drag`);
+        //             setTimeout(() => {
+        //                 const boardSelector = `[data-id="${boardId}"]`;
+        //                 const boardHeader = document.querySelector(`${boardSelector} .kanban-board-header`);
+        //                 const boardMain = document.querySelector(`${boardSelector} .kanban-drag`);
 
-                    if (boardHeader) {
-                        boardHeader.style.setProperty('background-color', formData.colorHex);
-                        boardHeader.style.setProperty('color', '#fff');
-                    }
+        //                 if (boardHeader) {
+        //                     boardHeader.style.setProperty('background-color', formData.colorHex);
+        //                     boardHeader.style.setProperty('color', '#fff');
+        //                 }
 
-                    if (boardMain) {
-                        // %20 açılmış rengi uygula
-                        const lightColor = lightenColor(formData.colorHex, 0.2);
-                        boardMain.style.setProperty('background-color', lightColor);
-                    }
-                }, 100);
+        //                 if (boardMain) {
+        //                     const lightColor = lightenColor(formData.colorHex, 0.8);
+        //                     boardMain.style.setProperty('background-color', lightColor);
+        //                 }
+        //             }, 100);
 
-                },
-                error: function () {
-                    alert("Kolon eklenirken bir hata oluştu.");
-                }
-            });
-        });
+        //         },
+        //         error: function () {
+        //             alert("Kolon eklenirken bir hata oluştu.");
+        //         }
+        //     });
+        // });
 
-        //Kolon Silme
-        $(document).on('click', '.delete-board-btn', function (e) {
-            e.preventDefault();
-            const stageId = $(this).data('stageid'); // veritabanındaki ID
-            const boardId = $(this).data('boardid'); // UI'deki ID
+        // Kolon Silme
+        // $(document).on('click', '.delete-board-btn', function (e) {
+        //     e.preventDefault();
+        //     const stageId = $(this).data('stageid'); veritabanındaki ID
+        //     const boardId = $(this).data('boardid'); UI'deki ID
 
-            if (confirm("Bu kolonu silmek istediğinize emin misiniz?")) {
-                kanban.removeBoard(boardId);
+        //         kanban.removeBoard(boardId);
 
-                $.ajax({
-                    url: '/Admin/DeleteStage',
-                    type: 'POST',
-                    data: JSON.stringify({ id: stageId }),
-                    contentType: 'application/json',
-                    success: () => console.log("Silme başarılı"),
-                    error: () => alert("Silme hatası")
-                });
-            }
-        });
+        //         $.ajax({
+        //             url: '/Admin/DeleteStage',
+        //             type: 'POST',
+        //             data: JSON.stringify({ id: stageId }),
+        //             contentType: 'application/json',
+        //             success: () => console.log("Silme başarılı"),
+        //             error: () => alert("Silme hatası")
+        //         });
+        // });
 
-        //Kolon Silme
+        // Kolon Silme
 
 
         // ↓↓↓ Yardımcı Fonksiyonlar ↓↓↓
@@ -539,15 +488,6 @@
 
          //Kolon renk açma
 
-        function getBoardTitle(name) {
-            return `
-                <div class="d-flex justify-content-between align-items-center">
-                    <span>${name}</span>
-                    <button class="btn btn-sm btn-light border-light-subtle text-dark add-task-btn" data-type="${name}">+ Yeni İşlem Ekle</button>
-                </div>
-            `;
-        }
-
         function getCardHTML(p) {
             return `
                 <div class="kanban-card-content" data-eid="${p.id}">
@@ -572,6 +512,7 @@
             const newType = boardId.replace(/^_/, ''); // _todo → todo
 
             const stage = stages.find(s => s.name.toLowerCase() === newType.toLowerCase());
+
             const badge = el.querySelector('.badge');
 
             if (stage && badge) {
@@ -584,7 +525,7 @@
                 url: '/Admin/UpdateType',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ id: id, newType: capitalize(newType) }),
+                data: JSON.stringify({ id: id, newProcessStageId: stage.id }),
                 error: () => alert("Güncellenirken hata oluştu")
             });
         }
@@ -599,50 +540,34 @@
 
         //Kolon ekleme bitiş
 
-            $(document).on('click', '.add-task-btn', function () {
-                const type = $(this).data('type');
-                $('#processType').val(type);
-                $('#addProcessModal').modal('show');
-            });
+     $(document).on('click', '.add-task-btn', function () {
+        const stageId = $(this).data('stageid');
+        const stageName = $(this).data('stagename');
+        const projectId = $('#selectedProjectId').val(); // Modal içindeki hidden input'tan al
 
+        $.get(`/Admin/AddProcess`, { projectId: projectId }, function (partialViewHtml) {
+            // SADECE modal-body içeriğini değiştir
+            $('#addProcessModal .modal-body').html(partialViewHtml);
 
-            $('#saveProcessBtn').click(function () {
-        const process = {
-            projectId: $('#projectSelect').val(),
-            title: $('#processTitle').val(),
-            description: $('#processDescription').val(),
-            processType: $('#processType').val(),
-            assignedUserId: $('#assignedUserId').val()
-        };
+            // Stage bilgilerini doldur
+            $('#processStageId').val(stageId);
+            $('#processTypeLabel').text(stageName);
 
-        $.ajax({
-            url: '/Admin/AddProcess',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(process),
-            success: function () {
-                $('#addProcessModal').modal('hide');
-                $('#addProcessForm')[0].reset();
-                $('#projectSelect').trigger('change');
-            },
-            error: function () {
-                alert('İşlem eklenirken hata oluştu.');
-            }
+            // Modalı göster
+            $('#addProcessModal').modal('show');
+
+            
+
         });
+
+        document.querySelectorAll('.activity-item')[0].click()
     });
 
-        function loadUsers() {
-        $.get('/Admin/GetAllPersonnel', function (users) {
-            $('#assignedUserId').empty().append(`<option value="" disabled selected>Personel seçin...</option>`);
-            users.forEach(function (u) {
-                $('#assignedUserId').append(`<option value="${u.id}">${u.fullName}</option>`);
-            });
-        });
-    }
 
-        
+
 
 </script>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -775,4 +700,43 @@
     });
 </script>
 
+<script>
 
+    $(document).on('click', '#saveProcessBtn', function () {
+        var form = $('#addProcessForm')[0];
+        var formData = new FormData(form);
+
+        $.ajax({
+            url: '/Admin/AddProcess',
+            method: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function () {
+                $('#addProcessModal').modal('hide');
+
+                const newProcess = {
+                id: 'process-' + result.id,
+                title: getCardHTML({
+                    id: result.id,
+                    title: result.title,
+                    description: result.description,
+                    processType: result.stageName, // Sunucudan dönen stage adı
+                    color: result.colorHex // Sunucudan dönen renk
+                })
+            };
+
+            const boardId = '_' + result.stageName.toLowerCase().replace(/\s+/g, '');
+
+            // İlgili board'a yeni işlemi ekle
+            kanban.addElement(boardId, newProcess);
+                location.reload(); // listeyi yenile veya tabloyu güncelle
+            },
+            error: function (err) {
+                alert('İşlem başarısız.');
+                console.error(err);
+            }
+        });
+    });
+
+</script>

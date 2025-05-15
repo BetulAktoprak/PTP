@@ -32,7 +32,13 @@ namespace PTP.DataAccess.Repositories
                .Include(pp => pp.Project)
                .FirstOrDefaultAsync(pp => pp.PersonnelId == personnelId && pp.ProjectId == projectId);
         }
-
+        public List<ProjectPersonnel> GetAllWithPersonnelByProjectId(int projectId)
+        {
+            return _context.ProjectPersonnels
+                .Include(pp => pp.Personnel)
+                .Where(pp => pp.ProjectId == projectId)
+                .ToList();
+        }
 
     }
 }

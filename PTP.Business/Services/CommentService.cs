@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using PTP.Business.Abstractions;
 using PTP.DataAccess.Repositories;
 using PTP.EntityLayer.Models;
@@ -31,6 +33,11 @@ namespace PTP.Business.Services
         public IEnumerable<Comment>? GetAll()
         {
             return _commentRepository.GetAll();
+        }
+
+        public IEnumerable<Comment> GetAll(Expression<Func<Comment, bool>>? filter = null)
+        {
+            return _commentRepository.GetAll(filter);
         }
 
         public Comment? GetByID(int id)
