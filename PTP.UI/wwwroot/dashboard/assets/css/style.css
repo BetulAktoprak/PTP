@@ -115,14 +115,14 @@
 
  */
 :root {
-    --theme-deafult: #e52421 !important;
+    --theme-deafult: #aa1c18 !important;
     --theme-secondary: #FE6A49;
     --light-background: rgba(242, 243, 247, 0.7);
     --body-font-color: #86909C;
     --chart-border: #E6E9EB;
     --recent-chart-bg: #FCFCFD;
     --light-bg: #EEF1F6;
-    --white: #fff;
+    --white: #aa1c18;
     --light2: #F5F6F9;
     --sidebar-border: rgba(0, 0, 0, 0.1);
     --chart-text-color: rgba(82, 82, 108, 0.8);
@@ -1620,7 +1620,9 @@ svg.f-light {
 .txt-secondary {
   color: #FE6A49 !important;
 }
-
+.logo-wrapper {
+    background-color: #f5f5f5; 
+}
 .txt-success {
   color: #00AC46 !important;
 }
@@ -32423,20 +32425,24 @@ footer .license-list h6 {
     3.29 Login CSS Start
 ==========================**/
 .login-card {
-  min-height: 100vh;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  margin: 0 auto;
-  background: url("../images/login/login_bg.jpg");
-  background-position: center;
-  padding: 30px 12px;
+    min-height: 100vh;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin: 0 auto;
+    /*    background: url("../images/login/login_bg.jpg");*/
+    background: url("../images/login/white_and_red_grunge_texture_background.jpg");
+    /*background: linear-gradient(to bottom right, #edb0af, #aa1c18);*/
+    background-position: center;
+    padding: 30px 12px;
+    /*    background-size: cover;
+background-position: center;*/
 }
 .login-card .logo {
   display: block;
@@ -44158,7 +44164,7 @@ table.table-bordered thead tr th p {
 }
 .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .logo-wrapper,
 .page-wrapper.compact-wrapper .page-body-wrapper div.sidebar-wrapper .logo-icon-wrapper {
-  padding: 22px 30px;
+  padding: 8px 20px;
   -webkit-box-shadow: -9px 0 20px rgba(89, 102, 122, 0.1);
           box-shadow: -9px 0 20px rgba(89, 102, 122, 0.1);
   border-top-right-radius: 15px;

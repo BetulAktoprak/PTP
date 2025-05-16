@@ -319,12 +319,13 @@
 
             if (kanban !== null) {
                 document.getElementById('kanbanBoard').innerHTML = '';
+                kanban = null;
             }
 
                 const boards = stages.map(stage => {
                     const stageName = stage.name;
                     const stageId = stage.id;
-                    const boardId = '_' + stageName.toLowerCase().replace(/\s+/g, '');
+                    const boardId = sanitizeId(stage.name);
                     return {
                         id: boardId,
                         title: `
@@ -348,7 +349,7 @@
 
 
              for (const p of processes) {
-                const boardId = '_' + p.processType.toLowerCase();
+                const boardId = sanitizeId(p.processType);
                 const board = boards.find(b => b.id === boardId);
                 if (board) {
                     board.item.push({
@@ -368,7 +369,7 @@
             });
             setTimeout(() => {
                 stages.forEach(stage => {
-                    const boardId = '_' + stage.name.toLowerCase().replace(/\s+/g, '');
+                    const boardId = sanitizeId(stage.name);
                     const boardElement = document.querySelector(`[data-id="${boardId}"] .kanban-board-header`);
                     const mainElement = document.querySelector(`[data-id="${boardId}"] .kanban-drag`);
                     if (boardElement) {
@@ -385,6 +386,8 @@
                     }
                 });
             }, 100);
+
+            
         });
 
         // Yeni kolon ekle butonu
@@ -512,30 +515,30 @@
 
          //Kolon renk açma
 
-        function getCardHTML(p) {
-            return `
-                <div class="kanban-card-content" data-eid="${p.id}">
-                    <div class="d-flex justify-content-between">
-                        <small class="text-muted">24/7/20</small>
-                        <span class="badge bg-secondary">${p.processType}</span>
+        window.getCardHTML =  function(p) {
+                return `
+                    <div class="kanban-card-content" data-eid="${p.id}">
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">24/7/20</small>
+                            <span class="badge" style="background-color:${p.colorHex || '#6c757d'}; color: white;">${p.processType}</span>
+                        </div>
+                        <h6 class="mt-2 mb-1">${p.title}</h6>
+                        <small class="text-muted">${p.description || 'Açıklama yok'}</small>
+                        <div class="mt-2 d-flex justify-content-between align-items-center">
+                            <div class="icons text-muted">💬 2 &nbsp; 📎 1 &nbsp; 👁️ 4</div>
+                            <div>+5</div>
+                        </div>
                     </div>
-                    <h6 class="mt-2 mb-1">${p.title}</h6>
-                    <small class="text-muted">${p.description || 'Açıklama yok'}</small>
-                    <div class="mt-2 d-flex justify-content-between align-items-center">
-                        <div class="icons text-muted">💬 2 &nbsp; 📎 1 &nbsp; 👁️ 4</div>
-                        <div>+5</div>
-                    </div>
-                </div>
-            `;
-        }
+                `;
+         }
 
 
         function handleDrop(el, target) {
             const id = parseInt(el.querySelector('[data-eid]').dataset.eid);
             const boardId = target.closest('.kanban-board').getAttribute('data-id');
-            const newType = boardId.replace(/^_/, ''); // _todo → todo
+            const newType = boardId.replace(/^_/, ''); 
 
-            const stage = stages.find(s => s.name.toLowerCase() === newType.toLowerCase());
+            const stage = stages.find(s => sanitizeId(s.name) === boardId);
 
             const badge = el.querySelector('.badge');
 
@@ -588,6 +591,10 @@
     });
 
 
+     window.sanitizeId =function (str) {
+        if (!str) return '';
+        return '_' + str.toLowerCase().replace(/\s+/g, '');
+    }
 
 
 </script>
@@ -725,7 +732,6 @@
 </script>
 
 <script>
-
     $(document).on('click', '#saveProcessBtn', function () {
         var form = $('#addProcessForm')[0];
         var formData = new FormData(form);
@@ -736,25 +742,43 @@
             data: formData,
             contentType: false,
             processData: false,
-            success: function () {
+            success: function (result) {
                 $('#addProcessModal').modal('hide');
 
-                const newProcess = {
-                id: 'process-' + result.id,
-                title: getCardHTML({
-                    id: result.id,
-                    title: result.title,
-                    description: result.description,
-                    processType: result.stageName, // Sunucudan dönen stage adı
-                    color: result.colorHex // Sunucudan dönen renk
-                })
-            };
+                const boardId = sanitizeId(result.processType || '');
 
-            const boardId = '_' + result.stageName.toLowerCase().replace(/\s+/g, '');
+                    console.log("result:", result);
+    console.log("processType:", result.processType);
 
-            // İlgili board'a yeni işlemi ekle
-            kanban.addElement(boardId, newProcess);
-                location.reload(); // listeyi yenile veya tabloyu güncelle
+
+                console.log('Kanban objesi:', kanban);
+                console.log('Board Id:', boardId);
+                console.log('Yeni kart verisi:', result);
+
+                // Yeni kart objesi
+                const newCard = {
+                    id: 'process-' + result.id,
+                    title: getCardHTML({
+                        id: result.id,
+                        title: result.title,
+                        description: result.description,
+                        processType: result.processType,
+                        colorHex: result.colorHex
+                    })
+                };
+
+                // Panoya yeni işlemi ekle
+                kanban.addElement(boardId, newCard);
+
+                if (kanban && typeof kanban.addElement === 'function') {
+                    kanban.addElement(boardId, newCard);
+                    console.log('Yeni kart eklendi.');
+                } else {
+                    console.error('Kanban objesi yok veya addElement fonksiyonu bulunamadı!');
+                }
+
+                // (İsteğe bağlı) Formu temizle
+                form.reset();
             },
             error: function (err) {
                 alert('İşlem başarısız.');
@@ -762,5 +786,5 @@
             }
         });
     });
-
 </script>
+

@@ -13,6 +13,7 @@ namespace PTP.EntityLayer.Models
         public string ColorHex { get; set; } = "#CCCCCC";
         public int? ProjectId { get; set; }
         public Project? Project { get; set; }
+        public int Order { get; set; }
         public ICollection<Process> Processes { get; set; } = new List<Process>();
     }
 }

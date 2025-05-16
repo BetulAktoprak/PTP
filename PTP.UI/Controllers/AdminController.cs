@@ -230,7 +230,22 @@ namespace PTP.UI.Controllers
                 _commentService.Add(comment);
             }
 
-            return Ok();
+            var stage = _processStageService.GetByID(model.ProcessStageId);
+
+            return Json(new
+            {
+                success = true,
+                process = new
+                {
+                    id = newProcess.Id,
+                    title = newProcess.Title,
+                    description = newProcess.Description,
+                    processType = stage.Name,
+                    colorHex = stage.ColorHex
+                }
+                
+            });
+
         }
 
 

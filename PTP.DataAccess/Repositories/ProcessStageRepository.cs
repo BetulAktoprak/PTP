@@ -23,6 +23,7 @@ namespace PTP.DataAccess.Repositories
             return await _context.ProcessStages
                .Where(p => p.ProjectId == projectId)
                .Include(p => p.Project)
+               .OrderBy(x => x.Order)
                .ToListAsync();
         }
 

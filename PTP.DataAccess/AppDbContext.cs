@@ -93,11 +93,7 @@ namespace PTP.DataAccess
                 .WithMany(p => p.ProjectPersonnels)
                 .HasForeignKey(pp => pp.PersonnelId);
 
-            modelBuilder.Entity<ProcessStage>().HasData(
-                new ProcessStage { Id = 1, Name = "To Do", ColorHex = "#6c757d", CreatedDate = new DateTime(2025, 5, 13) },
-                new ProcessStage { Id = 2, Name = "In Progress", ColorHex = "#ffc107", CreatedDate = new DateTime(2025, 5, 13) },
-                new ProcessStage { Id = 3, Name = "Done", ColorHex = "#198754", CreatedDate = new DateTime(2025, 5, 13) }
-            );
+           
         }
     }
 }
