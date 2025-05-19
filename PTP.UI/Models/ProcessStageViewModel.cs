@@ -4,5 +4,6 @@
     {
         public string ProcessStageName { get; set; }
         public string ColorHex { get; set; }
+        public int Order { get; set; }
     }
 }

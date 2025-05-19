@@ -264,67 +264,152 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
-                <button type="submit" class="btn btn-success" id="btnConfirmSave">Kaydet</button>
+                <button type="button" class="btn btn-success" id="btnConfirmSave">Kaydet</button>
             </div>
         </div>
     </div>
 </div>
 
-@* Kolon Silme *@
+@* Kolona İşlem Ekleme ve Silme *@
 <script>
-    function addStageRow() {
-        const container = document.getElementById("stagesContainer");
-        const row = document.createElement("div");
-        row.className = "stage-row mb-2 d-flex align-items-center";
-        row.innerHTML = `
-            <input type="text" placeholder="Kolon adı" class="form-control d-inline w-50" />
-            <input type="color" value="#007bff" class="form-control d-inline w-25 mx-2" />
-            <span class="remove-stage text-danger" style="cursor: pointer; font-size: 1.2rem;" onclick="removeStageRow(this)">&#10006;</span>
+
+    const existingStages = @Html.Raw(JsonConvert.SerializeObject(Model.Stages ?? new List<ProcessStageViewModel>()));
+    selectedPersonnel = @Html.Raw(ViewBag.SelectedPersonnel ?? "[]");
+
+    window.onload = function () {
+        if (existingStages.length > 0) {
+            existingStages.forEach((stage, index) => {
+                addStage(stage.ProcessStageName, stage.ColorHex, stage.Order ?? index);
+            });
+        }
+
+        if (selectedPersonnel.length > 0) {
+            selectedPersonnel.forEach(p => {
+                // burada senin personel alanını oluşturduğun yapıya göre checkbox'ları vs işaretlemen gerekir
+                const checkbox = document.querySelector(`input[data-personel-id='${p.PersonnelId}'][data-permission='read']`);
+                if (checkbox) checkbox.checked = p.CanRead;
+                if (checkbox) checkbox.checked = p.CanCreate;
+                if (checkbox) checkbox.checked = p.CanUpdate;
+                if (checkbox) checkbox.checked = p.CanDelete;
+                if (checkbox) checkbox.checked = p.CanComment;
+                // diğer izinleri de aynı şekilde işaretleyebilirsin
+            });
+        }
+    };
+
+    let stageIndex = 0;
+
+    function addStage(name = "", color = "#cccccc", order = 0) {
+        const list = document.getElementById('stageList');
+
+        const li = document.createElement('li');
+        li.className = 'item mb-2 d-flex align-items-center';
+        li.setAttribute('draggable', 'true');
+        li.dataset.index = stageIndex;
+
+        li.innerHTML = `
+            <div class="cont d-flex align-items-center w-100">
+                <input type="text" name="Stages[${stageIndex}].ProcessStageName" value="${name}" placeholder="Kolon adı" class="form-control w-50 me-2" />
+                <input type="color" name="Stages[${stageIndex}].ColorHex" value="${color}" class="form-control-color me-2" />
+                <input type="hidden" name="Stages[${stageIndex}].Order" class="stage-order" value="${stageIndex}" />
+                <span class="text-danger" style="cursor: pointer;" onclick="removeStage(this)">&#10006;</span>
+            </div>
         `;
-        container.appendChild(row);
-        reIndexStages();
+
+        list.appendChild(li);
+        stageIndex++;
+        updateSortable(); // yeniden sıralamayı başlat
     }
 
-    function removeStageRow(element) {
-        const row = element.parentElement;
-        row.remove();
-        reIndexStages(); 
+    function removeStage(el) {
+        const li = el.closest('li');
+        li.remove();
+        updateOrderInputs();
     }
 
-    function reIndexStages() {
-        const rows = document.querySelectorAll("#stagesContainer .stage-row");
-        rows.forEach((row, index) => {
-            const textInput = row.querySelector('input[type="text"]');
-            const colorInput = row.querySelector('input[type="color"]');
+    function updateOrderInputs() {
+        const items = document.querySelectorAll('#stageList .item');
+        items.forEach((item, i) => {
+            const nameInput = item.querySelector('input[type="text"]');
+            const colorInput = item.querySelector('input[type="color"]');
+            const orderInput = item.querySelector('.stage-order');
 
-            textInput.name = `Stages[${index}].ProcessStageName`;
-            colorInput.name = `Stages[${index}].ColorHex`;
+            if (nameInput) nameInput.name = `Stages[${i}].ProcessStageName`;
+            if (colorInput) colorInput.name = `Stages[${i}].ColorHex`;
+            if (orderInput) {
+                orderInput.name = `Stages[${i}].Order`;
+                orderInput.value = i;
+            }
+        });
+    }
+
+
+
+    function updateSortable() {
+        const list = document.getElementById('stageList');
+        let dragSrcEl = null;
+
+        list.querySelectorAll('.item').forEach(item => {
+            item.addEventListener('dragstart', function (e) {
+                dragSrcEl = this;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', this.innerHTML);
+                this.classList.add('dragging');
+            });
+
+            item.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            });
+
+            item.addEventListener('drop', function (e) {
+                e.stopPropagation();
+                if (dragSrcEl !== this) {
+                    const temp = this.innerHTML;
+                    this.innerHTML = dragSrcEl.innerHTML;
+                    dragSrcEl.innerHTML = temp;
+                    updateOrderInputs(); // sıralamaları güncelle
+                }
+                return false;
+            });
+
+            item.addEventListener('dragend', function () {
+                this.classList.remove('dragging');
+            });
         });
     }
 </script>
 
+
 <script>
-    const personnelList = @Html.Raw(personnelJson);
+    // JSON dataları parse ederken güvenli şekilde tanımla
+    const personnelList = @Html.Raw(JsonConvert.SerializeObject(ViewBag.PersonnelListJson ?? new object()));
+    let selectedPersonnel = @Html.Raw(ViewBag.SelectedPersonnel ?? "[]");
 
     const tbody = document.getElementById("personnelTableBody");
 
     personnelList.forEach(p => {
         const row = document.createElement("tr");
 
+        // Daha önce atanmış personel varsa onun yetkilerini al
+        const selected = selectedPersonnel.find(sp => sp.PersonnelId == parseInt(p.value));
+
         row.innerHTML = `
             <td class="text-start">${p.name}<input type="hidden" class="personnel-id" value="${p.value}" /></td>
-            <td><input type="checkbox" class="form-check-input can-read" /></td>
-            <td><input type="checkbox" class="form-check-input can-create" /></td>
-            <td><input type="checkbox" class="form-check-input can-update" /></td>
-            <td><input type="checkbox" class="form-check-input can-delete" /></td>
-            <td><input type="checkbox" class="form-check-input can-comment" /></td>
+            <td><input type="checkbox" class="form-check-input can-read" ${selected?.CanRead ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="form-check-input can-create" ${selected?.CanCreate ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="form-check-input can-update" ${selected?.CanUpdate ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="form-check-input can-delete" ${selected?.CanDelete ? 'checked' : ''} /></td>
+            <td><input type="checkbox" class="form-check-input can-comment" ${selected?.CanComment ? 'checked' : ''} /></td>
         `;
 
         tbody.appendChild(row);
     });
-
-   
+    // Hidden input'u da güncelle
+    document.getElementById("SelectedPersonnelJson").value = JSON.stringify(selectedPersonnel);
 </script>
+
 
 <script>
     document.getElementById("personnelSearch").addEventListener("keyup", function () {
@@ -526,7 +611,7 @@
 
     function prepareSelectedPersonnelJson(){
         const rows = document.querySelectorAll("#personnelTableBody tr");
-        const selectedPersonnel = [];
+        const updatedList = [];
 
         rows.forEach(row => {
             const id = row.querySelector(".personnel-id").value;
@@ -537,7 +622,7 @@
             const canComment = row.querySelector(".can-comment").checked;
 
             if (canRead || canCreate || canUpdate || canDelete || canComment) {
-                selectedPersonnel.push({
+                updatedList.push({
                     PersonnelId: parseInt(id),
                     CanRead: canRead,
                     CanCreate: canCreate,
@@ -548,27 +633,34 @@
             }
         });
 
+        selectedPersonnel = updatedList;
         document.getElementById("SelectedPersonnelJson").value = JSON.stringify(selectedPersonnel);
     }
+    window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btnConfirmSave").addEventListener("click", function (e) {
+                e.preventDefault();
 
-    document.getElementById("btnConfirmSave").addEventListener("click", function (e) {
-            e.preventDefault();
+                prepareSelectedPersonnelJson();
 
-            prepareSelectedPersonnelJson();
+                const descriptions = selectedFiles.map(item => item.description || "");
+                document.getElementById("DocumentDescriptionsJson").value = JSON.stringify(descriptions);
 
-            const descriptions = selectedFiles.map(item => item.description || "");
-        document.getElementById("DocumentDescriptionsJson").value = JSON.stringify(descriptions);
-            const formElement = document.getElementById('projectForm');
-                const formData = new FormData(formElement);
+                const formElement = document.getElementById('projectForm');
+                    const formData = new FormData(formElement);
 
-                selectedFiles.forEach((item, index) => {
-                    formData.append(`ProjectFiles[${index}]`, item.file);
-                    formData.append(`DocumentDescriptions[${index}]`, item.description);
-                });
+                    formData.set("SelectedPersonnelJson", document.getElementById("SelectedPersonnelJson").value);
+                    formData.set("DocumentDescriptionsJson", document.getElementById("DocumentDescriptionsJson").value);
+
+                    selectedFiles.forEach((item, index) => {
+                        formData.append(`ProjectFiles[${index}]`, item.file);
+                        formData.append(`DocumentDescriptions[${index}]`, item.description);
+                    });
 
 
-        fetch(formElement.action, { method: "POST", body: formData })
-        .then(r => r.ok ? location.href = "/Project/Index"
-                        : r.text().then(t => alert("Hata:\n" + t)));
+            fetch(formElement.action, { method: "POST", body: formData })
+            .then(r => r.ok ? location.href = "/Project/Index"
+                            : r.text().then(t => alert("Hata:\n" + t)));
+        });
     });
 </script>
+
