@@ -12,7 +12,7 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250428112724_mig1")]
+    [Migration("20250520061845_mig1")]
     partial class mig1
     {
         /// <inheritdoc />
@@ -84,7 +84,6 @@ namespace PTP.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
@@ -103,7 +102,13 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
@@ -122,6 +127,9 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DocumentDescriptions")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
@@ -131,10 +139,13 @@ namespace PTP.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PersonnelId")
+                    b.Property<int?>("PersonnelId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProcessId")
+                    b.Property<int?>("ProcessId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
@@ -143,11 +154,18 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PersonnelId");
 
                     b.HasIndex("ProcessId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Documents");
                 });
@@ -172,14 +190,16 @@ namespace PTP.DataAccess.Migrations
                     b.Property<string>("FullName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Phone")
+                    b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
+                    b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
@@ -188,7 +208,13 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Personnels");
                 });
@@ -216,8 +242,8 @@ namespace PTP.DataAccess.Migrations
                     b.Property<int>("PersonnelId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ProcessType")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ProcessStageId")
+                        .HasColumnType("int");
 
                     b.Property<int>("ProjectId")
                         .HasColumnType("int");
@@ -235,9 +261,55 @@ namespace PTP.DataAccess.Migrations
 
                     b.HasIndex("PersonnelId");
 
+                    b.HasIndex("ProcessStageId");
+
                     b.HasIndex("ProjectId");
 
                     b.ToTable("Processes");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.ProcessStage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ColorHex")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProcessStages");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Project", b =>
@@ -248,16 +320,19 @@ namespace PTP.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ClientName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int?>("CustomerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Details")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("EndDate")
@@ -266,7 +341,22 @@ namespace PTP.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Priority")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProcessStageName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ProjectRate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProjectSize")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProjectTitle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProjectType")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -283,6 +373,119 @@ namespace PTP.DataAccess.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Projects");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.ProjectPersonnel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CanComment")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanCreate")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRead")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanUpdate")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PersonnelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PersonnelId");
+
+                    b.HasIndex("ProjectId", "PersonnelId")
+                        .IsUnique();
+
+                    b.ToTable("ProjectPersonnels");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("PersonnelProject", b =>
+                {
+                    b.Property<int>("PersonnelsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonnelsId", "ProjectsId");
+
+                    b.HasIndex("ProjectsId");
+
+                    b.ToTable("PersonnelProject");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Comment", b =>
@@ -304,23 +507,56 @@ namespace PTP.DataAccess.Migrations
                     b.Navigation("Process");
                 });
 
+            modelBuilder.Entity("PTP.EntityLayer.Models.Customer", b =>
+                {
+                    b.HasOne("PTP.EntityLayer.Models.User", "User")
+                        .WithOne("Customer")
+                        .HasForeignKey("PTP.EntityLayer.Models.Customer", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PTP.EntityLayer.Models.Document", b =>
                 {
                     b.HasOne("PTP.EntityLayer.Models.Personnel", "Personnel")
                         .WithMany()
                         .HasForeignKey("PersonnelId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PTP.EntityLayer.Models.Process", "Process")
                         .WithMany("Documents")
                         .HasForeignKey("ProcessId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PTP.EntityLayer.Models.Project", "Project")
+                        .WithMany("Documents")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("PTP.EntityLayer.Models.User", "User")
+                        .WithMany("Documents")
+                        .HasForeignKey("UserId");
 
                     b.Navigation("Personnel");
 
                     b.Navigation("Process");
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.Personnel", b =>
+                {
+                    b.HasOne("PTP.EntityLayer.Models.User", "User")
+                        .WithOne("Personnel")
+                        .HasForeignKey("PTP.EntityLayer.Models.Personnel", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Process", b =>
@@ -329,6 +565,12 @@ namespace PTP.DataAccess.Migrations
                         .WithMany("Processes")
                         .HasForeignKey("PersonnelId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PTP.EntityLayer.Models.ProcessStage", "ProcessStage")
+                        .WithMany("Processes")
+                        .HasForeignKey("ProcessStageId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("PTP.EntityLayer.Models.Project", "Project")
@@ -339,6 +581,17 @@ namespace PTP.DataAccess.Migrations
 
                     b.Navigation("Personnel");
 
+                    b.Navigation("ProcessStage");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.ProcessStage", b =>
+                {
+                    b.HasOne("PTP.EntityLayer.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId");
+
                     b.Navigation("Project");
                 });
 
@@ -347,10 +600,43 @@ namespace PTP.DataAccess.Migrations
                     b.HasOne("PTP.EntityLayer.Models.Customer", "Customer")
                         .WithMany("Projects")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.ProjectPersonnel", b =>
+                {
+                    b.HasOne("PTP.EntityLayer.Models.Personnel", "Personnel")
+                        .WithMany("ProjectPersonnels")
+                        .HasForeignKey("PersonnelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PTP.EntityLayer.Models.Project", "Project")
+                        .WithMany("ProjectPersonnels")
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Personnel");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("PersonnelProject", b =>
+                {
+                    b.HasOne("PTP.EntityLayer.Models.Personnel", null)
+                        .WithMany()
+                        .HasForeignKey("PersonnelsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PTP.EntityLayer.Models.Project", null)
+                        .WithMany()
+                        .HasForeignKey("ProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Customer", b =>
@@ -361,6 +647,8 @@ namespace PTP.DataAccess.Migrations
             modelBuilder.Entity("PTP.EntityLayer.Models.Personnel", b =>
                 {
                     b.Navigation("Processes");
+
+                    b.Navigation("ProjectPersonnels");
                 });
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Process", b =>
@@ -370,9 +658,27 @@ namespace PTP.DataAccess.Migrations
                     b.Navigation("Documents");
                 });
 
-            modelBuilder.Entity("PTP.EntityLayer.Models.Project", b =>
+            modelBuilder.Entity("PTP.EntityLayer.Models.ProcessStage", b =>
                 {
                     b.Navigation("Processes");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.Project", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("Processes");
+
+                    b.Navigation("ProjectPersonnels");
+                });
+
+            modelBuilder.Entity("PTP.EntityLayer.Models.User", b =>
+                {
+                    b.Navigation("Customer");
+
+                    b.Navigation("Documents");
+
+                    b.Navigation("Personnel");
                 });
 #pragma warning restore 612, 618
         }

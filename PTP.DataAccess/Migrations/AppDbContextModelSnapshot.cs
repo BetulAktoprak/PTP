@@ -374,11 +374,11 @@ namespace PTP.DataAccess.Migrations
 
             modelBuilder.Entity("PTP.EntityLayer.Models.ProjectPersonnel", b =>
                 {
-                    b.Property<int>("ProjectId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("PersonnelId")
-                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("CanComment")
                         .HasColumnType("bit");
@@ -401,11 +401,14 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<int>("PersonnelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
@@ -413,9 +416,12 @@ namespace PTP.DataAccess.Migrations
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ProjectId", "PersonnelId");
+                    b.HasKey("Id");
 
                     b.HasIndex("PersonnelId");
+
+                    b.HasIndex("ProjectId", "PersonnelId")
+                        .IsUnique();
 
                     b.ToTable("ProjectPersonnels");
                 });

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using PTP.EntityLayer.Models;
 
 namespace PTP.UI.Models
 {
@@ -22,5 +23,7 @@ namespace PTP.UI.Models
         public List<SelectListItem> PersonnelList { get; set; }
         public string PersonnelPermissionsJson { get; set; }
         public List<ProcessStageViewModel> Stages { get; set; } = new();
+        public List<DocumentViewModel> ExistingDocuments { get; set; }
+        public string DocumentJson { get; set; }
     }
 }

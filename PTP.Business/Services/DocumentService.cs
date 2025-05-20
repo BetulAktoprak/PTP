@@ -10,7 +10,7 @@ using PTP.EntityLayer.Models;
 
 namespace PTP.Business.Services
 {
-    public class DocumentService : IService<Document>
+    public class DocumentService : IService<Document>, IDocumentService
     {
         private readonly DocumentRepository _documentRepository;
 
@@ -42,6 +42,11 @@ namespace PTP.Business.Services
         public Document? GetByID(int id)
         {
             return _documentRepository.GetById(id);
+        }
+
+        public List<Document> GetDocumentsByProjectId(int projectId)
+        {
+            return _documentRepository.GetDocumentsByProjectId(projectId);
         }
 
         public void Update(Document entity)

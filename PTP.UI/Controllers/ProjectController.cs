@@ -90,6 +90,15 @@ namespace PTP.UI.Controllers
                     return NotFound();
                 }
 
+                var documents = _documentService.GetDocumentsByProjectId(project.Id)
+                    .Select(d => new DocumentViewModel
+                    {
+                        Id = d.Id,
+                        FileName = d.FileName,
+                        FilePath = d.FilePath,
+                        DocumentDescriptions = d.DocumentDescriptions
+                    }).ToList();
+
                 var model = new ProjectCreateViewModel
                 {
                     ProjectId = project.Id,
@@ -102,6 +111,7 @@ namespace PTP.UI.Controllers
                     StartingDate = project.StartDate,
                     EndingDate = Convert.ToDateTime(project.EndDate),
                     Details = project.Details,
+                    ExistingDocuments = documents,
                     Stages = _processStageService.GetAll().Where(p => p.ProjectId == project.Id)
                                 .Select(s => new ProcessStageViewModel
                                 {
@@ -110,16 +120,16 @@ namespace PTP.UI.Controllers
                                 }).ToList()
                 };
 
-                var existingDocuments = _documentService.GetAll()
-                    .Where(d => d.ProjectId == id.Value)
-                    .Select(d => new
-                    {
-                        FileName = d.FileName,
-                        FilePath = d.FilePath,
-                        Description = d.DocumentDescriptions
-                    }).ToList();
+                //var existingDocuments = _documentService.GetAll()
+                //    .Where(d => d.ProjectId == id.Value)
+                //    .Select(d => new
+                //    {
+                //        FileName = d.FileName,
+                //        FilePath = d.FilePath,
+                //        Description = d.DocumentDescriptions
+                //    }).ToList();
 
-                ViewBag.ExistingDocuments = JsonConvert.SerializeObject(existingDocuments);
+                //ViewBag.ExistingDocuments = JsonConvert.SerializeObject(existingDocuments);
 
 
                 // Projeye atanmış personelleri ViewBag ile gönder
@@ -144,7 +154,7 @@ namespace PTP.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson, string DocumentDescriptionsJson, string ExistingDocumentsJson, string DeletedDocumentIds)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson)
         {
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -156,17 +166,15 @@ namespace PTP.UI.Controllers
             int userId = int.Parse(userIdClaim.Value);
 
 
-            var descriptions = JsonConvert.DeserializeObject<List<string>>(DocumentDescriptionsJson);
-            var existingDocuments = JsonConvert.DeserializeObject<List<DocumentViewModel>>(ExistingDocumentsJson ?? "[]");
-            var deletedDocumentIds = JsonConvert.DeserializeObject<List<int>>(DeletedDocumentIds ?? "[]");
+            //var descriptions = JsonConvert.DeserializeObject<List<string>>(DocumentDescriptionsJson);
 
             var files = Request.Form.Files;
 
-            if (files == null || descriptions == null)
-            {
-                ModelState.AddModelError("", "Yüklenen dosyalar ile açıklamalar eşleşmiyor.");
-                return View(model);
-            }
+            //if (files == null || descriptions == null)
+            //{
+            //    ModelState.AddModelError("", "Yüklenen dosyalar ile açıklamalar eşleşmiyor.");
+            //    return View(model);
+            //}
 
             try
             {
@@ -292,17 +300,39 @@ namespace PTP.UI.Controllers
                     }
                 }
 
+                var docMeta = JsonConvert.DeserializeObject<List<DocumentViewModel>>(model.DocumentJson);
+                var existingDocs = _documentService.GetDocumentsByProjectId(model.ProjectId);
+
+                // Silinmiş dosyaları bul
+                var existingIds = docMeta.Where(x => x.Id.HasValue).Select(x => x.Id.Value).ToList();
+                var toDelete = existingDocs.Where(x => !existingIds.Contains(x.Id)).ToList();
+
+                foreach (var doc in toDelete)
+                {
+                    var path = Path.Combine(_environment.WebRootPath, doc.FilePath);
+                    if (System.IO.File.Exists(path))
+                        System.IO.File.Delete(path);
+                    _documentService.Delete(doc.Id);
+                }
+
+                foreach (var item in docMeta.Where(x => x.Id.HasValue))
+                {
+                    var existing = existingDocs.FirstOrDefault(d => d.Id == item.Id);
+                    if (existing != null && existing.DocumentDescriptions != item.DocumentDescriptions)
+                    {
+                        existing.DocumentDescriptions = item.DocumentDescriptions;
+                        _documentService.Update(existing);
+                    }
+                }
 
                 var uploads = Path.Combine(_environment.WebRootPath, "uploads");
                 Directory.CreateDirectory(uploads);
 
-
-                for (int i = 0; i < files.Count; i++)
+                int newFileIndex = 0;
+                foreach (var item in docMeta.Where(x => !x.Id.HasValue))
                 {
-                    var file = files[i];
-                    var desc = descriptions[i];
-
-                    var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                    var file = model.ProjectFiles[newFileIndex++];
+                    var uniqueFileName = Guid.NewGuid() + Path.GetExtension(file.FileName);
                     var relativePath = Path.Combine("uploads", uniqueFileName);
                     var fullPath = Path.Combine(_environment.WebRootPath, relativePath);
 
@@ -311,17 +341,18 @@ namespace PTP.UI.Controllers
                         await file.CopyToAsync(stream);
                     }
 
-                    var document = new Document
+                    var newDoc = new Document
                     {
                         FileName = file.FileName,
                         FilePath = relativePath,
-                        DocumentDescriptions = desc,
-                        ProjectId = project.Id,
+                        DocumentDescriptions = item.DocumentDescriptions,
+                        ProjectId = model.ProjectId,
                         UserId = userId
                     };
 
-                    _documentService.Add(document);
+                    _documentService.Add(newDoc);
                 }
+
 
                 List<ProjectPersonnelViewModel> selectedList = new();
                 if (!string.IsNullOrEmpty(SelectedPersonnelJson))

@@ -81,19 +81,12 @@ namespace PTP.DataAccess
                 .HasForeignKey<Customer>(c => c.UserId);
 
             modelBuilder.Entity<ProjectPersonnel>()
-                .HasKey(pp => new { pp.ProjectId, pp.PersonnelId });
+                .HasKey(pp => pp.Id); 
 
             modelBuilder.Entity<ProjectPersonnel>()
-                .HasOne(pp => pp.Project)
-                .WithMany(p => p.ProjectPersonnels)
-                .HasForeignKey(pp => pp.ProjectId);
+                .HasIndex(pp => new { pp.ProjectId, pp.PersonnelId }).IsUnique(); 
 
-            modelBuilder.Entity<ProjectPersonnel>()
-                .HasOne(pp => pp.Personnel)
-                .WithMany(p => p.ProjectPersonnels)
-                .HasForeignKey(pp => pp.PersonnelId);
 
-           
         }
     }
 }
