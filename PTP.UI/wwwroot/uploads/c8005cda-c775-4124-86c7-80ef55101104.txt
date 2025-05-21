@@ -1,0 +1,31 @@
+Merhaba.
+
+Vpn Dış ip           : 82.138.125.130
+Port                       : 443
+User name          : wmsproje
+Password            : 4LirLg$Bns
+
+
+Rdp
+Sunucu Ip        : 10.100.20.16
+User name      : Ada\ wmsproje
+Password            : Wm2025Pj**!
+
+Programın kısayolunu ve wmsdepo diye database oluşturdum.
+Hali hazırda kullanılan veritabanı firebird 2.5
+
+Connection string            : 10.100.20.11/3050:D:\ERP\Ofisnet\Data\WMSDEMO.fdb 
+User name                          : wms
+Şifre                                      : wms
+
+
+SQL 
+Kullanıcı Adı: sysdba
+Şifre: AdmYlmz
+
+
+Stokla ilgili işlem ve kart  tabloları STOK ile başlıyor, sipariş ile ilgili tablolar ALSA ile başlıyor.
+
+Gönderdiğiniz maile göre viewler hazırlayacağım. 
+
+Şimdilik bu şekilde dataya bağlanıp kontrol edebilirsiniz. 

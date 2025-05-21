@@ -7,6 +7,8 @@ namespace PTP.UI.Models
     {
         public int ProjectId { get; set; }
         public List<IFormFile> ProjectFiles { get; set; } = new();
+        public IFormFile? LogoFile { get; set; }
+        public string? LogoPath { get; set; }
         public string ProjectTitle { get; set; }
         public string ClientName { get; set; }
         public decimal ProjectRate { get; set; }

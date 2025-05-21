@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
 }
 
 <style>
@@ -26,9 +27,25 @@
 </div>
 
 
+<div class="modal fade" id="projectDocumentsModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Proje Dökümanları</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
+                <div class="d-flex flex-column align-items-center" id="projectDocumentsContent"></div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
 
 <script>
-    $(function () {
+ $(function () {
         $("#jsGrid").jsGrid({
             width: "100%",
             height: "auto",
@@ -62,151 +79,111 @@
             fields: [
                 { name: "id", type: "number", title: "Id", width: 50 },
                     {
-                    name: "documents",
-                    title: "Dökümanlar",
-                    type: "text",
-                    width: 100,
-                    itemTemplate: function(docs) {
-                        if (!Array.isArray(docs) || docs.length === 0) {
-                            return $("<span>").text("Dosya yok");
-                        }
-
-                        var container = $("<div>").css("display", "flex").css("gap", "6px");
-
-                        docs.forEach(function(file) {
-
-                            var ext = file.split('.').pop().toLowerCase();
-                            var fullPath = "/" + file;
-
-                            let iconUrl;
-                            switch (ext) {
-                                case "pdf":
-                                    iconUrl = "/icons/pdf-icon.png"; break;
-                                case "doc":
-                                case "docx":
-                                    iconUrl = "/icons/word-icon.png"; break;
-                                case "xls":
-                                case "xlsx":
-                                    iconUrl = "/icons/excel-icon.png"; break;
-                                case "jpg":
-                                case "jpeg":
-                                case "png":
-                                case "gif":
-                                    iconUrl = fullPath; break; // resmi direkt göster
-                                default:
-                                    iconUrl = "/icons/file-icon.png";
-                            }
-
-                            container.append(
-                                $("<a>").attr("href", fullPath).attr("target", "_blank").append(
-                                    $("<img>").attr("src", iconUrl)
-                                              .css({ width: "40px", height: "40px", objectFit: "cover" })
-                                )
-                            );
-                        });
-
-                        return container;
+                        name: "logo",
+                        title: "Logo",
+                        type: "text",
+                        width: 80,
+                        itemTemplate: function (value, item) {
+                               if (value) {
+                                   return $("<img>").attr("src", "/" + value)
+                                                    .css({ height: "40px", width: "auto" });
+                               } else {
+                                   return $("<span>").text("Yok");
+                               }
                     }
                 },
 
                 { name: "projectTitle", type: "text", title: "Proje Adı", width: 150 },
-                { name: "clientName", type: "text", title: "Müşteri", width: 100 },
+                { name: "clientName", type: "text", title: "Oluşturan", width: 100 },
                 { name: "projectRate", type: "number", title: "Rate", width: 60 },
                 { name: "projectType", type: "text", title: "Tür", width: 80 },
                 { name: "priority", type: "text", title: "Öncelik", width: 80 },
                 { name: "projectSize", type: "text", title: "Boyut", width: 80 },
                 { name: "startDate", type: "text", title: "Başlangıç", width: 100 },
                 { name: "endDate", type: "text", title: "Bitiş", width: 100 },
-                { name: "details", type: "text", title: "Detaylar", width: 150 },
-                // { name: "documentDetail", type: "text", title: "Döküman", width: 150 },
+                {
+                    name: "details",
+                    type: "text",
+                    title: "Detaylar",
+                    width: 130,
+                    itemTemplate: function (value, item) {
+                        if (value && value.length > 15) {
+                            return value.substring(0, 15) + "...";
+                        }
+                        return value;
+                    }
+                },
                 {
                     type: "control",
-                    width: 60,
+                    width: 120,
                     editButton: false,
                     deleteButton: false,
                     itemTemplate: function (_, item) {
-                        return $("<div>").append(
-                            $("<a>").attr("href", "/Project/Create?id=" + item.id)
-                                   .html('<i class="fa fa-edit text-primary mx-1"></i>'),
-                            $("<a>").attr("href", "/Project/Delete/" + item.id)
-                                   .html('<i class="fa fa-trash text-danger mx-1"></i>')
-                        );
-                    }
+                       // Projeye ait dökümanları gösterecek ikon
+                       var icon = $("<i class='fa fa-folder-open text-secondary mx-2 fs-5' style='cursor:pointer;'></i>");
+
+                       // İkona tıklanınca dökümanları gösteren modalı aç
+                        icon.on("click", function (event) {
+                           event.stopPropagation(); // rowClick olayını engelle
+                           showProjectDocumentsModal(item.documents); // Projeye ait dökümanları modalda göster
+                       });
+
+                       // Düzenleme ve silme ikonları
+                       var editButton = $("<a>").attr("href", "/Project/Create?id=" + item.id)
+                           .html('<i class="fa fa-edit text-primary mx-2"></i>');
+                       var deleteButton = $("<a>").attr("href", "/Project/Delete/" + item.id)
+                           .html('<i class="fa fa-trash text-danger mx-2"></i>');
+
+                       // Döndürülen içerik: Edit, Delete, ve Dosya ikonları
+                       return $("<div>").append(icon, editButton, deleteButton);
+                   }
                 }
             ]
         });
     });
+
+    function showProjectDocumentsModal(documents) {
+        const container = $("#projectDocumentsContent");
+        container.empty();  // Önceki içeriği temizle
+
+        if (!Array.isArray(documents) || documents.length === 0) {
+            container.append("<p class='text-muted'>Dosya bulunamadı.</p>");
+        } else {
+            documents.forEach(doc => {
+                const filePath = doc.filePath || doc; // string ya da object olabilir
+                   const description = doc.documentDescriptions || "Açıklama bulunmuyor.";
+                      console.log("Document:", doc);
+
+
+                const ext = filePath.split('.').pop().toLowerCase();
+                const fullPath = "/" + filePath;
+                let content;
+
+                if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+                    content = `<img src="${fullPath}" class="img-fluid rounded mb-2" style="max-height: 300px;" />`;
+                } else if (ext === "pdf") {
+                    content = `<iframe src="${fullPath}" style="width:100%; height:300px;" frameborder="0"></iframe>`;
+                } else {
+                    content = `<a href="${fullPath}" target="_blank">${filePath.split('/').pop()}</a>`;
+                }
+
+                container.append(`
+                       <div class="card m-2" style="width: 30rem;">
+                            <div class="border p-2 rounded shadow-lg">
+                            ${content}
+                               <p class="card-text text-truncate fw-bold" title="${description}">${description}</p>
+                        </div>
+                    </div>
+                        <div class="border-top my-3 w-100"></div>
+                `);
+            });
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('projectDocumentsModal'));
+        modal.show();
+    }
+
+
 </script>
 
 
-@* <div class="container-fluid"> *@
-@*     <div class="row project-cards"> *@
-@*         <div class="col-md-12 project-list"> *@
-@*             <div class="card"> *@
-@*                 <div class="row"> *@
-@*                     <div class="col-md-6"> *@
-@*                         <ul class="nav nav-tabs border-tab" id="top-tab" role="tablist"> *@
-@*                             <li class="nav-item"><a class="nav-link active" id="top-home-tab" data-bs-toggle="tab" href="#top-home" role="tab" aria-controls="top-home" aria-selected="true"><i data-feather="target"></i>All</a></li> *@
-@*                             <li class="nav-item"><a class="nav-link" id="profile-top-tab" data-bs-toggle="tab" href="#top-profile" role="tab" aria-controls="top-profile" aria-selected="false"><i data-feather="info"></i>Doing</a></li> *@
-@*                             <li class="nav-item"><a class="nav-link" id="contact-top-tab" data-bs-toggle="tab" href="#top-contact" role="tab" aria-controls="top-contact" aria-selected="false"><i data-feather="check-circle"></i>Done</a></li> *@
-@*                         </ul> *@
-@*                     </div> *@
-@*                     <div class="col-md-6 text-end"> *@
-@*                         <a class="btn btn-primary" asp-controller="Project" asp-action="Create"><i data-feather="plus-square"></i> Create New Project</a> *@
-@*                     </div> *@
-@*                 </div> *@
-@*             </div> *@
-@*         </div> *@
-
-@*         <div class="col-sm-12"> *@
-@*             <div class="card"> *@
-@*                 <div class="card-body"> *@
-@*                     <div class="tab-content" id="top-tabContent"> *@
-
-@*                         <div class="tab-pane fade show active" id="top-home" role="tabpanel"> *@
-@*                             <div class="row"> *@
-@*                                 @foreach (var project in Model) *@
-@*                                 { *@
-@*                                     <div class="col-xxl-4 col-lg-6 box-col-6 "> *@
-@*                                     @Html.Partial("_ProjectCard", project) *@
-@*                                     </div> *@
-@*                                 } *@
-@*                             </div> *@
-@*                         </div> *@
-
-@*                         <div class="tab-pane fade" id="top-profile" role="tabpanel"> *@
-@*                             <div class="row"> *@
-@*                                 @foreach (var project in Model.Where(p => GetCompletionRate(p) > 0 && GetCompletionRate(p) < 100)) *@
-@*                                 { *@
-@*                                     <div class="col-xxl-4 col-lg-6 box-col-6 "> *@
-@*                                         @Html.Partial("_ProjectCard", project) *@
-@*                                     </div> *@
-@*                                 } *@
-@*                             </div> *@
-@*                         </div> *@
-
-@*                         <div class="tab-pane fade" id="top-contact" role="tabpanel"> *@
-@*                             <div class="row"> *@
-@*                                 @foreach (var project in Model.Where(p => GetCompletionRate(p) == 100)) *@
-@*                                 { *@
-@*                                     <div class="col-xxl-4 col-lg-6 box-col-6 "> *@
-@*                                         @Html.Partial("_ProjectCard", project) *@
-@*                                     </div> *@
-@*                                 } *@
-@*                             </div> *@
-@*                         </div> *@
-@*                     </div> *@
-@*                 </div> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-@* </div> *@
-
-@* @functions { *@
-@*     int GetCompletionRate(PTP.EntityLayer.Models.Project project) *@
-@*     { *@
-@*         var total = project.Processes?.Count() ?? 0; *@
-@*         var done = project.Processes?.Count(p => p.ProcessType == "Done") ?? 0; *@
-@*         return total == 0 ? 0 : (done * 100 / total); *@
-@*     } *@
-@* } *@

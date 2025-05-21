@@ -40,24 +40,31 @@ namespace PTP.UI.Controllers
         [HttpGet]
         public JsonResult GetProjects()
         {
-            var projects = _projectService.GetAll().Select(p => new
-            {
-                id = p.Id,
-                projectTitle = p.ProjectTitle,
-                clientName = p.ClientName,
-                projectRate = p.ProjectRate,
-                projectType = p.ProjectType,
-                priority = p.Priority,
-                projectSize = p.ProjectSize,
-                startDate = p.StartDate.ToString("dd/MM/yyyy"),
-                endDate = p.EndDate?.ToString("dd/MM/yyyy"),
-                details = p.Details,
-                Documents = _documentService.GetAll()
-                       .Where(d => d.ProjectId == p.Id)
-                       .Select(d => d.FilePath)
-                       .ToList()
-            });
-            return Json(projects);
+            var projects = _projectService.GetAll()
+                .Where(p => !p.IsDeleted)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    logo = p.Logo,
+                    projectTitle = p.ProjectTitle,
+                    clientName = p.ClientName,
+                    projectRate = p.ProjectRate,
+                    projectType = p.ProjectType,
+                    priority = p.Priority,
+                    projectSize = p.ProjectSize,
+                    startDate = p.StartDate.ToString("dd/MM/yyyy"),
+                    endDate = p.EndDate?.ToString("dd/MM/yyyy"),
+                    details = p.Details,
+                    Documents = _documentService.GetAll()
+                           .Where(d => d.ProjectId == p.Id)
+                           .Select(d => new
+                           {
+                               FilePath = d.FilePath,
+                               DocumentDescriptions = d.DocumentDescriptions
+                           })
+                            .ToList()
+                });
+                return Json(projects);
         }
 
 
@@ -94,11 +101,12 @@ namespace PTP.UI.Controllers
                     .Select(d => new DocumentViewModel
                     {
                         Id = d.Id,
+                        ProjectId = project.Id,
                         FileName = d.FileName,
                         FilePath = d.FilePath,
                         DocumentDescriptions = d.DocumentDescriptions
                     }).ToList();
-
+                Console.WriteLine("DOCS: " + JsonConvert.SerializeObject(documents));
                 var model = new ProjectCreateViewModel
                 {
                     ProjectId = project.Id,
@@ -112,6 +120,7 @@ namespace PTP.UI.Controllers
                     EndingDate = Convert.ToDateTime(project.EndDate),
                     Details = project.Details,
                     ExistingDocuments = documents,
+                    LogoPath = project.Logo,
                     Stages = _processStageService.GetAll().Where(p => p.ProjectId == project.Id)
                                 .Select(s => new ProcessStageViewModel
                                 {
@@ -120,19 +129,6 @@ namespace PTP.UI.Controllers
                                 }).ToList()
                 };
 
-                //var existingDocuments = _documentService.GetAll()
-                //    .Where(d => d.ProjectId == id.Value)
-                //    .Select(d => new
-                //    {
-                //        FileName = d.FileName,
-                //        FilePath = d.FilePath,
-                //        Description = d.DocumentDescriptions
-                //    }).ToList();
-
-                //ViewBag.ExistingDocuments = JsonConvert.SerializeObject(existingDocuments);
-
-
-                // Projeye atanmış personelleri ViewBag ile gönder
                 var selectedPersonnel = _projectPersonnelService.GetAll()
                                             .Where(p => p.ProjectId == id)
                                             .Select(p => new ProjectPersonnelViewModel
@@ -154,7 +150,7 @@ namespace PTP.UI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson)
+        public async Task<IActionResult> Create(ProjectCreateViewModel model, string SelectedPersonnelJson, string DocumentDescriptionsJson)
         {
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
@@ -166,15 +162,15 @@ namespace PTP.UI.Controllers
             int userId = int.Parse(userIdClaim.Value);
 
 
-            //var descriptions = JsonConvert.DeserializeObject<List<string>>(DocumentDescriptionsJson);
+            var descriptions = JsonConvert.DeserializeObject<List<string>>(DocumentDescriptionsJson);
 
             var files = Request.Form.Files;
 
-            //if (files == null || descriptions == null)
-            //{
-            //    ModelState.AddModelError("", "Yüklenen dosyalar ile açıklamalar eşleşmiyor.");
-            //    return View(model);
-            //}
+            if (files == null || descriptions == null)
+            {
+                ModelState.AddModelError("", "Yüklenen dosyalar ile açıklamalar eşleşmiyor.");
+                return View(model);
+            }
 
             try
             {
@@ -182,6 +178,23 @@ namespace PTP.UI.Controllers
 
                 if (model.ProjectId == 0)
                 {
+                    string logoPath = null;
+
+                    if (model.LogoFile != null && model.LogoFile.Length > 0)
+                    {
+                        var logoUploads = Path.Combine(_environment.WebRootPath, "uploads/logos");
+                        Directory.CreateDirectory(logoUploads);
+
+                        var uniqueLogoName = Guid.NewGuid().ToString() + Path.GetExtension(model.LogoFile.FileName);
+                        logoPath = Path.Combine("uploads/logos", uniqueLogoName);
+                        var fullLogoPath = Path.Combine(_environment.WebRootPath, logoPath);
+
+                        using (var stream = new FileStream(fullLogoPath, FileMode.Create))
+                        {
+                            await model.LogoFile.CopyToAsync(stream);
+                        }
+                    }
+
                     project = new Project
                     {
                         ProjectTitle = model.ProjectTitle,
@@ -193,10 +206,12 @@ namespace PTP.UI.Controllers
                         StartDate = model.StartingDate,
                         EndDate = model.EndingDate,
                         Details = model.Details,
+                        Logo = logoPath,
                         CreatedBy = userId.ToString()
                     };
 
                     _projectService.Add(project);
+                    model.ProjectId = project.Id;
                 }
                 else
                 {
@@ -206,6 +221,32 @@ namespace PTP.UI.Controllers
                     {
                         return NotFound();
                     }
+
+                    if (model.LogoFile != null && model.LogoFile.Length > 0)
+                    {
+                        var logoUploads = Path.Combine(_environment.WebRootPath, "uploads/logos");
+                        Directory.CreateDirectory(logoUploads);
+
+                        var uniqueLogoName = Guid.NewGuid().ToString() + Path.GetExtension(model.LogoFile.FileName);
+                        var logoPath = Path.Combine("uploads/logos", uniqueLogoName);
+                        var fullLogoPath = Path.Combine(_environment.WebRootPath, logoPath);
+
+                        using (var stream = new FileStream(fullLogoPath, FileMode.Create))
+                        {
+                            await model.LogoFile.CopyToAsync(stream);
+                        }
+
+                        // Eski logo varsa sil
+                        if (!string.IsNullOrEmpty(project.Logo))
+                        {
+                            var oldLogoPath = Path.Combine(_environment.WebRootPath, project.Logo);
+                            if (System.IO.File.Exists(oldLogoPath))
+                                System.IO.File.Delete(oldLogoPath);
+                        }
+
+                        project.Logo = logoPath;
+                    }
+
 
                     project.ProjectTitle = model.ProjectTitle;
                     project.ClientName = model.ClientName;
@@ -397,6 +438,18 @@ namespace PTP.UI.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var project = _projectService.GetByID(id);
+            if (project == null)
+                return NotFound();
+
+            project.IsDeleted = true;
+            _projectService.Update(project); 
+
+            return RedirectToAction("Index"); 
+        }
 
 
     }

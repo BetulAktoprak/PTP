@@ -4,6 +4,7 @@ namespace PTP.EntityLayer.Models;
 
 public class Project : BaseEntity
 {
+    public string? Logo { get; set; }
     public string? ProjectTitle { get; set; }
     public string? ClientName { get; set; }
     public decimal? ProjectRate { get; set; }
