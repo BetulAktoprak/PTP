@@ -140,6 +140,29 @@ namespace PTP.UI.Controllers
             return Json(users);
         }
 
+        [HttpPost]
+        public IActionResult UpdateStageOrders([FromBody] List<StageOrderUpdateModel> list)
+        {
+            foreach (var item in list)
+            {
+                var stage = _processStageService.GetByID(item.Id);
+                if (stage != null)
+                {
+                    stage.Order = item.Order;
+                    _processStageService.Update(stage);
+                }
+            }
+
+            return Ok();
+        }
+
+        public class StageOrderUpdateModel
+        {
+            public int Id { get; set; }
+            public int Order { get; set; }
+        }
+
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult AddProcess(int projectId, int? processId = null)

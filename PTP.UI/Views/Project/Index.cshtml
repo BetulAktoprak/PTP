@@ -10,28 +10,92 @@
         table-layout: fixed !important;
         width: 1500px !important;
     }
+
+    #pageSizeButtons .btn:hover {
+        background-color: #aa1c18 !important;
+        color: white !important;
+    }
+
+    #pageSizeButtons .btn.active {
+        background-color: #aa1c18 !important;
+        color: white !important;
+    }
+
+    #pageSizeButtons .btn-outline-primary {
+        border-color: #aa1c18 !important; /* Kenarlık rengi - yeşil */
+       
+    }
+
+    #topScroll::-webkit-scrollbar {
+        height: 15px;
+    }
+
+    #topScroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    #topScroll::-webkit-scrollbar-thumb {
+        background: #5b5757;
+        border-radius: 5px;
+    }
+
+        #topScroll::-webkit-scrollbar-thumb:hover {
+            background: #5b5757;
+        }
+
+    /* Firefox */
+    #topScroll {
+        scrollbar-color: #f1f1f1 #f1f1f1;
+        scrollbar-width: thin;
+    }
+
 </style>
+
 
 
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12">
             <div class="card">
-                <div style="overflow-x: auto;">
-                    <div id="jsGrid"></div>
+
+                <div id="topScroll" style="overflow-x: auto; height: 16px;">
+                    <div id="scrollSyncContent" style="height: 1px;"></div>
                 </div>
 
+                <div id="jsGridWrapper" style="overflow-x: auto;">
+                    <div id="jsGrid">
+
+                    </div>
+
+                </div>
+                <div class="d-flex justify-content-end align-items-center m-3 gap-2">
+                    <label class="me-2">Her sayfada</label>
+                    <div id="pageSizeButtons" class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-size="8">8</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-size="20">20</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-size="50">50</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-size="100">100</button>
+                    </div>
+                    <label class="me-2">proje göster</label>
+                </div>
             </div>
         </div>
     </div>
+    <div class="floating-add-btn d-flex justify-content-end" style="position: fixed; bottom: 55px; right: 45px; z-index: 999;">
+        <a class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+           href="/Project/Create" style="width: 50px; height: 50px;" title="Yeni Proje">
+            <i class="fa fa-plus"></i>
+        </a>
+    </div>
 </div>
+
 
 
 <div class="modal fade" id="projectDocumentsModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Proje Dökümanları</h5>
+                <h5 class="modal-title" id="modalLabel">Dökümanlar</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
             </div>
             <div class="modal-body" style="max-height: 600px; overflow-y: auto;">
@@ -45,19 +109,50 @@
 
 
 <script>
- $(function () {
-        $("#jsGrid").jsGrid({
-            width: "100%",
-            height: "auto",
+    let currentPageSize = 8;
 
-            filtering: true,
-            paging: true,
-            autoload: true,
-            pageSize: 15,
-            pageButtonCount: 5,
+    $(function () {
+        initializeGrid(currentPageSize);
 
-            scrolling: true,
-            scrollbarSize: 15,
+        // Butonlara tıklanınca page size güncelle
+        $("#pageSizeButtons button").on("click", function () {
+            const newSize = parseInt($(this).data("size"));
+            currentPageSize = newSize;
+
+            // Aktif butonu güncelle
+            $("#pageSizeButtons button").removeClass("active");
+            $(this).addClass("active");
+
+            // jsGrid'i yeniden oluştur
+            $("#jsGrid").jsGrid("destroy");
+            initializeGrid(currentPageSize);
+        });
+
+        // İlk butonu aktif olarak işaretle
+        $("#pageSizeButtons button[data-size='" + currentPageSize + "']").addClass("active");
+
+        $("#topScroll").on("scroll", function () {
+            $("#jsGridWrapper").scrollLeft($(this).scrollLeft());
+        });
+
+        $("#jsGridWrapper").on("scroll", function () {
+            $("#topScroll").scrollLeft($(this).scrollLeft());
+        });
+    });
+
+    function initializeGrid(pageSize) {
+       $("#jsGrid").jsGrid({
+           width: "100%",
+           height: "auto",
+
+           filtering: true,
+           paging: true,
+           autoload: true,
+           pageSize: pageSize,
+           pageButtonCount: 5,
+
+           scrolling: true,
+           scrollbarSize: 15,
 
              rowClick: function (args) {
                 const projectId = args.item.id;
@@ -88,7 +183,7 @@
                                    return $("<img>").attr("src", "/" + value)
                                                     .css({ height: "40px", width: "auto" });
                                } else {
-                                   return $("<span>").text("Yok");
+                                   return $("<span>").text("Logo");
                                }
                     }
                 },
@@ -136,11 +231,26 @@
 
                        // Döndürülen içerik: Edit, Delete, ve Dosya ikonları
                        return $("<div>").append(icon, editButton, deleteButton);
-                   }
+                    }
                 }
-            ]
+            ],
+            onDataLoaded: function () {
+                // Scroll alanını genişlet (üst scroll bar çalışsın)
+                setTimeout(function () {
+                    const gridContent = document.querySelector("#jsGrid .jsgrid-grid-body");
+                    const scrollSync = document.getElementById("scrollSyncContent");
+
+                    if (gridContent && scrollSync) {
+                        scrollSync.style.width = gridContent.scrollWidth + "px";
+                    }
+                }, 50);
+            }
         });
-    });
+    };
+
+    function showProjectDocumentsModal(docs) {
+        alert("Döküman gösterimi buraya eklenecek.");
+    }
 
     function showProjectDocumentsModal(documents) {
         const container = $("#projectDocumentsContent");

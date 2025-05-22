@@ -124,9 +124,11 @@ namespace PTP.UI.Controllers
                     Stages = _processStageService.GetAll().Where(p => p.ProjectId == project.Id)
                                 .Select(s => new ProcessStageViewModel
                                 {
+                                    Id = s.Id,
                                     ProcessStageName = s.Name,
-                                    ColorHex = s.ColorHex
-                                }).ToList()
+                                    ColorHex = s.ColorHex,
+                                    Order = s.Order
+                                }).OrderBy(p => p.Order).ToList()
                 };
 
                 var selectedPersonnel = _projectPersonnelService.GetAll()
@@ -271,15 +273,18 @@ namespace PTP.UI.Controllers
 
                     // Gelen kolon listesi
                     var incomingStages = model.Stages;
+                    model.Stages = model.Stages.OrderBy(s => s.Order).ToList();
+
 
                     // 1. Güncelleme veya ekleme işlemi
                     foreach (var incoming in incomingStages)
                     {
-                        var existing = existingStages.FirstOrDefault(x => x.Name == incoming.ProcessStageName);
+                        var existing = existingStages.FirstOrDefault(x => x.Id == incoming.Id);
 
                         if (existing != null)
                         {
                             // Güncelle
+                            existing.Name = incoming.ProcessStageName;
                             existing.ColorHex = incoming.ColorHex;
                             existing.Order = incoming.Order;
 
@@ -301,11 +306,11 @@ namespace PTP.UI.Controllers
                     }
 
                     // 2. Silme işlemi: Artık gelen listede olmayan kolonları sil
-                    var incomingOrders = incomingStages.Select(s => s.ProcessStageName).ToList();
+                    var incomingOrders = incomingStages.Select(s => s.Id).ToList();
 
                     foreach (var old in existingStages)
                     {
-                        if (!incomingOrders.Contains(old.Name))
+                        if (!incomingOrders.Contains(old.Id))
                         {
                             try
                             {

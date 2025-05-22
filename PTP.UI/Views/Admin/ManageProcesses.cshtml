@@ -301,8 +301,6 @@
             return;
         }
 
-        console.log("Seçilen proje ID:", projectId);
-
         // Modal açıldığında proje ID'sini gizli inputa yaz
         $('#addStageModal').on('show.bs.modal', function () {
             $('#stageProjectId').val(projectId);
@@ -343,7 +341,8 @@
                             </div>
                         `,
                         class: '',
-                        item: []
+                        item: [],
+                        stageId: stageId
                     };
                 });
 
@@ -367,6 +366,44 @@
                 dropEl: handleDrop,
                 
             });
+
+             $(function () {
+                $("#kanbanBoard").sortable({
+                    items: '.kanban-board',
+                    handle: '.kanban-board-header',
+                    update: function (event, ui) {
+                        const newOrder = [];
+
+                        $('#kanbanBoard .kanban-board').each(function (index) {
+                            const stageId = $(this).data('stageid');
+                            if (stageId) {
+                                newOrder.push({ id: stageId, order: index });
+                            }
+                        });
+
+                        // Gönder veritabanına
+                        $.ajax({
+                            url: '/Admin/UpdateStageOrders',
+                            method: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(newOrder),
+                            success: () => console.log("Sıralama güncellendi"),
+                            error: () => alert("Sıralama güncellenemedi")
+                        });
+                    }
+                });
+            });
+
+            setTimeout(() => {
+                $('#kanbanBoard .kanban-board').each(function (index) {
+                    const boardId = $(this).attr('data-id');
+                    const stage = stages.find(s => sanitizeId(s.name) === boardId);
+                    if (stage) {
+                        $(this).attr('data-stageid', stage.id); // ✅
+                    }
+                });
+            }, 100);
+
             setTimeout(() => {
                 stages.forEach(stage => {
                     const boardId = sanitizeId(stage.name);
@@ -390,105 +427,26 @@
             
         });
 
-        // Yeni kolon ekle butonu
-        // $('#addBoardBtn').click(function () {
-        //     $('#addStageModal').modal('show');
-        // });
+       
 
-        // Yeni kolon ekleme işlemi
-        // $('#addStageForm').submit(function (e) {
-        //     e.preventDefault();
+        //Kolon Silme
+        $(document).on('click', '.delete-board-btn', function (e) {
+            e.preventDefault();
+            const stageId = $(this).data('stageid'); //veritabanındaki ID
+            const boardId = $(this).data('boardid'); //UI'deki ID
 
-        //     const formData = {
-        //         name: $(this).find('[name="name"]').val(),
-        //         colorHex: $(this).find('[name="colorHex"]').val(),
-        //         projectId: $('#stageProjectId').val()
-        //     };
+                kanban.removeBoard(boardId);
 
-        //     $.ajax({
-        //         url: '/Admin/AddStage',
-        //         type: 'POST',
-        //         data: JSON.stringify(formData),
-        //         contentType: 'application/json',
-        //         success: function (createdId) {
-        //             $('#addStageModal').modal('hide');
+                $.ajax({
+                    url: '/Admin/DeleteStage',
+                    type: 'POST',
+                    data: JSON.stringify({ id: stageId }),
+                    contentType: 'application/json',
+                    success: () => console.log("Silme başarılı"),
+                    error: () => alert("Silme hatası")
+                });
+        });
 
-        //             const boardId = '_' + formData.name.toLowerCase().replace(/\s+/g, '');
-
-        //             if (document.querySelector(`[data-id="${boardId}"]`)) {
-        //                 alert("Bu isimde bir kolon zaten var.");
-        //                 return;
-        //             }
-
-        //             const boardTitle = `
-        //                 <span>${formData.name}</span>
-        //                     <div class="dropdown float-end">
-        //                     <button class="btn btn-sm btn-light btn-dot" type="button" data-bs-toggle="dropdown">
-        //                         ⋯
-        //                     </button>
-        //                     <ul class="dropdown-menu dropdown-menu-end">
-        //                         <li><a class="dropdown-item add-task-btn" href="#" data-type="${formData.name}">➕ Yeni İşlem</a></li>
-        //                         <li><a class="dropdown-item text-danger delete-board-btn" href="#" data-stageid="${createdId}" data-boardid="${boardId}">❌ Sil</a></li>
-        //                     </ul>
-        //                 </div>
-        //             `;
-
-        //             kanban.addBoards([
-        //                 {
-        //                     id: boardId,
-        //                     title: boardTitle,
-        //                     class: '',
-        //                     item: []
-        //                 }
-        //             ]);
-
-        //             setTimeout(() => {
-        //                 const boardSelector = `[data-id="${boardId}"]`;
-        //                 const boardHeader = document.querySelector(`${boardSelector} .kanban-board-header`);
-        //                 const boardMain = document.querySelector(`${boardSelector} .kanban-drag`);
-
-        //                 if (boardHeader) {
-        //                     boardHeader.style.setProperty('background-color', formData.colorHex);
-        //                     boardHeader.style.setProperty('color', '#fff');
-        //                 }
-
-        //                 if (boardMain) {
-        //                     const lightColor = lightenColor(formData.colorHex, 0.8);
-        //                     boardMain.style.setProperty('background-color', lightColor);
-        //                 }
-        //             }, 100);
-
-        //         },
-        //         error: function () {
-        //             alert("Kolon eklenirken bir hata oluştu.");
-        //         }
-        //     });
-        // });
-
-        // Kolon Silme
-        // $(document).on('click', '.delete-board-btn', function (e) {
-        //     e.preventDefault();
-        //     const stageId = $(this).data('stageid'); veritabanındaki ID
-        //     const boardId = $(this).data('boardid'); UI'deki ID
-
-        //         kanban.removeBoard(boardId);
-
-        //         $.ajax({
-        //             url: '/Admin/DeleteStage',
-        //             type: 'POST',
-        //             data: JSON.stringify({ id: stageId }),
-        //             contentType: 'application/json',
-        //             success: () => console.log("Silme başarılı"),
-        //             error: () => alert("Silme hatası")
-        //         });
-        // });
-
-        // Kolon Silme
-
-
-        // ↓↓↓ Yardımcı Fonksiyonlar ↓↓↓
-
-        
         //Kolon renk açma
         function lightenColor(hex, percent) {
         // HEX başındaki # işaretini kaldır
@@ -557,7 +515,10 @@
             });
         }
 
-      
+       
+
+        
+
 
         function capitalize(str) {
             return str.charAt(0).toUpperCase() + str.slice(1);
@@ -616,7 +577,6 @@
                 // Seçilen değeri kaydet
                 selectedActivity = this.textContent.trim();
 
-                console.log("Seçilen etkinlik:", selectedActivity);
             });
         });
     });
@@ -747,13 +707,6 @@
 
                 const boardId = sanitizeId(result.processType || '');
 
-                    console.log("result:", result);
-    console.log("processType:", result.processType);
-
-
-                console.log('Kanban objesi:', kanban);
-                console.log('Board Id:', boardId);
-                console.log('Yeni kart verisi:', result);
 
                 // Yeni kart objesi
                 const newCard = {

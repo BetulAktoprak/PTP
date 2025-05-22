@@ -287,39 +287,28 @@
 @*             </div> *@
 @*         </div> *@
 @*     </div> *@
-@* </div> *@
+@* </div> selectedPersonnel
 
 @* Kolona İşlem Ekleme ve Silme *@
 <script>
 
     const existingStages = @Html.Raw(JsonConvert.SerializeObject(Model.Stages ?? new List<ProcessStageViewModel>()));
-    selectedPersonnel = @Html.Raw(JsonConvert.SerializeObject(ViewBag.SelectedPersonnel ?? new List<object>()));
+    @*selectedPersonnel = @Html.Raw(JsonConvert.SerializeObject(ViewBag.SelectedPersonnel ?? new List<object>())); *@
 
 
     window.onload = function () {
         if (existingStages.length > 0) {
+            existingStages.sort((a, b) => a.Order - b.Order);
             existingStages.forEach((stage, index) => {
-                addStage(stage.ProcessStageName, stage.ColorHex, stage.Order ?? index);
+                addStage(stage.ProcessStageName, stage.ColorHex, stage.Order ?? index, stage.Id ?? 0);
             });
         }
 
-        if (selectedPersonnel.length > 0) {
-            selectedPersonnel.forEach(p => {
-                // burada senin personel alanını oluşturduğun yapıya göre checkbox'ları vs işaretlemen gerekir
-                const checkbox = document.querySelector(`input[data-personel-id='${p.PersonnelId}'][data-permission='read']`);
-                if (checkbox) checkbox.checked = p.CanRead;
-                if (checkbox) checkbox.checked = p.CanCreate;
-                if (checkbox) checkbox.checked = p.CanUpdate;
-                if (checkbox) checkbox.checked = p.CanDelete;
-                if (checkbox) checkbox.checked = p.CanComment;
-                // diğer izinleri de aynı şekilde işaretleyebilirsin
-            });
-        }
     };
 
     let stageIndex = 0;
 
-    function addStage(name = "", color = "#cccccc", order = 0) {
+    function addStage(name = "", color = "#cccccc", order = 0, id = 0) {
         const list = document.getElementById('stageList');
 
         const li = document.createElement('li');
@@ -332,6 +321,7 @@
                 <input type="text" name="Stages[${stageIndex}].ProcessStageName" value="${name}" placeholder="Kolon adı" class="form-control w-50 me-2" />
                 <input type="color" name="Stages[${stageIndex}].ColorHex" value="${color}" class="form-control-color me-2" />
                 <input type="hidden" name="Stages[${stageIndex}].Order" class="stage-order" value="${stageIndex}" />
+                <input type="hidden" name="Stages[${stageIndex}].Id" value="${id}" />
                 <span class="text-danger" style="cursor: pointer;" onclick="removeStage(this)">&#10006;</span>
             </div>
         `;
@@ -339,6 +329,7 @@
         list.appendChild(li);
         stageIndex++;
         updateSortable(); // yeniden sıralamayı başlat
+        updateOrderInputs();
     }
 
     function removeStage(el) {
@@ -353,6 +344,7 @@
             const nameInput = item.querySelector('input[type="text"]');
             const colorInput = item.querySelector('input[type="color"]');
             const orderInput = item.querySelector('.stage-order');
+            const idInput = item.querySelector('input[name*=".Id"]');
 
             if (nameInput) nameInput.name = `Stages[${i}].ProcessStageName`;
             if (colorInput) colorInput.name = `Stages[${i}].ColorHex`;
@@ -360,6 +352,7 @@
                 orderInput.name = `Stages[${i}].Order`;
                 orderInput.value = i;
             }
+            if (idInput) idInput.name = `Stages[${i}].Id`;
         });
     }
 
@@ -373,7 +366,7 @@
             item.addEventListener('dragstart', function (e) {
                 dragSrcEl = this;
                 e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/html', this.innerHTML);
+                e.dataTransfer.setData('text/plain', this.innerHTML);
                 this.classList.add('dragging');
             });
 
@@ -385,11 +378,20 @@
 
             item.addEventListener('drop', function (e) {
                 e.stopPropagation();
-                if (dragSrcEl !== this) {
-                    const temp = this.innerHTML;
-                    this.innerHTML = dragSrcEl.innerHTML;
-                    dragSrcEl.innerHTML = temp;
-                    updateOrderInputs(); // sıralamaları güncelle
+                if (dragSrcEl && dragSrcEl !== this) {
+                    const list = document.getElementById('stageList');
+                    const allItems = Array.from(list.children);
+
+                    const dropIndex = allItems.indexOf(this);
+                    const dragIndex = allItems.indexOf(dragSrcEl);
+
+                    if (dragIndex < dropIndex) {
+                        list.insertBefore(dragSrcEl, this.nextSibling);
+                    } else {
+                        list.insertBefore(dragSrcEl, this);
+                    }
+
+                    updateOrderInputs();
                 }
                 return false;
             });
