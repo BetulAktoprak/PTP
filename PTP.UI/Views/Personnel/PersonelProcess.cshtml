@@ -16,10 +16,20 @@
                 <div class="card-body">
                     <h5 class="card-title">İşlem: @process.Description</h5>
 
-                    @* <p><strong>Başlangıç Tarihi:</strong> @process..ToShortDateString()</p> *@
-                    @* <p><strong>Bitiş Tarihi:</strong> @(process.EndDate?.ToShortDateString() ?? "Bilinmiyor")</p> *@
-
-                    <p><strong>Personel:</strong> @process.Personnel?.FullName</p>
+                    <p>
+                        <strong>Personeller:</strong>
+                        @if (process.ProcessPersonnels != null && process.ProcessPersonnels.Any())
+                        {
+                            foreach (var pp in process.ProcessPersonnels)
+                            {
+                                @pp.Personnel?.FullName <text>, </text>
+                            }
+                        }
+                        else
+                        {
+                            <span>Atanmış personel yok</span>
+                        }
+                    </p>
                 </div>
             </div>
         }

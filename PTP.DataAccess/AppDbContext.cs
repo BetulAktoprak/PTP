@@ -18,6 +18,7 @@ namespace PTP.DataAccess
         public DbSet<User> Users { get; set; }
         public DbSet<ProcessStage> ProcessStages { get; set; }
         public DbSet<ProjectPersonnel> ProjectPersonnels { get; set; }
+        public DbSet<ProcessPersonnel> ProcessPersonnels { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,12 +34,6 @@ namespace PTP.DataAccess
                 .HasOne(p => p.Project)
                 .WithMany(pj => pj.Processes)
                 .HasForeignKey(p => p.ProjectId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            modelBuilder.Entity<Process>()
-                .HasOne(p => p.Personnel)
-                .WithMany(pers => pers.Processes)
-                .HasForeignKey(p => p.PersonnelId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Comment>()
@@ -84,7 +79,18 @@ namespace PTP.DataAccess
                 .HasKey(pp => pp.Id); 
 
             modelBuilder.Entity<ProjectPersonnel>()
-                .HasIndex(pp => new { pp.ProjectId, pp.PersonnelId }).IsUnique(); 
+                .HasIndex(pp => new { pp.ProjectId, pp.PersonnelId }).IsUnique();
+
+            modelBuilder.Entity<ProcessPersonnel>()
+                .HasOne(pp => pp.Process)
+                .WithMany(p => p.ProcessPersonnels)
+                .HasForeignKey(pp => pp.ProcessId);
+
+            modelBuilder.Entity<ProcessPersonnel>()
+                .HasOne(pp => pp.Personnel)
+                .WithMany(p => p.ProcessPersonnels)
+                .HasForeignKey(pp => pp.PersonnelId);
+
 
 
         }

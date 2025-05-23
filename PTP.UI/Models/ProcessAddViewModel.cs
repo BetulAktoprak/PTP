@@ -15,6 +15,9 @@ namespace PTP.UI.Models
         public int PersonnelId { get; set; }
         public string DocumentDescriptions { get; set; }
         public List<IFormFile>? Files { get; set; }
+        public List<int> AssignedUserIds { get; set; }
+        public string ColorHex { get; set; }
+
 
         public List<SelectListItem> ProjectPersonnels { get; set; }
 

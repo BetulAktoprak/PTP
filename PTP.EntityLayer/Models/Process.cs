@@ -11,8 +11,8 @@ public class Process : BaseEntity
     public ProcessStage ProcessStage { get; set; } = null!;
     public int ProjectId { get; set; }
     public Project? Project { get; set; }
-    public int PersonnelId { get; set; }
-    public Personnel? Personnel { get; set; }
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<Document> Documents { get; set; } = new List<Document>();
+    public ICollection<ProcessPersonnel> ProcessPersonnels { get; set; } = new List<ProcessPersonnel>();
+
 }

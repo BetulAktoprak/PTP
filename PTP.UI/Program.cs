@@ -33,6 +33,7 @@ builder.Services.AddScoped<PersonnelRepository>();
 builder.Services.AddScoped<ProcessRepository>();
 builder.Services.AddScoped<ProcessStageRepository>();
 builder.Services.AddScoped<ProjectPersonnelRepository>();
+builder.Services.AddScoped<ProcessPersonnelRepository>();
 builder.Services.AddScoped<IProcessRepository, ProcessRepository>();
 
 builder.Services.AddScoped<ProjectService>();
@@ -44,6 +45,7 @@ builder.Services.AddScoped<ProcessService>();
 builder.Services.AddScoped<ProcessStageService>();
 builder.Services.AddScoped<ProjectPersonnelService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ProcessPersonnelService>();
 builder.Services.AddScoped<IProcessService, ProcessService>();
 
 var app = builder.Build();

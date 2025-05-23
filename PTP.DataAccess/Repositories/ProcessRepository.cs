@@ -17,7 +17,8 @@ namespace PTP.DataAccess.Repositories
             return await _context.Processes
                .Where(p => p.ProjectId == projectId)
                .Include(p => p.Project)
-               .Include(p => p.Personnel)
+               .Include(p => p.ProcessPersonnels)
+                    .ThenInclude(pp => pp.Personnel)
                .ToListAsync();
         }
     }

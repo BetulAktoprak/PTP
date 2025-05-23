@@ -22,8 +22,9 @@ namespace PTP.UI.Controllers
         private readonly DocumentService _documentService;
         private readonly CommentService _commentService;
         private readonly ProjectPersonnelService _projectPersonnelService;
+        private readonly ProcessPersonnelService _processPersonnelService;
 
-        public AdminController(ProjectService projectService, ProcessService processService, PersonnelService personnelService, ProcessStageService processStageService, DocumentService documentService, CommentService commentService, ProjectPersonnelService projectPersonnelService)
+        public AdminController(ProjectService projectService, ProcessService processService, PersonnelService personnelService, ProcessStageService processStageService, DocumentService documentService, CommentService commentService, ProjectPersonnelService projectPersonnelService, ProcessPersonnelService processPersonnelService)
         {
             _projectService = projectService;
             _processService = processService;
@@ -32,6 +33,7 @@ namespace PTP.UI.Controllers
             _documentService = documentService;
             _commentService = commentService;
             _projectPersonnelService = projectPersonnelService;
+            _processPersonnelService = processPersonnelService;
         }
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
@@ -203,7 +205,6 @@ namespace PTP.UI.Controllers
                 Description = model.Description,
                 ProjectId = model.ProjectId,
                 ProcessStageId = model.ProcessStageId,
-                PersonnelId = model.AssignedUserId,
                 CreatedBy = userId,
                 CreatedDate = DateTime.Now,
                 UpdatedBy = userId,
@@ -211,6 +212,19 @@ namespace PTP.UI.Controllers
             };
 
             _processService.Add(newProcess);
+
+            if (model.AssignedUserIds != null && model.AssignedUserIds.Any())
+            {
+                foreach (var personId in model.AssignedUserIds)
+                {
+                    var assignment = new ProcessPersonnel
+                    {
+                        ProcessId = newProcess.Id,
+                        PersonnelId = personId
+                    };
+                    _processPersonnelService.Add(assignment); 
+                }
+            }
 
             if (model.Files != null && model.Files.Any())
             {

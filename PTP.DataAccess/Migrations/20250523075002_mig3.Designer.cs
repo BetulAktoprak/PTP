@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PTP.DataAccess;
 
@@ -11,9 +12,11 @@ using PTP.DataAccess;
 namespace PTP.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250523075002_mig3")]
+    partial class mig3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -236,7 +239,7 @@ namespace PTP.DataAccess.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("PersonnelId")
+                    b.Property<int>("PersonnelId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProcessStageId")
@@ -602,9 +605,11 @@ namespace PTP.DataAccess.Migrations
 
             modelBuilder.Entity("PTP.EntityLayer.Models.Process", b =>
                 {
-                    b.HasOne("PTP.EntityLayer.Models.Personnel", null)
+                    b.HasOne("PTP.EntityLayer.Models.Personnel", "Personnel")
                         .WithMany("Processes")
-                        .HasForeignKey("PersonnelId");
+                        .HasForeignKey("PersonnelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("PTP.EntityLayer.Models.ProcessStage", "ProcessStage")
                         .WithMany("Processes")
@@ -617,6 +622,8 @@ namespace PTP.DataAccess.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Personnel");
 
                     b.Navigation("ProcessStage");
 

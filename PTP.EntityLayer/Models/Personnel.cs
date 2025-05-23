@@ -14,5 +14,7 @@ public class Personnel : BaseEntity
     public ICollection<Project> Projects { get; set; } = new List<Project>();
     public ICollection<Process> Processes { get; set; } = new List<Process>();
     public ICollection<ProjectPersonnel> ProjectPersonnels { get; set; } = new List<ProjectPersonnel>();
+    public ICollection<ProcessPersonnel> ProcessPersonnels { get; set; } = new List<ProcessPersonnel>();
+
 
 }
